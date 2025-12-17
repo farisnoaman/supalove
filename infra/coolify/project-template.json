@@ -1,0 +1,5 @@
+{
+  "name": "supabase-project",
+  "source": "./data-plane/project-template",
+  "domains": ["{project_id}.api.yourdomain.com"]
+}
