@@ -3,6 +3,6 @@ from services.project_service import create_project
 
 router = APIRouter()
 
-@router.post("/")
+@router.post("/projects")
 def create():
     return create_project()

@@ -14,8 +14,8 @@ def provision_project(project_id: str):
         check=True
     )
 
-    subprocess.run(
-        ["docker", "compose", "up", "-d"],
-        cwd=project_dir,
-        check=True
-    )
+    # subprocess.run(
+    #     ["docker", "compose", "up", "-d"],
+    #     cwd=project_dir,
+    #     check=True
+    # )
