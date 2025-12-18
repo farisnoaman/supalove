@@ -21,3 +21,4 @@ def generate_project_secrets(
         ))
 
     db.commit()
+    return secrets_map

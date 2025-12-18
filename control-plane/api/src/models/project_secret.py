@@ -9,5 +9,4 @@ class ProjectSecret(Base):
     key = Column(String, primary_key=True)
     value = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+   
