@@ -224,3 +224,217 @@ Everything else is iteration.
 * Do not add Kubernetes yet
 
 **One project. One click. One success.**
+--------------------------------
+## 🚀 Deployment Architecture
+🎉 **Excellent — this is a BIG milestone**
+
+You now have a **working control plane**:
+
+```
+curl → FastAPI → create_project() → response
+```
+
+This is exactly how Supabase Cloud starts internally.
+
+---
+
+# ✅ STEP 2 — Persist Projects (Control-Plane Database)
+
+Right now, projects are **ephemeral**.
+If you restart FastAPI → all projects are forgotten.
+
+In this step we will:
+
+> **Store projects in a control-plane database**
+> (NOT project databases — this is platform metadata)
+
+
+
+
+---
+
+## 2️⃣.3 Add Postgres (local dev)
+
+At repo root, update **top-level** `docker-compose.yml`:
+
+📍 `supabase_lovable_cloud_clone/docker-compose.yml`
+
+```yaml
+version: "3.9"
+
+services:
+  control-plane-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: platform
+      POSTGRES_PASSWORD: platform
+      POSTGRES_DB: control_plane
+    ports:
+      - "5433:5432"
+    volumes:
+      - control_plane_data:/var/lib/postgresql/data
+
+volumes:
+  control_plane_data:
+```
+
+Start it:
+
+```bash
+docker compose up -d
+```
+
+Verify:
+
+```bash
+docker ps
+```
+
+---
+
+## 2️⃣.4 Add DB Dependencies
+
+Inside your venv:
+
+```bash
+pip install sqlalchemy psycopg2-binary
+```
+
+Update `requirements.txt`:
+
+```txt
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+```
+
+---
+
+## 2️⃣.5 Create Database Connection
+
+📍 `control-plane/api/src/core/database.py`
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+DATABASE_URL = "postgresql://platform:platform@localhost:5433/control_plane"
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
+
+Base = declarative_base()
+```
+
+---
+
+## 2️⃣.6 Create Project Model
+
+📍 `control-plane/api/src/models/project.py`
+
+```python
+from sqlalchemy import Column, String, DateTime
+from datetime import datetime
+from core.database import Base
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(String, primary_key=True, index=True)
+    status = Column(String, default="provisioning")
+    created_at = Column(DateTime, default=datetime.utcnow)
+```
+
+---
+
+## 2️⃣.7 Create Tables Automatically (v1 shortcut)
+
+📍 `control-plane/api/src/main.py`
+
+```python
+from fastapi import FastAPI
+from api.v1.projects import router as projects_router
+from core.database import Base, engine
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Supabase Cloud Clone")
+app.include_router(projects_router, prefix="/v1/projects")
+```
+
+⚠️ Later we’ll replace this with Alembic.
+
+---
+
+## 2️⃣.8 Save Project When Created
+
+📍 `services/project_service.py`
+
+```python
+import uuid
+from sqlalchemy.orm import Session
+from core.database import SessionLocal
+from models.project import Project
+from services.provisioning_service import provision_project
+
+def create_project():
+    project_id = uuid.uuid4().hex[:12]
+
+    db: Session = SessionLocal()
+    project = Project(id=project_id, status="provisioning")
+    db.add(project)
+    db.commit()
+
+    provision_project(project_id)
+
+    project.status = "running"
+    db.commit()
+
+    return {
+        "project_id": project_id,
+        "status": project.status,
+        "api_url": f"http://localhost:{project_id}"
+    }
+```
+
+---
+
+## 2️⃣.9 Restart & Test Again
+
+Restart API:
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+Test:
+
+```bash
+curl -X POST http://localhost:8000/v1/projects
+```
+
+---
+
+## 2️⃣.🔟 Verify Data Is Stored
+
+Connect to DB:
+
+```bash
+docker exec -it <postgres_container_id> psql -U platform -d control_plane
+```
+
+Then:
+
+```sql
+SELECT * FROM projects;
+```
+
+You should see your project 🎉
+
+---
+
+---
+
+
+---

@@ -1,1 +1,17 @@
 # Root docker-compose
+version: "3.9"
+
+services:
+  control-plane-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: platform
+      POSTGRES_PASSWORD: platform
+      POSTGRES_DB: control_plane
+    ports:
+      - "5433:5432"
+    volumes:
+      - control_plane_data:/var/lib/postgresql/data
+
+volumes:
+  control_plane_data:

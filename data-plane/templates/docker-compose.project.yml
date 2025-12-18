@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: project_${PROJECT_ID}_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data
+
+  rest:
+    image: postgrest/postgrest
+    container_name: project_${PROJECT_ID}_rest
+    depends_on:
+      - db
+    environment:
+      PGRST_DB_URI: postgres://app:${DB_PASSWORD}@db:5432/app
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_ANON_ROLE: anon
+    ports:
+      - "${REST_PORT}:3000"
