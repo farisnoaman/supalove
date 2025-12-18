@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from services.project_service import (
     create_project,
+    get_projects,
     stop_project,
     start_project,
     delete_project,
@@ -8,6 +9,10 @@ from services.project_service import (
 )
 
 router = APIRouter()
+
+@router.get("/projects")
+def list_projects():
+    return get_projects()
 
 @router.post("/projects")
 def create():

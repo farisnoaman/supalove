@@ -1,271 +1,51 @@
+nohup: ignoring input
 INFO:     Will watch for changes in these directories: ['/home/faris/Documents/MyApps/supalove/control-plane/api/src']
-INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [59344] using WatchFiles
-INFO:     Started server process [59347]
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [73632] using WatchFiles
+INFO:     Started server process [73635]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 [Provisioning] Using Local Docker provider
-INFO:     127.0.0.1:36064 - "POST /v1/projects HTTP/1.1" 500 Internal Server Error
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1139, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-    await self.app(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    await route.handle(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    await self.app(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 120, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 106, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 430, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 318, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/to_thread.py", line 61, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2525, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 14, in create
-    return create_project()
-           ^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 29, in create_project
-    provision_output = provision_project(project_id, secrets)
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_service.py", line 29, in provision_project
-    return _provider.provision_project(project_id)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_local.py", line 26, in provision_project
-    env_vars = script_provision(project_id, BASE_PROJECTS_DIR)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: provision_project() missing 1 required positional argument: 'base_dir'
-WARNING:  WatchFiles detected changes in 'services/provisioning_local.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [59347]
-INFO:     Started server process [59522]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'services/provisioning_service.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [59522]
-INFO:     Started server process [59559]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'services/provisioning_interface.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [59559]
-INFO:     Started server process [59605]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'services/provisioning_coolify.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [59605]
-INFO:     Started server process [59641]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-time="2025-12-19T00:45:45+03:00" level=warning msg="/home/faris/Documents/MyApps/supalove/data-plane/templates/docker-compose.project.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
- Network templates_default Creating 
- Network templates_default Created 
- Container project_ff5aa7ea4002_db Creating 
- Container project_ff5aa7ea4002_db Created 
- Container project_ff5aa7ea4002_rest Creating 
- Container project_ff5aa7ea4002_rest Created 
- Container project_ff5aa7ea4002_db Starting 
- Container project_ff5aa7ea4002_db Started 
- Container project_ff5aa7ea4002_rest Starting 
- Container project_ff5aa7ea4002_rest Started 
-[Provisioning] Using Local Docker provider
-INFO:     127.0.0.1:53890 - "POST /v1/projects HTTP/1.1" 500 Internal Server Error
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1139, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-    await self.app(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    await route.handle(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    await self.app(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 120, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 106, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 430, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 318, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/to_thread.py", line 61, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2525, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 14, in create
-    return create_project()
-           ^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 38, in create_project
-    "api_url": f"http://localhost:{provision_output['REST_PORT']}",
-                                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-KeyError: 'REST_PORT'
-time="2025-12-19T00:46:25+03:00" level=warning msg="/home/faris/Documents/MyApps/supalove/data-plane/templates/docker-compose.project.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
- Container project_ff5aa7ea4002_db Recreate 
- Container project_ff5aa7ea4002_db Recreated 
- Container project_ff5aa7ea4002_rest Recreate 
- Container project_ff5aa7ea4002_rest Recreated 
- Container project_263c2adc01b9_db Starting 
- Container project_263c2adc01b9_db Started 
- Container project_263c2adc01b9_rest Starting 
- Container project_263c2adc01b9_rest Started 
-INFO:     127.0.0.1:35076 - "POST /v1/projects HTTP/1.1" 500 Internal Server Error
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1139, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-    await self.app(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    await route.handle(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    await self.app(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 120, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 106, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 430, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 318, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/to_thread.py", line 61, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2525, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 14, in create
-    return create_project()
-           ^^^^^^^^^^^^^^^^
-  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 38, in create_project
-    "api_url": f"http://localhost:{provision_output['REST_PORT']}",
-                                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-KeyError: 'REST_PORT'
-INFO:     127.0.0.1:35088 - "GET /v1/projects HTTP/1.1" 405 Method Not Allowed
-INFO:     127.0.0.1:35090 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-WARNING:  WatchFiles detected changes in 'services/project_service.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [59641]
-INFO:     Started server process [61928]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
+INFO:     127.0.0.1:59836 - "GET /v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45888 - "OPTIONS /v1/projects HTTP/1.1" 200 OK
+time="2025-12-19T01:55:10+03:00" level=warning msg="/home/faris/Documents/MyApps/supalove/data-plane/templates/docker-compose.project.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container project_29315029c9e7_db Recreate 
+ Container project_29315029c9e7_db Recreated 
+ Container project_29315029c9e7_realtime Recreate 
+ Container project_29315029c9e7_rest Recreate 
+ Container project_29315029c9e7_rest Recreated 
+ Container project_29315029c9e7_realtime Recreated 
+ Container project_9d270c318feb_db Starting 
+ Container project_9d270c318feb_db Started 
+ Container project_9d270c318feb_rest Starting 
+ Container project_9d270c318feb_realtime Starting 
+ Container project_9d270c318feb_rest Started 
+ Container project_9d270c318feb_realtime Started 
+[Provisioning] Setting up Auth for 9d270c318feb...
+[AuthService] Created realm: project-9d270c318feb
+[Provisioning] Auth setup failed (continuing with placeholders): KeycloakAdmin.get_clients() got an unexpected keyword argument 'realm_name'
+[Provisioning] Setting up Storage for 9d270c318feb...
+[Provisioning] Storage setup failed: HTTPConnectionPool(host='minio', port=9000): Max retries exceeded with url: /project-9d270c318feb?location= (Caused by NameResolutionError("HTTPConnection(host='minio', port=9000): Failed to resolve 'minio' ([Errno -3] Temporary failure in name resolution)"))
+INFO:     127.0.0.1:45890 - "POST /v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40838 - "GET /v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48178 - "GET /v1/projects HTTP/1.1" 200 OK
+time="2025-12-19T01:57:11+03:00" level=warning msg="/home/faris/Documents/MyApps/supalove/data-plane/templates/docker-compose.project.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container project_9d270c318feb_db Recreate 
+ Container project_9d270c318feb_db Recreated 
+ Container project_9d270c318feb_rest Recreate 
+ Container project_9d270c318feb_realtime Recreate 
+ Container project_9d270c318feb_rest Recreated 
+ Container project_9d270c318feb_realtime Recreated 
+ Container project_055ac2d9bfa8_db Starting 
+ Container project_055ac2d9bfa8_db Started 
+ Container project_055ac2d9bfa8_rest Starting 
+ Container project_055ac2d9bfa8_realtime Starting 
+ Container project_055ac2d9bfa8_rest Started 
+ Container project_055ac2d9bfa8_realtime Started 
+[Provisioning] Setting up Auth for 055ac2d9bfa8...
+[AuthService] Created realm: project-055ac2d9bfa8
+[Provisioning] Auth setup failed (continuing with placeholders): KeycloakAdmin.get_clients() got an unexpected keyword argument 'realm_name'
+[Provisioning] Setting up Storage for 055ac2d9bfa8...
+[Provisioning] Storage setup failed: HTTPConnectionPool(host='minio', port=9000): Max retries exceeded with url: /project-055ac2d9bfa8?location= (Caused by NameResolutionError("HTTPConnection(host='minio', port=9000): Failed to resolve 'minio' ([Errno -3] Temporary failure in name resolution)"))
+INFO:     127.0.0.1:36670 - "POST /v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38930 - "GET /v1/projects HTTP/1.1" 200 OK

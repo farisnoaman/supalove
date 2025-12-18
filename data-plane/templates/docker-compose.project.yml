@@ -13,6 +13,27 @@ services:
       - "${DB_PORT}:5432"
     volumes:
       - ./volumes/db:/var/lib/postgresql/data
+    command: [ "postgres", "-c", "wal_level=logical" ]
+
+  realtime:
+    image: supabase/realtime:v2.28.32
+    container_name: project_${PROJECT_ID}_realtime
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: app
+      DB_USER: app
+      DB_PASSWORD: ${DB_PASSWORD}
+      jwt_secret: ${JWT_SECRET}
+      REPLICATION_MODE: RLS
+      REPLICATION_POLL_INTERVAL: 100
+      SECURE_CHANNELS: "true"
+      SLOT_NAME: supabase_realtime_replication_slot
+      TEMPORARY_SLOT: "true"
+    ports:
+      - "${REALTIME_PORT}:4000"
 
   rest:
     image: postgrest/postgrest

@@ -18,14 +18,52 @@ def _get_provider() -> ProvisioningProvider:
         print("[Provisioning] Using Local Docker provider")
         return LocalProvisioner()
 
-# Global provider instance
-_provider = _get_provider()
+from services.auth_service import AuthService
+from services.storage_service import StorageService
 
-def provision_project(project_id: str, secrets: dict):
+# Global providers
+_provider = _get_provider()
+_auth_service = AuthService()
+_storage_service = StorageService()
+
+def provision_project(project_id: str, secrets: dict = None):
     """
     Orchestrates provisioning of a project runtime.
-    Delegates to the configured provider (Local or Coolify).
+    1. Creates Auth Realm & Client (Keycloak)
+    2. Provision Storage Bucket (MinIO)
+    3. Provisions Infrastructure (Docker/Coolify)
     """
+    if secrets is None:
+        secrets = {}
+
+    try:
+        # 1. Auth Provisioning
+        print(f"[Provisioning] Setting up Auth for {project_id}...")
+        realm = _auth_service.create_project_realm(project_id)
+        client_info = _auth_service.create_api_client(realm)
+        
+        jwt_secret = _auth_service.get_jwt_secret(realm)
+        secrets["JWT_SECRET"] = jwt_secret
+        secrets["SERVICE_ROLE_KEY"] = client_info["client_secret"]
+        
+    except Exception as e:
+        print(f"[Provisioning] Auth setup failed (continuing with placeholders): {e}")
+        if "JWT_SECRET" not in secrets:
+            secrets["JWT_SECRET"] = "fallback-secret-for-dev"
+
+    try:
+        # 2. Storage Provisioning
+        print(f"[Provisioning] Setting up Storage for {project_id}...")
+        bucket = _storage_service.create_project_bucket(project_id)
+        storage_config = _storage_service.get_storage_config(bucket)
+        
+        # Merge storage config into secrets/env
+        secrets.update(storage_config)
+
+    except Exception as e:
+        print(f"[Provisioning] Storage setup failed: {e}")
+
+    # 3. Infra Provisioning
     return _provider.provision_project(project_id, secrets)
 
 def stop_project(project_id: str):

@@ -31,10 +31,12 @@ class LocalProvisioner(ProvisioningProvider):
         
         api_port = env_vars["REST_PORT"]
         db_port = env_vars["DB_PORT"]
+        realtime_port = env_vars["REALTIME_PORT"]
         
         return {
             "api_url": f"http://localhost:{api_port}",
-            "db_url": f"postgresql://app:{env_vars['DB_PASSWORD']}@localhost:{db_port}/app"
+            "db_url": f"postgresql://app:{env_vars['DB_PASSWORD']}@localhost:{db_port}/app",
+            "realtime_url": f"ws://localhost:{realtime_port}"
         }
 
     def stop_project(self, project_id: str):

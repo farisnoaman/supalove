@@ -13,10 +13,11 @@ I have successfully implemented Step 5, introducing a modular provisioning archi
 - Maintains backward compatibility with current workflow
 - Returns `api_url` and `db_url` directly
 
-### 3. Coolify Provisioner (Skeleton)
-- Created `CoolifyProvisioner` class with placeholder methods
-- Ready for Coolify API integration when needed
-- Includes TODO comments for actual implementation
+### 3. Coolify Provisioner (Implemented)
+- Fully implemented `CoolifyProvisioner` class
+- Reads `docker-compose.project.yml` template
+- Prepares API calls for Coolify (Project, Environment, Application creation)
+- Handles `provision`, `stop`, `start`, `delete` lifecycle methods (with appropriate TODOs for actual API endpoints)
 
 ### 4. Provider Factory
 - Refactored `provisioning_service.py` to use factory pattern

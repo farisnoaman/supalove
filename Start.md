@@ -32,3 +32,11 @@ curl -X POST http://localhost:8000/v1/projects
 curl -X POST http://localhost:8000/v1/projects/11e6ecfe5c8f/stop
 
 
+---------------------new implemntation-------------
+ps aux | grep uvicorn | grep -v grep
+
+ps aux | grep "npm run dev" | grep -v grep
+
+nohup ../.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 > api.log 2>&1 &
+
+curl -s http://localhost:8000/v1/projects | head -n 20

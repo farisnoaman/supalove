@@ -20,6 +20,7 @@ def provision_project(project_id: str, secrets: dict, base_dir: Path):
         "JWT_SECRET": secrets["JWT_SECRET"],
         "DB_PORT": str(6000 + int(project_id[:2], 16)),
         "REST_PORT": str(7000 + int(project_id[:2], 16)),
+        "REALTIME_PORT": str(8000 + int(project_id[:2], 16)),
     }
 
     with open(env_path, "w") as f:

@@ -13,6 +13,11 @@ from services.provisioning_service import (
 )
 
 
+def get_projects():
+    db: Session = SessionLocal()
+    return db.query(Project).all()
+
+
 def create_project():
     project_id = uuid.uuid4().hex[:12]
     db: Session = SessionLocal()

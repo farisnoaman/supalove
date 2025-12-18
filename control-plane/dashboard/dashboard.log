@@ -1,0 +1,27 @@
+nohup: ignoring input
+
+> dashboard@0.1.0 dev
+> next dev -p 3000
+
+▲ Next.js 16.1.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.0.4.196:3000
+
+✓ Starting...
+✓ Ready in 472ms
+ GET / 200 in 2.7s (compile: 2.6s, render: 100ms)
+ GET /projects/new 200 in 266ms (compile: 236ms, render: 30ms)
+ GET /settings 404 in 247ms (compile: 203ms, render: 44ms)
+ GET / 200 in 32ms (compile: 2ms, render: 29ms)
+ GET /projects/new 200 in 28ms (compile: 2ms, render: 26ms)
+ GET /projects/new 200 in 30ms (compile: 3ms, render: 28ms)
+ GET /projects/new 200 in 31ms (compile: 2ms, render: 29ms)
+ GET / 200 in 27ms (compile: 2ms, render: 24ms)
+ GET /projects/new 200 in 28ms (compile: 2ms, render: 26ms)
+ GET /projects/new 200 in 29ms (compile: 3ms, render: 26ms)
+ GET / 200 in 25ms (compile: 2ms, render: 22ms)
+ GET /projects/29315029c9e7 404 in 25ms (compile: 3ms, render: 22ms)
+ GET / 200 in 23ms (compile: 1618µs, render: 22ms)
+ GET /projects/new 200 in 27ms (compile: 3ms, render: 25ms)
+ GET / 200 in 23ms (compile: 1565µs, render: 22ms)
+ GET /projects/29315029c9e7 404 in 24ms (compile: 2ms, render: 21ms)
