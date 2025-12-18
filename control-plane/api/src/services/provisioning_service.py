@@ -1,22 +1,41 @@
-from pathlib import Path
-from scripts.provision_project import provision_project as docker_provision
+import os
+from services.provisioning_interface import ProvisioningProvider
+from services.provisioning_local import LocalProvisioner
+from services.provisioning_coolify import CoolifyProvisioner
 
+def _get_provider() -> ProvisioningProvider:
+    """
+    Factory function to get the appropriate provisioning provider
+    based on environment variables.
+    """
+    coolify_url = os.getenv("COOLIFY_API_URL")
+    coolify_token = os.getenv("COOLIFY_API_TOKEN")
+    
+    if coolify_url and coolify_token:
+        print(f"[Provisioning] Using Coolify provider: {coolify_url}")
+        return CoolifyProvisioner(coolify_url, coolify_token)
+    else:
+        print("[Provisioning] Using Local Docker provider")
+        return LocalProvisioner()
 
-# Repo root → data-plane/projects
-BASE_PROJECTS_DIR = (
-    Path(__file__).resolve().parents[4] / "data-plane" / "projects"
-)
-
+# Global provider instance
+_provider = _get_provider()
 
 def provision_project(project_id: str, secrets: dict):
     """
     Orchestrates provisioning of a project runtime.
-    Delegates Docker + filesystem work to scripts layer.
+    Delegates to the configured provider (Local or Coolify).
     """
-    BASE_PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
+    return _provider.provision_project(project_id, secrets)
 
-    docker_provision(
-        project_id=project_id,
-        secrets=secrets,
-        base_dir=BASE_PROJECTS_DIR,
-    )
+def stop_project(project_id: str):
+    return _provider.stop_project(project_id)
+
+def start_project(project_id: str):
+    return _provider.start_project(project_id)
+
+def delete_project(project_id: str):
+    return _provider.delete_project(project_id)
+
+def restore_project(project_id: str):
+    return _provider.restore_project(project_id)

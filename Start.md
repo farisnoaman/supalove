@@ -27,6 +27,8 @@ curl -X POST http://localhost:8000/v1/projects
   "status": "running",
   "api_url": "http://localhost:..."
 }
-
+----------------------
+../.venv/bin/python -m uvicorn main:app --reload --port 8000
+curl -X POST http://localhost:8000/v1/projects/11e6ecfe5c8f/stop
 
 

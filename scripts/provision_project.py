@@ -40,9 +40,13 @@ def provision_project(project_id: str, secrets: dict, base_dir: Path):
             "compose",
             "-f",
             str(compose_file),
+            "--env-file",
+            ".env",
             "up",
             "-d",
         ],
         cwd=project_dir,
         check=True,
     )
+
+    return env
