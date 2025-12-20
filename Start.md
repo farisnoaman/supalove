@@ -40,3 +40,11 @@ ps aux | grep "npm run dev" | grep -v grep
 nohup ../.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 > api.log 2>&1 &
 
 curl -s http://localhost:8000/v1/projects | head -n 20
+-----------
+nohup ../.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --reload > api.log 2>&1 &
+-------
+tail -n 15 api.log
+---------
+
+
+curl -s -H "Origin: http://localhost:3000" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: Content-Type" -X OPTIONS http://localhost:8000/v1/projects -v 2>&1 | grep -i "access-control"

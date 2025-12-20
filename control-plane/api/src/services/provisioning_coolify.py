@@ -1,7 +1,8 @@
-import httpx
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional
+import httpx
+
 from services.provisioning_interface import ProvisioningProvider
 
 class CoolifyProvisioner(ProvisioningProvider):
@@ -26,7 +27,7 @@ class CoolifyProvisioner(ProvisioningProvider):
             raise FileNotFoundError(f"Template not found at: {template_path}")
         return template_path.read_text()
 
-    def _make_request(self, method: str, endpoint: str, data: dict = None) -> Dict[str, Any]:
+    def _make_request(self, method: str, endpoint: str, data: Optional[dict] = None) -> Dict[str, Any]:
         """Helper to make HTTP requests to Coolify API"""
         url = f"{self.api_url}{endpoint}"
         try:
@@ -53,7 +54,7 @@ class CoolifyProvisioner(ProvisioningProvider):
         print(f"[Coolify] Looking up UUID for project: {project_id}")
         return None 
 
-    def provision_project(self, project_id: str, secrets: dict = None) -> Dict[str, Any]:
+    def provision_project(self, project_id: str, secrets: Optional[dict] = None) -> Dict[str, Any]:
         """
         Provisions a new project in Coolify.
         """
@@ -115,7 +116,7 @@ class CoolifyProvisioner(ProvisioningProvider):
             "realtime_url": f"wss://realtime-{project_id}.{domain}"
         }
 
-    def stop_project(self, project_id: str):
+    def stop_project(self, project_id: str) -> None:
         uuid = self._find_uuid_by_name(project_id)
         if uuid:
             print(f"[Coolify] Stopping application {uuid}...")
@@ -123,7 +124,7 @@ class CoolifyProvisioner(ProvisioningProvider):
         else:
             print(f"[Coolify] Could not find application for project {project_id} to stop")
 
-    def start_project(self, project_id: str):
+    def start_project(self, project_id: str) -> None:
         uuid = self._find_uuid_by_name(project_id)
         if uuid:
             print(f"[Coolify] Starting application {uuid}...")
@@ -131,7 +132,7 @@ class CoolifyProvisioner(ProvisioningProvider):
         else:
             print(f"[Coolify] Could not find application for project {project_id} to start")
 
-    def delete_project(self, project_id: str):
+    def delete_project(self, project_id: str) -> None:
         uuid = self._find_uuid_by_name(project_id)
         if uuid:
             print(f"[Coolify] Deleting application {uuid}...")
@@ -139,5 +140,5 @@ class CoolifyProvisioner(ProvisioningProvider):
         else:
             print(f"[Coolify] Could not find application for project {project_id} to delete")
 
-    def restore_project(self, project_id: str):
+    def restore_project(self, project_id: str) -> None:
         print(f"[Coolify] Restore not supported via API yet for {project_id}")

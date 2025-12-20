@@ -18,6 +18,11 @@ def get_projects():
     return db.query(Project).all()
 
 
+def get_project_by_id(project_id: str):
+    db: Session = SessionLocal()
+    return db.query(Project).filter(Project.id == project_id).first()
+
+
 def create_project():
     project_id = uuid.uuid4().hex[:12]
     db: Session = SessionLocal()
@@ -34,7 +39,7 @@ def create_project():
     provision_output = provision_project(project_id, secrets)
 
     # 4️⃣ Mark running
-    project.status = "running"
+    db.query(Project).filter(Project.id == project_id).update({"status": "running"})
     db.commit()
     db.refresh(project)
 
@@ -53,7 +58,7 @@ def stop_project(project_id: str):
         return None
 
     provision_stop(project_id)
-    project.status = "stopped"
+    db.query(Project).filter(Project.id == project_id).update({"status": "stopped"})
     db.commit()
     db.refresh(project)
     return project
@@ -66,7 +71,7 @@ def start_project(project_id: str):
         return None
 
     provision_start(project_id)
-    project.status = "running"
+    db.query(Project).filter(Project.id == project_id).update({"status": "running"})
     db.commit()
     db.refresh(project)
     return project
@@ -79,7 +84,7 @@ def delete_project(project_id: str):
         return None
 
     provision_delete(project_id)
-    project.status = "deleted" 
+    db.query(Project).filter(Project.id == project_id).update({"status": "deleted"})
     # Soft delete: We keep the row but mark as deleted.
     db.commit()
     db.refresh(project)
@@ -94,7 +99,7 @@ def restore_project(project_id: str):
 
     provision_restore(project_id)
     # Restored projects are essentially stopped until started explicitly
-    project.status = "stopped"
+    db.query(Project).filter(Project.id == project_id).update({"status": "stopped"})
     db.commit()
     db.refresh(project)
     return project

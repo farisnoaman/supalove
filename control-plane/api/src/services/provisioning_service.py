@@ -26,7 +26,7 @@ _provider = _get_provider()
 _auth_service = AuthService()
 _storage_service = StorageService()
 
-def provision_project(project_id: str, secrets: dict = None):
+def provision_project(project_id: str, secrets: dict = None) -> dict:
     """
     Orchestrates provisioning of a project runtime.
     1. Creates Auth Realm & Client (Keycloak)
@@ -35,6 +35,8 @@ def provision_project(project_id: str, secrets: dict = None):
     """
     if secrets is None:
         secrets = {}
+    elif isinstance(secrets, dict):
+        secrets = dict(secrets)
 
     try:
         # 1. Auth Provisioning
