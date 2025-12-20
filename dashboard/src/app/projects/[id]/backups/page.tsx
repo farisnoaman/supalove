@@ -2,8 +2,12 @@
 
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Download, Clock, Database, HardDrive, RefreshCw } from "lucide-react";
+import { Download, Clock, Database, HardDrive, RefreshCw, Shield, ArrowRight, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Backup {
     name: string;
@@ -18,7 +22,7 @@ export default function BackupsPage() {
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
     const fetchBackups = async () => {
         try {
@@ -74,134 +78,120 @@ export default function BackupsPage() {
     };
 
     return (
-        <div className="p-8 space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-100">Backups</h1>
-                    <p className="text-slate-400 mt-1">
-                        Manage database and storage backups for your project
-                    </p>
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-5xl">
+            {/* Hero Section */}
+            <div className="relative p-8 rounded-3xl bg-card border border-border/40 overflow-hidden shadow-2xl glass">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <Badge variant="success" className="mb-4">
+                            <Shield size={12} className="mr-1.5 fill-emerald-500" />
+                            Data Protected
+                        </Badge>
+                        <h1 className="text-4xl font-black tracking-tight text-gradient">Backups</h1>
+                        <p className="text-muted-foreground mt-2 max-w-md">
+                            Manage database and storage backups for your project. Create point-in-time snapshots of your entire infrastructure.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            onClick={createBackup}
+                            disabled={creating}
+                            className="primary-gradient shadow-lg shadow-emerald-500/20 min-w-[140px]"
+                        >
+                            {creating ? (
+                                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                            )}
+                            {creating ? "Creating..." : "Create Backup"}
+                        </Button>
+                    </div>
                 </div>
-                <button
-                    onClick={createBackup}
-                    disabled={creating}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-                >
-                    <RefreshCw className={`h-4 w-4 ${creating ? "animate-spin" : ""}`} />
-                    {creating ? "Creating..." : "Create Backup"}
-                </button>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg p-6">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-blue-500/10 rounded-lg">
-                            <Database className="h-6 w-6 text-blue-400" />
-                        </div>
-                        <div>
-                            <p className="text-slate-400 text-sm">Database Backups</p>
-                            <p className="text-2xl font-bold text-slate-100">
-                                {backups.filter((b) => getBackupType(b.name) === "database").length}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg p-6">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-purple-500/10 rounded-lg">
-                            <HardDrive className="h-6 w-6 text-purple-400" />
-                        </div>
-                        <div>
-                            <p className="text-slate-400 text-sm">Storage Backups</p>
-                            <p className="text-2xl font-bold text-slate-100">
-                                {backups.filter((b) => getBackupType(b.name) === "storage").length}
-                            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                    { label: "Database Backups", icon: Database, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10", count: backups.filter((b) => getBackupType(b.name) === "database").length },
+                    { label: "Storage Backups", icon: HardDrive, color: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-500/10", count: backups.filter((b) => getBackupType(b.name) === "storage").length },
+                    { label: "Total Backups", icon: Clock, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10", count: backups.length }
+                ].map((stat, i) => (
+                    <div key={i} className="bg-card border border-border/40 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex items-center gap-4">
+                            <div className={cn("p-3 rounded-xl", stat.bg)}>
+                                <stat.icon className={cn("h-6 w-6", stat.color)} />
+                            </div>
+                            <div>
+                                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{stat.label}</p>
+                                <p className="text-2xl font-black text-foreground">{stat.count}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg p-6">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-emerald-500/10 rounded-lg">
-                            <Clock className="h-6 w-6 text-emerald-400" />
-                        </div>
-                        <div>
-                            <p className="text-slate-400 text-sm">Total Backups</p>
-                            <p className="text-2xl font-bold text-slate-100">{backups.length}</p>
-                        </div>
-                    </div>
-                </div>
+                ))}
             </div>
 
             {/* Backups List */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg overflow-hidden">
-                <div className="p-6 border-b border-slate-700/50">
-                    <h2 className="text-xl font-semibold text-slate-100">Backup History</h2>
+            <div className="bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm">
+                <div className="p-6 border-b border-border/20 bg-muted/30 flex items-center justify-between">
+                    <h2 className="text-lg font-bold">Backup History</h2>
+                    <Badge variant="outline" className="bg-background">
+                        {backups.length} archived
+                    </Badge>
                 </div>
 
                 {loading ? (
-                    <div className="p-12 text-center text-slate-400">Loading backups...</div>
+                    <div className="p-12 space-y-4">
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                    </div>
                 ) : backups.length === 0 ? (
-                    <div className="p-12 text-center">
-                        <div className="inline-block p-4 bg-slate-700/30 rounded-full mb-4">
-                            <Download className="h-8 w-8 text-slate-500" />
+                    <div className="p-20 text-center flex flex-col items-center">
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                            <Download className="h-8 w-8 text-muted-foreground" />
                         </div>
-                        <p className="text-slate-400 mb-2">No backups yet</p>
-                        <p className="text-slate-500 text-sm">
-                            Create your first backup to get started
+                        <h3 className="text-sm font-bold">No backups created yet</h3>
+                        <p className="text-xs text-muted-foreground mt-2 max-w-[240px]">
+                            Create your first snapshot to secure your project's data and storage assets.
                         </p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-slate-900/50 border-b border-slate-700/50">
+                        <table className="w-full text-left">
+                            <thead className="bg-muted/50 border-b border-border/20">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                                        Type
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                                        Name
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                                        Size
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                                        Created
-                                    </th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Type</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Snapshot Name</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Size</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Created At</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-700/50">
+                            <tbody className="divide-y divide-border/10">
                                 {backups.map((backup, idx) => {
                                     const type = getBackupType(backup.name);
                                     return (
-                                        <tr
-                                            key={idx}
-                                            className="hover:bg-slate-700/20 transition-colors"
-                                        >
+                                        <tr key={idx} className="hover:bg-muted/30 transition-colors group">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
                                                     {type === "database" ? (
-                                                        <Database className="h-4 w-4 text-blue-400" />
+                                                        <Database className="h-4 w-4 text-blue-500" />
                                                     ) : (
-                                                        <HardDrive className="h-4 w-4 text-purple-400" />
+                                                        <HardDrive className="h-4 w-4 text-purple-500" />
                                                     )}
-                                                    <span className="text-sm font-medium text-slate-300 capitalize">
+                                                    <span className="text-xs font-semibold capitalize text-foreground">
                                                         {type}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <code className="text-sm text-slate-400 font-mono">
-                                                    {backup.name}
+                                                <code className="text-[11px] text-muted-foreground font-mono bg-muted/50 px-1.5 py-0.5 rounded">
+                                                    {backup.name.split('/').pop()}
                                                 </code>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                                            <td className="px-6 py-4 whitespace-nowrap text-xs text-right font-medium text-foreground">
                                                 {formatSize(backup.size)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                                            <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-muted-foreground">
                                                 {formatDate(backup.last_modified)}
                                             </td>
                                         </tr>
@@ -214,18 +204,19 @@ export default function BackupsPage() {
             </div>
 
             {/* Info Banner */}
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                <div className="flex gap-3">
-                    <Clock className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                        <p className="text-blue-300 font-medium">Automated Backups</p>
-                        <p className="text-blue-200/70 text-sm mt-1">
-                            Backups are automatically created daily at 3:00 AM. You can also create
-                            manual backups anytime using the button above.
-                        </p>
-                    </div>
+            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-6 flex gap-4">
+                <div className="p-2 bg-emerald-500/10 rounded-lg h-fit">
+                    <Zap className="h-5 w-5 text-emerald-500 fill-emerald-500" />
+                </div>
+                <div>
+                    <h4 className="text-sm font-bold text-foreground">Automated Maintenance</h4>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-2xl">
+                        Your project is protected with daily automated snapshots at 3:00 AM UTC.
+                        Each snapshot includes the full PostgreSQL schema and MinIO storage volumes.
+                    </p>
                 </div>
             </div>
         </div>
     );
 }
+

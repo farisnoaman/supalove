@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Table as TableIcon, Settings, Shield, Folder, Code2, Zap, ArrowRight, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export default function ProjectOverviewPage() {
@@ -273,15 +274,3 @@ export default function ProjectOverviewPage() {
     );
 }
 
-function Badge({ children, variant = "default", className }: { children: React.ReactNode, variant?: string, className?: string }) {
-    const variants: Record<string, string> = {
-        default: "bg-primary text-primary-foreground",
-        secondary: "bg-secondary text-secondary-foreground",
-        outline: "border border-border text-foreground",
-    };
-    return (
-        <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors", variants[variant], className)}>
-            {children}
-        </span>
-    );
-}

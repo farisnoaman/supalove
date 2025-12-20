@@ -102,3 +102,24 @@ INFO:     127.0.0.1:47286 - "OPTIONS /v1/projects HTTP/1.1" 200 OK
 INFO:     127.0.0.1:47290 - "GET /v1/projects HTTP/1.1" 200 OK
 INFO:     127.0.0.1:35752 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
 INFO:     127.0.0.1:35234 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53546 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53546 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53546 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53546 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53546 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43374 - "OPTIONS /v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43388 - "GET /v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58414 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+[API] Listing users for project 29315029c9e7
+[API] Listing buckets for project 29315029c9e7
+[API] Found 1 buckets: ['project-29315029c9e7']
+INFO:     127.0.0.1:58440 - "GET /v1/projects/29315029c9e7/storage/buckets HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58414 - "GET /v1/projects/29315029c9e7/tables HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58414 - "GET /v1/projects/29315029c9e7/tables/browser_verify/data HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58440 - "GET /v1/projects/29315029c9e7/tables/one/data HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58450 - "GET /v1/projects/29315029c9e7/tables/test_table/data HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58466 - "GET /v1/projects/29315029c9e7/tables/verification_final/data HTTP/1.1" 200 OK
+[API] Found 2 users
+INFO:     127.0.0.1:58428 - "GET /v1/projects/29315029c9e7/auth/users HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58428 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58428 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
