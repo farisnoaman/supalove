@@ -13,22 +13,58 @@ export default function ProjectOverviewPage() {
     const projectId = params.id as string;
 
     const [tables, setTables] = useState<any[]>([]);
+    const [userCount, setUserCount] = useState<number | null>(null);
+    const [bucketCount, setBucketCount] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
     useEffect(() => {
-        fetchTables();
+        fetchAllStats();
     }, [projectId]);
 
-    const fetchTables = async () => {
+    const fetchAllStats = async () => {
         setLoading(true);
+        try {
+            await Promise.all([
+                fetchTables(),
+                fetchUserCount(),
+                fetchBucketCount()
+            ]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchUserCount = async () => {
+        try {
+            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/auth/users`);
+            const data = await resp.json();
+            setUserCount(Array.isArray(data) ? data.length : 0);
+        } catch (err) {
+            console.error("Failed to fetch user count", err);
+            setUserCount(0);
+        }
+    };
+
+    const fetchBucketCount = async () => {
+        try {
+            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/storage/buckets`);
+            const data = await resp.json();
+            setBucketCount(Array.isArray(data) ? data.length : 0);
+        } catch (err) {
+            console.error("Failed to fetch bucket count", err);
+            setBucketCount(0);
+        }
+    };
+
+    const fetchTables = async () => {
         try {
             const resp = await fetch(`${API_URL}/v1/projects/${projectId}/tables`);
             const data = await resp.json();
             // Fetch row counts for each table
             const tablesWithCounts = await Promise.all(
-                data.map(async (table: any) => {
+                (data || []).map(async (table: any) => {
                     try {
                         const dataResp = await fetch(
                             `${API_URL}/v1/projects/${projectId}/tables/${table.table_name}/data`
@@ -46,8 +82,6 @@ export default function ProjectOverviewPage() {
             setTables(tablesWithCounts);
         } catch (err) {
             console.error("Failed to fetch tables", err);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -158,16 +192,22 @@ export default function ProjectOverviewPage() {
                                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Keycloak OIDC</p>
                             </div>
                         </div>
-                        <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Enabled</Badge>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                            {loading ? "..." : userCount} Users
+                        </Badge>
                     </div>
                     <div className="p-6">
                         <p className="text-sm text-muted-foreground mb-6">
                             Securely manage users, configure login providers, and handle session management.
                         </p>
-                        <Button variant="outline" className="w-full justify-between group border-border/50">
+                        <Button
+                            variant="outline"
+                            className="w-full justify-between group border-border/50"
+                            onClick={() => router.push(`/projects/${projectId}/auth`)}
+                        >
                             <span className="flex items-center gap-2">
                                 <Shield size={14} className="text-blue-500" />
-                                Manage Auth Settings
+                                Manage Auth & Users
                             </span>
                             <ArrowRight size={14} className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
                         </Button>
@@ -187,19 +227,19 @@ export default function ProjectOverviewPage() {
                             </div>
                         </div>
                         <span className="text-xs font-medium px-2 py-1 bg-background border border-border/40 rounded-md">
-                            1 Bucket
+                            {loading ? "..." : bucketCount} {bucketCount === 1 ? 'Bucket' : 'Buckets'}
                         </span>
                     </div>
                     <div className="p-6">
-                        <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200/20 flex items-center justify-between mb-4 group cursor-pointer hover:bg-amber-100/50 transition-colors">
-                            <div className="flex items-center gap-3">
-                                <Folder size={16} className="text-amber-500" />
-                                <span className="text-sm font-semibold">project-assets</span>
-                            </div>
-                            <Badge variant="secondary" className="text-[10px]">12.4 MB</Badge>
-                        </div>
-                        <Button variant="outline" className="w-full justify-center border-border/50">
-                            Browse Buckets
+                        <p className="text-sm text-muted-foreground mb-6">
+                            Store and serve large files like images, videos, and documents within project-isolated buckets.
+                        </p>
+                        <Button
+                            variant="outline"
+                            className="w-full justify-center border-border/50"
+                            onClick={() => router.push(`/projects/${projectId}/storage`)}
+                        >
+                            Open File Browser
                         </Button>
                     </div>
                 </div>

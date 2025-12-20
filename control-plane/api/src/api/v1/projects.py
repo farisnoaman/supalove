@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+import io
+from fastapi import APIRouter, HTTPException, File, UploadFile
 from pydantic import BaseModel
 from services.project_service import (
     create_project,
@@ -10,8 +11,12 @@ from services.project_service import (
     restore_project,
 )
 from services.database_service import DatabaseService
+from services.auth_service import AuthService
+from services.storage_service import StorageService
 
 router = APIRouter()
+auth_service = AuthService()
+storage_service = StorageService()
 
 class SQLQuery(BaseModel):
     sql: str
@@ -103,5 +108,85 @@ def get_table_data(project_id: str, table_name: str, limit: int = 50):
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_table_data(table_name, limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Auth Management Endpoints
+
+class UserCreate(BaseModel):
+    email: str
+    password: str = None
+
+@router.get("/projects/{project_id}/auth/users")
+def list_auth_users(project_id: str):
+    print(f"[API] Listing users for project {project_id}")
+    try:
+        users = auth_service.list_users(project_id)
+        print(f"[API] Found {len(users)} users")
+        return users
+    except Exception as e:
+        print(f"[API] Error listing users: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/projects/{project_id}/auth/users")
+def create_auth_user(project_id: str, user: UserCreate):
+    try:
+        return auth_service.create_user(project_id, user.email, user.password)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/projects/{project_id}/auth/users/{user_id}")
+def delete_auth_user(project_id: str, user_id: str):
+    try:
+        auth_service.delete_user(project_id, user_id)
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Storage Management Endpoints
+
+@router.get("/projects/{project_id}/storage/buckets")
+def list_storage_buckets(project_id: str):
+    print(f"[API] Listing buckets for project {project_id}")
+    try:
+        buckets = storage_service.list_buckets(project_id)
+        print(f"[API] Found {len(buckets)} buckets: {buckets}")
+        return buckets
+    except Exception as e:
+        print(f"[API] Error listing buckets: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/projects/{project_id}/storage/buckets/{bucket_name}/objects")
+def list_storage_objects(project_id: str, bucket_name: str, prefix: str = None):
+    try:
+        return storage_service.list_objects(project_id, bucket_name, prefix)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/projects/{project_id}/storage/buckets/{bucket_name}/objects")
+async def upload_storage_object(project_id: str, bucket_name: str, file: UploadFile = File(...)):
+    print(f"[API] Uploading object to bucket {bucket_name} for project {project_id}")
+    try:
+        # Read file content
+        content = await file.read()
+        storage_service.upload_object(
+            project_id=project_id,
+            bucket_name=bucket_name,
+            object_name=file.filename,
+            data=io.BytesIO(content),
+            length=len(content),
+            content_type=file.content_type
+        )
+        return {"name": file.filename, "size": len(content)}
+    except Exception as e:
+        print(f"[API] Error uploading object: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/projects/{project_id}/storage/buckets/{bucket_name}/objects/{object_name:path}")
+def delete_storage_object(project_id: str, bucket_name: str, object_name: str):
+    try:
+        storage_service.delete_object(project_id, bucket_name, object_name)
+        return {"status": "success"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

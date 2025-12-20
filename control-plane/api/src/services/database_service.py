@@ -58,6 +58,11 @@ class DatabaseService:
             if cursor.description:
                 columns = [desc[0] for desc in cursor.description]
                 rows = [dict(row) for row in cursor.fetchall()]
+                
+                # If it was an INSERT/UPDATE/DELETE with RETURNING, we must commit!
+                if sql.strip().upper().startswith(("INSERT", "UPDATE", "DELETE")):
+                    conn.commit()
+                    
                 result = {
                     "rows": rows,
                     "columns": columns,

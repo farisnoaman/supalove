@@ -13,11 +13,12 @@ import {
     Column,
     CellContext,
 } from "@tanstack/react-table";
-import { ArrowUpDown, Plus, Download, RefreshCw, ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { ArrowUpDown, Plus, Download, RefreshCw, ChevronLeft, ChevronRight, Settings, Table as TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { RowEditor } from "@/components/RowEditor";
 import { cn } from "@/lib/utils";
 
 export default function TableDetailPage() {
@@ -31,6 +32,7 @@ export default function TableDetailPage() {
     const [loading, setLoading] = useState(true);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [rowCount, setRowCount] = useState(0);
+    const [rowEditorOpen, setRowEditorOpen] = useState(false);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -117,14 +119,22 @@ export default function TableDetailPage() {
                 return typeof val === 'object' ? `"${JSON.stringify(val).replace(/"/g, '""')}"` : `"${String(val ?? '').replace(/"/g, '""')}"`;
             }).join(",")
         );
-        const csv = [headers, ...rows].join("\n");
 
-        const blob = new Blob([csv], { type: "text/csv" });
+        // Add UTF-8 BOM for Excel compatibility
+        const csv = "\uFEFF" + [headers, ...rows].join("\n");
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${tableName}_export.csv`;
-        a.click();
+        const link = document.createElement("a");
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", `${tableName}.csv`);
+        link.style.visibility = "hidden";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
         URL.revokeObjectURL(url);
     };
 
@@ -166,7 +176,7 @@ export default function TableDetailPage() {
                         <Download size={14} />
                         Export CSV
                     </Button>
-                    <Button size="sm" className="gap-2 primary-gradient shadow-lg shadow-emerald-500/10">
+                    <Button size="sm" onClick={() => setRowEditorOpen(true)} className="gap-2 primary-gradient shadow-lg shadow-emerald-500/10">
                         <Plus size={14} />
                         Insert Row
                     </Button>
@@ -191,7 +201,7 @@ export default function TableDetailPage() {
                         <p className="text-sm text-muted-foreground text-center mt-2 max-w-sm">
                             This table currently has no rows. Click "Insert Row" to add your first entry or import data via SQL.
                         </p>
-                        <Button className="mt-6 primary-gradient" size="sm">
+                        <Button className="mt-6 primary-gradient" size="sm" onClick={() => setRowEditorOpen(true)}>
                             <Plus size={14} className="mr-2" />
                             Add First Row
                         </Button>
@@ -202,25 +212,21 @@ export default function TableDetailPage() {
                             <table className="w-full border-collapse">
                                 <thead className="bg-muted/50 border-b border-border/40 sticky top-0 z-10 backdrop-blur-md">
                                     {table.getHeaderGroups().map((headerGroup) => (
-                                        <tr key={headerGroup.id}>
-                                            <th className="w-10 px-4 py-4 text-center">
-                                                <input type="checkbox" className="rounded border-border text-primary focus:ring-primary/20" />
+                                        <tr key={headerGroup.id}><th className="w-10 px-4 py-4 text-center">
+                                            <input type="checkbox" className="rounded border-border text-primary focus:ring-primary/20" />
+                                        </th>{headerGroup.headers.map((header) => (
+                                            <th
+                                                key={header.id}
+                                                className="px-6 py-4 text-left font-normal"
+                                            >
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
                                             </th>
-                                            {headerGroup.headers.map((header) => (
-                                                <th
-                                                    key={header.id}
-                                                    className="px-6 py-4 text-left font-normal"
-                                                >
-                                                    {header.isPlaceholder
-                                                        ? null
-                                                        : flexRender(
-                                                            header.column.columnDef.header,
-                                                            header.getContext()
-                                                        )}
-                                                </th>
-                                            ))}
-                                            <th className="w-20 px-6 py-4" /> {/* Actions column */}
-                                        </tr>
+                                        ))}<th className="w-20 px-6 py-4" /></tr>
                                     ))}
                                 </thead>
                                 <tbody>
@@ -228,23 +234,19 @@ export default function TableDetailPage() {
                                         <tr
                                             key={row.id}
                                             className="border-b border-border/20 hover:bg-emerald-50/30 dark:hover:bg-emerald-500/5 transition-colors group"
-                                        >
-                                            <td className="w-10 px-4 py-4 text-center">
+                                        ><td className="w-10 px-4 py-4 text-center">
                                                 <input type="checkbox" className="rounded border-border text-primary focus:ring-primary/20" />
-                                            </td>
-                                            {row.getVisibleCells().map((cell) => (
+                                            </td>{row.getVisibleCells().map((cell) => (
                                                 <td key={cell.id} className="px-6 py-4">
                                                     <div className="truncate max-w-[200px]">
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </div>
                                                 </td>
-                                            ))}
-                                            <td className="w-20 px-6 py-4 text-right">
+                                            ))}<td className="w-20 px-6 py-4 text-right">
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <Settings size={14} className="text-muted-foreground" />
                                                 </Button>
-                                            </td>
-                                        </tr>
+                                            </td></tr>
                                     ))}
                                 </tbody>
                             </table>
@@ -303,24 +305,15 @@ export default function TableDetailPage() {
                     </div>
                 )}
             </div>
+
+            <RowEditor
+                open={rowEditorOpen}
+                onOpenChange={setRowEditorOpen}
+                projectId={projectId}
+                tableName={tableName}
+                onSuccess={fetchTableData}
+            />
         </div>
     );
 }
 
-const TableIcon = ({ size, className }: { size?: number, className?: string }) => (
-    <svg
-        width={size || 24}
-        height={size || 24}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-    >
-        <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18" />
-        <line x1="3" y1="9" x2="21" y2="9" />
-        <line x1="3" y1="15" x2="21" y2="15" />
-    </svg>
-);

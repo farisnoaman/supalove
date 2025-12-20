@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/faris/Documents/MyApps/supabase_lovable_cloud_clone/control-plane/api/.venv
+set -gx VIRTUAL_ENV /home/faris/Documents/MyApps/supalove/control-plane/api/.venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH

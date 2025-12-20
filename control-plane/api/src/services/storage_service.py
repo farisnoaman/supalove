@@ -54,6 +54,34 @@ class StorageService:
             print(f"[StorageService] Error creating bucket: {e}")
             raise
     
+    def list_buckets(self, project_id: str):
+        """Lists all buckets for a project (structured as prefix for now)"""
+        buckets = self.client.list_buckets()
+        project_prefix = f"project-{project_id}"
+        return [b.name for b in buckets if b.name.startswith(project_prefix)]
+
+    def list_objects(self, project_id: str, bucket_name: str, prefix: str = None):
+        """Lists objects in a project's bucket"""
+        objects = self.client.list_objects(bucket_name, prefix=prefix, recursive=True)
+        return [
+            {
+                "name": obj.object_name,
+                "size": obj.size,
+                "last_modified": str(obj.last_modified),
+                "is_dir": obj.is_dir,
+                "content_type": obj.content_type
+            }
+            for obj in objects
+        ]
+
+    def upload_object(self, project_id: str, bucket_name: str, object_name: str, data, length: int, content_type: str = "application/octet-stream"):
+        """Uploads an object to a bucket"""
+        return self.client.put_object(bucket_name, object_name, data, length, content_type=content_type)
+
+    def delete_object(self, project_id: str, bucket_name: str, object_name: str):
+        """Deletes an object from a bucket"""
+        return self.client.remove_object(bucket_name, object_name)
+
     def get_storage_config(self, bucket_name: str) -> dict:
         """
         Returns configuration needed for the project stack to access this bucket.

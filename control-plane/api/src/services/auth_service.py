@@ -110,9 +110,39 @@ class AuthService:
         Simplification: We return a placeholder or the client secret if we treat it as the signing key for now.
         Use Case: PostgREST needs a JWT secret.
         """
-        # TODO: Configure Realm to use HS256 and generate a secret or retrieve the RS256 public key.
-        # For compatibility with PostgREST verifying RS256 validation is better but more complex setup.
-        # Let's return a generated secret that we MIGHT force onto the realm or just a placeholder.
+    # User Management
+
+    def list_users(self, project_id: str):
+        """Lists all users in the project's realm"""
+        realm_name = f"project-{project_id}"
+        realm_admin = self._get_admin(realm_name=realm_name)
+        return realm_admin.get_users()
+
+    def create_user(self, project_id: str, email: str, password: str = None):
+        """Creates a new user in the project's realm"""
+        realm_name = f"project-{project_id}"
+        realm_admin = self._get_admin(realm_name=realm_name)
         
-        # Placeholder
+        user_payload = {
+            "email": email,
+            "username": email,
+            "enabled": True,
+            "emailVerified": True,
+        }
+        
+        user_id = realm_admin.create_user(payload=user_payload)
+        
+        if password:
+            realm_admin.set_user_password(user_id=user_id, password=password, temporary=False)
+            
+        return realm_admin.get_user(user_id=user_id)
+
+    def delete_user(self, project_id: str, user_id: str):
+        """Deletes a user from the project's realm"""
+        realm_name = f"project-{project_id}"
+        realm_admin = self._get_admin(realm_name=realm_name)
+        return realm_admin.delete_user(user_id=user_id)
+
+    def get_jwt_secret(self, realm_name: str) -> str:
+        # TODO: Configure Realm to use HS256 and generate a secret or retrieve the RS256 public key.
         return "super-secret-jwt-token-placeholder"
