@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from core.database import SessionLocal
 from models.project import Project
 from services.secrets_service import generate_project_secrets
+from services.auth_service import AuthService
+from services.storage_service import StorageService
 from services.provisioning_service import (
     provision_project,
     stop_project as provision_stop,
@@ -32,13 +34,43 @@ def create_project():
     db.add(project)
     db.commit()
 
-    # 2️⃣ Generate secrets (RETURN them)
+    # 2️⃣ Generate base secrets
     secrets = generate_project_secrets(db, project_id)
 
-    # 3️⃣ Provision infra using secrets
+    # 3️⃣ Auth Setup (Keycloak)
+    auth_service = AuthService()
+    realm_name = auth_service.create_project_realm(project_id)
+    auth_config = auth_service.create_api_client(realm_name)
+    
+    # Store auth secrets
+    from models.project_secret import ProjectSecret
+    db.add(ProjectSecret(project_id=project_id, key="AUTH_REALM", value=realm_name))
+    db.add(ProjectSecret(project_id=project_id, key="AUTH_CLIENT_ID", value=auth_config["client_id"]))
+    db.add(ProjectSecret(project_id=project_id, key="AUTH_CLIENT_SECRET", value=auth_config["client_secret"]))
+    
+    secrets.update({
+        "AUTH_REALM": realm_name,
+        "AUTH_CLIENT_ID": auth_config["client_id"],
+        "AUTH_CLIENT_SECRET": auth_config["client_secret"]
+    })
+
+    # 4️⃣ Storage Setup (MinIO)
+    storage_service = StorageService()
+    bucket_name = storage_service.create_project_bucket(project_id)
+    storage_config = storage_service.get_storage_config(bucket_name)
+    
+    # Store storage secrets
+    for key, value in storage_config.items():
+        db.add(ProjectSecret(project_id=project_id, key=key, value=value))
+    
+    secrets.update(storage_config)
+    
+    db.commit()
+
+    # 5️⃣ Provision infra using consolidated secrets
     provision_output = provision_project(project_id, secrets)
 
-    # 4️⃣ Mark running
+    # 6️⃣ Mark running
     db.query(Project).filter(Project.id == project_id).update({"status": "running"})
     db.commit()
     db.refresh(project)

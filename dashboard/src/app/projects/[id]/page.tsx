@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Table as TableIcon, Settings } from "lucide-react";
+import { Table as TableIcon, Settings, Shield, Folder, Code2, Zap, ArrowRight, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 export default function ProjectOverviewPage() {
     const params = useParams();
@@ -52,132 +54,177 @@ export default function ProjectOverviewPage() {
     const topTables = tables.slice(0, 3);
 
     return (
-        <div className="space-y-6 max-w-4xl">
-            {/* Database Section */}
-            <div className="bg-white border border-gray-200 rounded-lg">
-                <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Database</h2>
-                            <p className="text-sm text-gray-600 mt-0.5">
-                                View tables and edit data
-                            </p>
-                        </div>
-                        <span className="text-sm text-gray-600">{tables.length} Tables</span>
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-5xl">
+            {/* Hero Section */}
+            <div className="relative p-8 rounded-3xl bg-card border border-border/40 overflow-hidden shadow-2xl glass">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <Badge variant="outline" className="mb-4 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1">
+                            <Zap size={12} className="mr-1.5 fill-emerald-500" />
+                            Project Active
+                        </Badge>
+                        <h1 className="text-4xl font-black tracking-tight text-gradient">Project Overview</h1>
+                        <p className="text-muted-foreground mt-2 max-w-md">
+                            Manage your backend infrastructure, browse your data, and configure authentication for your application.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Button variant="outline" className="border-border/50">
+                            <Settings size={16} className="mr-2" />
+                            Settings
+                        </Button>
+                        <Button className="primary-gradient shadow-lg shadow-emerald-500/20">
+                            Go to Docs
+                            <ArrowRight size={16} className="ml-2" />
+                        </Button>
                     </div>
                 </div>
-                <div className="p-6">
-                    {loading ? (
-                        <div className="text-center py-8 text-gray-500">Loading...</div>
-                    ) : tables.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                            No tables found. Create your first table in the database view.
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Database Section */}
+                <div className="bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-primary/20 transition-all flex flex-col">
+                    <div className="p-6 border-b border-border/20 flex items-center justify-between bg-muted/30">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg">
+                                <Database size={20} className="text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold">Database</h2>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">PostgreSQL</p>
+                            </div>
                         </div>
-                    ) : (
-                        <>
-                            <div className="space-y-0">
-                                {topTables.map((table, index) => (
+                        <span className="text-xs font-medium px-2 py-1 bg-background border border-border/40 rounded-md">
+                            {tables.length} Tables
+                        </span>
+                    </div>
+                    <div className="p-4 flex-1">
+                        {loading ? (
+                            <div className="space-y-2 p-2">
+                                <Skeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
+                            </div>
+                        ) : tables.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground text-sm italic">
+                                No tables found. Create your first table.
+                            </div>
+                        ) : (
+                            <div className="space-y-1">
+                                {topTables.map((table) => (
                                     <button
                                         key={table.table_name}
                                         onClick={() =>
                                             router.push(`/projects/${projectId}/database/${table.table_name}`)
                                         }
-                                        className={cn(
-                                            "w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors text-left",
-                                            index < topTables.length - 1 && "border-b border-gray-100"
-                                        )}
+                                        className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-muted/50 transition-colors text-left group"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <TableIcon size={16} className="text-gray-400" />
-                                            <span className="text-sm font-medium text-gray-900">
+                                            <TableIcon size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                                            <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
                                                 {table.table_name}
                                             </span>
                                         </div>
-                                        <span className="text-sm text-gray-500">
-                                            {table.rowCount} rows
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-muted-foreground font-mono">
+                                                {table.rowCount} rows
+                                            </span>
+                                            <ArrowRight size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
+                                        </div>
                                     </button>
                                 ))}
-                            </div>
-                            {tables.length > 3 && (
-                                <div className="mt-4 text-center">
+                                {tables.length > 3 && (
                                     <button
                                         onClick={() => router.push(`/projects/${projectId}/database`)}
-                                        className="text-sm text-gray-900 hover:underline font-medium"
+                                        className="w-full mt-2 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors text-center border-t border-border/10"
                                     >
-                                        View all
+                                        View all {tables.length} tables
                                     </button>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            </div>
-
-            {/* Users Section */}
-            <div className="bg-white border border-gray-200 rounded-lg">
-                <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Users</h2>
-                            <p className="text-sm text-gray-600 mt-0.5">
-                                View user data and configure how users sign up
-                            </p>
-                        </div>
-                        <span className="text-sm text-gray-600">1 Signup</span>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div className="p-6">
-                    <Button variant="outline" className="w-full justify-start gap-2 bg-gray-50 border-gray-200 hover:bg-gray-100">
-                        <Settings size={16} />
-                        Auth settings
-                    </Button>
-                </div>
-            </div>
 
-            {/* Storage Section */}
-            <div className="bg-white border border-gray-200 rounded-lg">
-                <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Storage</h2>
-                            <p className="text-sm text-gray-600 mt-0.5">
-                                View and manage files, images, and documents
-                            </p>
+                {/* Users / Auth Section */}
+                <div className="bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-blue-500/20 transition-all flex flex-col">
+                    <div className="p-6 border-b border-border/20 flex items-center justify-between bg-muted/30">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-lg">
+                                <Shield size={20} className="text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold">Authentication</h2>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Keycloak OIDC</p>
+                            </div>
                         </div>
-                        <span className="text-sm text-gray-600">1 Bucket</span>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Enabled</Badge>
+                    </div>
+                    <div className="p-6">
+                        <p className="text-sm text-muted-foreground mb-6">
+                            Securely manage users, configure login providers, and handle session management.
+                        </p>
+                        <Button variant="outline" className="w-full justify-between group border-border/50">
+                            <span className="flex items-center gap-2">
+                                <Shield size={14} className="text-blue-500" />
+                                Manage Auth Settings
+                            </span>
+                            <ArrowRight size={14} className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                        </Button>
                     </div>
                 </div>
-                <div className="p-6">
-                    <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left bg-gray-50 rounded">
-                        <span className="text-sm font-medium text-gray-900">product-images</span>
-                    </button>
-                </div>
-            </div>
 
-            {/* Edge Functions Section */}
-            <div className="bg-white border border-gray-200 rounded-lg">
-                <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Edge functions</h2>
-                            <p className="text-sm text-gray-600 mt-0.5">
-                                Configure functions executed in your app
-                            </p>
+                {/* Storage Section */}
+                <div className="bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-amber-500/20 transition-all flex flex-col">
+                    <div className="p-6 border-b border-border/20 flex items-center justify-between bg-muted/30">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
+                                <Folder size={20} className="text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold">Storage</h2>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">MinIO S3</p>
+                            </div>
                         </div>
-                        <span className="text-sm text-gray-600">0 Functions</span>
+                        <span className="text-xs font-medium px-2 py-1 bg-background border border-border/40 rounded-md">
+                            1 Bucket
+                        </span>
+                    </div>
+                    <div className="p-6">
+                        <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200/20 flex items-center justify-between mb-4 group cursor-pointer hover:bg-amber-100/50 transition-colors">
+                            <div className="flex items-center gap-3">
+                                <Folder size={16} className="text-amber-500" />
+                                <span className="text-sm font-semibold">project-assets</span>
+                            </div>
+                            <Badge variant="secondary" className="text-[10px]">12.4 MB</Badge>
+                        </div>
+                        <Button variant="outline" className="w-full justify-center border-border/50">
+                            Browse Buckets
+                        </Button>
                     </div>
                 </div>
-                <div className="p-6">
-                    <div className="text-center py-12">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-400">
-                                <path d="M9 3L3 9L9 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <path d="M15 9L21 15L15 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
+
+                {/* Edge Functions Section */}
+                <div className="bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-purple-500/20 transition-all flex flex-col">
+                    <div className="p-6 border-b border-border/20 flex items-center justify-between bg-muted/30">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded-lg">
+                                <Code2 size={20} className="text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold">Edge Functions</h2>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Deno Runtime</p>
+                            </div>
                         </div>
-                        <p className="text-sm text-gray-500">
-                            Edge functions will appear when<br />adding custom background actions
+                        <Badge variant="secondary" className="bg-muted text-muted-foreground">Beta</Badge>
+                    </div>
+                    <div className="p-10 flex flex-col items-center justify-center text-center">
+                        <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center mb-4">
+                            <Zap size={24} className="text-purple-500 fill-purple-500" />
+                        </div>
+                        <h3 className="text-sm font-bold">No functions deployed</h3>
+                        <p className="text-[11px] text-muted-foreground mt-2 max-w-[200px]">
+                            Serverless functions will appear here when you add custom logic to your app.
                         </p>
                     </div>
                 </div>
@@ -186,6 +233,15 @@ export default function ProjectOverviewPage() {
     );
 }
 
-function cn(...classes: any[]) {
-    return classes.filter(Boolean).join(' ');
+function Badge({ children, variant = "default", className }: { children: React.ReactNode, variant?: string, className?: string }) {
+    const variants: Record<string, string> = {
+        default: "bg-primary text-primary-foreground",
+        secondary: "bg-secondary text-secondary-foreground",
+        outline: "border border-border text-foreground",
+    };
+    return (
+        <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors", variants[variant], className)}>
+            {children}
+        </span>
+    );
 }

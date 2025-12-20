@@ -55,15 +55,10 @@ class LocalProvisioner(ProvisioningProvider):
                 shutil.copytree(item, project_dir / item.name, dirs_exist_ok=True)
 
         # Create .env file for the project
-        env_content = f"""# Project: {project_id}
-DB_PASSWORD={db_password}
-DB_PORT={db_port}
-REST_PORT={rest_port}
-REALTIME_PORT={realtime_port}
-JWT_SECRET={secrets.get('JWT_SECRET', 'default-jwt-secret')}
-ANON_KEY={secrets.get('ANON_KEY', 'default-anon-key')}
-SERVICE_ROLE_KEY={secrets.get('SERVICE_ROLE_KEY', 'default-service-role-key')}
-"""
+        env_content = f"# Project: {project_id}\n"
+        for key, value in secrets.items():
+            env_content += f"{key}={value}\n"
+            
         env_file = project_dir / ".env"
         env_file.write_text(env_content)
 
@@ -101,17 +96,27 @@ SERVICE_ROLE_KEY={secrets.get('SERVICE_ROLE_KEY', 'default-service-role-key')}
         }
 
     def stop_project(self, project_id: str) -> None:
-        # TODO: Implement stop functionality
-        pass
+        project_dir = BASE_PROJECTS_DIR / project_id
+        if project_dir.exists():
+            import subprocess
+            subprocess.run(["docker", "compose", "stop"], cwd=project_dir, capture_output=True)
 
     def start_project(self, project_id: str) -> None:
-        # TODO: Implement start functionality
-        pass
+        project_dir = BASE_PROJECTS_DIR / project_id
+        if project_dir.exists():
+            import subprocess
+            subprocess.run(["docker", "compose", "start"], cwd=project_dir, capture_output=True)
 
     def delete_project(self, project_id: str) -> None:
-        # TODO: Implement delete functionality
-        pass
+        project_dir = BASE_PROJECTS_DIR / project_id
+        if project_dir.exists():
+            import subprocess
+            subprocess.run(["docker", "compose", "down", "-v"], cwd=project_dir, capture_output=True)
+            import shutil
+            shutil.rmtree(project_dir)
 
     def restore_project(self, project_id: str) -> None:
-        # TODO: Implement restore functionality
-        pass
+        project_dir = BASE_PROJECTS_DIR / project_id
+        if project_dir.exists():
+            import subprocess
+            subprocess.run(["docker", "compose", "up", "-d"], cwd=project_dir, capture_output=True)

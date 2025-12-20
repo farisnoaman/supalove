@@ -1,4 +1,5 @@
 import os
+import secrets
 from keycloak import KeycloakAdmin
 from keycloak.exceptions import KeycloakError
 
@@ -14,21 +15,25 @@ class AuthService:
         self.realm_name = "master"
         self._admin = None
 
+    def _get_admin(self, realm_name: str = None) -> KeycloakAdmin:
+        """Helper to get a KeycloakAdmin instance for a specific realm"""
+        return KeycloakAdmin(
+            server_url=self.server_url,
+            username=self.username,
+            password=self.password,
+            realm_name=realm_name or self.realm_name,
+            user_realm_name="master",
+            verify=True
+        )
+
     @property
     def admin(self):
-        """Lazy initialization of KeycloakAdmin client"""
+        """Lazy initialization of KeycloakAdmin client for the master realm"""
         if not self._admin:
             try:
-                self._admin = KeycloakAdmin(
-                    server_url=self.server_url,
-                    username=self.username,
-                    password=self.password,
-                    realm_name=self.realm_name,
-                    verify=True
-                )
+                self._admin = self._get_admin()
             except Exception as e:
                 print(f"[AuthService] Failed to connect to Keycloak: {e}")
-                # We might want to re-raise or handle this depending on resilience needs
                 raise
         return self._admin
 
@@ -57,13 +62,14 @@ class AuthService:
 
     def create_api_client(self, realm_name: str) -> dict:
         """
-        Creates an OIDC client for the project API.
+        Creates an OIDC client for the project API in the specified realm.
         Returns client secrets.
         """
         client_id = "api-service"
+        realm_admin = self._get_admin(realm_name=realm_name)
         
         # Check if client exists
-        clients = self.admin.get_clients(realm_name=realm_name)
+        clients = realm_admin.get_clients()
         existing = next((c for c in clients if c.get("clientId") == client_id), None)
         
         if existing:
@@ -74,21 +80,16 @@ class AuthService:
                 "name": "API Service",
                 "enabled": True,
                 "clientAuthenticatorType": "client-secret",
-                "secret": "generated-later-by-keycloak", # Dummy, will be overwritten or generated
+                "secret": secrets.token_urlsafe(32),
                 "serviceAccountsEnabled": True,
-                "standardFlowEnabled": False, # Machine-to-machine
+                "standardFlowEnabled": False,
                 "directAccessGrantsEnabled": True,
             }
-            client_uuid = self.admin.create_client(payload=payload, realm_name=realm_name)
+            client_uuid = realm_admin.create_client(payload=payload)
         
         # Get Secret
-        # Note: python-keycloak create_client returns UUID of the client
-        # We need to fetch the secret
-        # There isn't a direct get_client_secret in KeycloakAdmin for a specific client UUID easily exposed?
-        # Actually there is keycloak_admin.get_client_secrets(client_id=client_uuid, realm_name=realm_name)
-        
-        secrets = self.admin.get_client_secrets(client_id=client_uuid, realm_name=realm_name)
-        secret_value = secrets.get("value")
+        client_secrets_data = realm_admin.get_client_secrets(client_id=client_uuid)
+        secret_value = client_secrets_data.get("value")
         
         return {
             "client_id": client_id,

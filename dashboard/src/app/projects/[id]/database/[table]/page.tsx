@@ -13,11 +13,12 @@ import {
     Column,
     CellContext,
 } from "@tanstack/react-table";
-import { ArrowUpDown, Plus, Download } from "lucide-react";
+import { ArrowUpDown, Plus, Download, RefreshCw, ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export default function TableDetailPage() {
     const params = useParams();
@@ -55,20 +56,28 @@ export default function TableDetailPage() {
                     header: ({ column }: { column: Column<any> }) => {
                         return (
                             <button
-                                className="flex items-center gap-2 font-semibold hover:text-primary transition-colors"
+                                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors py-2"
                                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                             >
                                 {col}
-                                <ArrowUpDown size={14} />
+                                {column.getIsSorted() ? (
+                                    <ArrowUpDown size={12} className="text-primary" />
+                                ) : (
+                                    <ArrowUpDown size={12} className="opacity-30" />
+                                )}
                             </button>
                         );
                     },
                     cell: (info: CellContext<any, unknown>) => {
                         const value = info.getValue();
-                        if (value === null) return <span className="text-muted-foreground italic">NULL</span>;
-                        if (typeof value === "boolean") return value ? "true" : "false";
-                        if (typeof value === "object") return JSON.stringify(value);
-                        return String(value);
+                        if (value === null) return <span className="text-muted-foreground/40 italic font-mono text-xs">NULL</span>;
+                        if (typeof value === "boolean") return (
+                            <Badge variant={value ? "default" : "secondary"} className="text-[10px] h-5">
+                                {value ? "true" : "false"}
+                            </Badge>
+                        );
+                        if (typeof value === "object") return <span className="font-mono text-xs text-blue-500">{JSON.stringify(value)}</span>;
+                        return <span className="text-sm">{String(value)}</span>;
                     },
                 }));
 
@@ -103,7 +112,10 @@ export default function TableDetailPage() {
 
         const headers = columns.map((col: any) => col.accessorKey).join(",");
         const rows = data.map((row) =>
-            columns.map((col: any) => JSON.stringify(row[col.accessorKey] ?? "")).join(",")
+            columns.map((col: any) => {
+                const val = row[col.accessorKey];
+                return typeof val === 'object' ? `"${JSON.stringify(val).replace(/"/g, '""')}"` : `"${String(val ?? '').replace(/"/g, '""')}"`;
+            }).join(",")
         );
         const csv = [headers, ...rows].join("\n");
 
@@ -111,13 +123,13 @@ export default function TableDetailPage() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${tableName}.csv`;
+        a.download = `${tableName}_export.csv`;
         a.click();
         URL.revokeObjectURL(url);
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 h-full flex flex-col">
             {/* Breadcrumb */}
             <Breadcrumb
                 items={[
@@ -128,98 +140,187 @@ export default function TableDetailPage() {
             />
 
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-bold">{tableName}</h2>
-                    <Badge variant="secondary">{rowCount} rows</Badge>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl">
+                        <TableIcon size={24} className="text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-3xl font-bold tracking-tight">{tableName}</h2>
+                            <Badge variant="secondary" className="bg-muted/50 border-border/40 text-muted-foreground px-2">
+                                {rowCount} rows
+                            </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Browse and managedata in the <span className="font-mono font-medium text-foreground">public.{tableName}</span> table.
+                        </p>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-2">
-                        <Download size={16} />
-                        Export
+                    <Button variant="outline" size="sm" onClick={fetchTableData} className="gap-2 border-border/50">
+                        <RefreshCw size={14} className={cn(loading && "animate-spin")} />
+                        Refresh
                     </Button>
-                    <Button size="sm" className="gap-2">
-                        <Plus size={16} />
-                        Add Row
+                    <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-2 border-border/50">
+                        <Download size={14} />
+                        Export CSV
+                    </Button>
+                    <Button size="sm" className="gap-2 primary-gradient shadow-lg shadow-emerald-500/10">
+                        <Plus size={14} />
+                        Insert Row
                     </Button>
                 </div>
             </div>
 
-            {/* Data Grid */}
-            {loading ? (
-                <div className="space-y-3">
-                    <Skeleton className="h-12 w-full" />
-                    {[...Array(10)].map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full" />
-                    ))}
-                </div>
-            ) : (
-                <div className="border border-border rounded-lg overflow-hidden bg-card">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-muted border-b border-border">
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <tr key={headerGroup.id}>
-                                        {headerGroup.headers.map((header) => (
-                                            <th
-                                                key={header.id}
-                                                className="px-4 py-3 text-left text-sm font-semibold text-foreground"
-                                            >
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
+            {/* Data Grid Section */}
+            <div className="flex-1 flex flex-col min-h-[400px]">
+                {loading ? (
+                    <div className="space-y-3 bg-card border border-border/40 rounded-2xl p-6 shadow-sm">
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                        {[...Array(8)].map((_, i) => (
+                            <Skeleton key={i} className="h-14 w-full rounded-lg opacity-40" />
+                        ))}
+                    </div>
+                ) : data.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center bg-card/40 border-2 border-dashed border-border/40 rounded-2xl p-12">
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                            <TableIcon size={32} className="text-muted-foreground/40" />
+                        </div>
+                        <h3 className="text-xl font-bold text-foreground">No data found</h3>
+                        <p className="text-sm text-muted-foreground text-center mt-2 max-w-sm">
+                            This table currently has no rows. Click "Insert Row" to add your first entry or import data via SQL.
+                        </p>
+                        <Button className="mt-6 primary-gradient" size="sm">
+                            <Plus size={14} className="mr-2" />
+                            Add First Row
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="flex-1 flex flex-col border border-border/40 rounded-2xl overflow-hidden bg-card shadow-xl glass">
+                        <div className="overflow-x-auto flex-1">
+                            <table className="w-full border-collapse">
+                                <thead className="bg-muted/50 border-b border-border/40 sticky top-0 z-10 backdrop-blur-md">
+                                    {table.getHeaderGroups().map((headerGroup) => (
+                                        <tr key={headerGroup.id}>
+                                            <th className="w-10 px-4 py-4 text-center">
+                                                <input type="checkbox" className="rounded border-border text-primary focus:ring-primary/20" />
                                             </th>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </thead>
-                            <tbody>
-                                {table.getRowModel().rows.map((row) => (
-                                    <tr
-                                        key={row.id}
-                                        className="border-b border-border hover:bg-muted/50 transition-colors"
-                                    >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <td key={cell.id} className="px-4 py-3 text-sm">
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            {headerGroup.headers.map((header) => (
+                                                <th
+                                                    key={header.id}
+                                                    className="px-6 py-4 text-left font-normal"
+                                                >
+                                                    {header.isPlaceholder
+                                                        ? null
+                                                        : flexRender(
+                                                            header.column.columnDef.header,
+                                                            header.getContext()
+                                                        )}
+                                                </th>
+                                            ))}
+                                            <th className="w-20 px-6 py-4" /> {/* Actions column */}
+                                        </tr>
+                                    ))}
+                                </thead>
+                                <tbody>
+                                    {table.getRowModel().rows.map((row) => (
+                                        <tr
+                                            key={row.id}
+                                            className="border-b border-border/20 hover:bg-emerald-50/30 dark:hover:bg-emerald-500/5 transition-colors group"
+                                        >
+                                            <td className="w-10 px-4 py-4 text-center">
+                                                <input type="checkbox" className="rounded border-border text-primary focus:ring-primary/20" />
                                             </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                            {row.getVisibleCells().map((cell) => (
+                                                <td key={cell.id} className="px-6 py-4">
+                                                    <div className="truncate max-w-[200px]">
+                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                    </div>
+                                                </td>
+                                            ))}
+                                            <td className="w-20 px-6 py-4 text-right">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Settings size={14} className="text-muted-foreground" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
-                    {/* Pagination */}
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/30">
-                        <div className="text-sm text-muted-foreground">
-                            Page {table.getState().pagination.pageIndex + 1} of{" "}
-                            {table.getPageCount()} • {data.length} rows
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                Previous
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                Next
-                            </Button>
+                        {/* Professional Pagination */}
+                        <div className="flex items-center justify-between px-8 py-4 border-t border-border/40 bg-muted/20">
+                            <div className="flex items-center gap-6">
+                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+                                    Rows: <span className="text-foreground">{data.length}</span>
+                                </span>
+                                <div className="h-4 w-[1px] bg-border/40" />
+                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+                                    Page <span className="text-foreground">{table.getState().pagination.pageIndex + 1}</span> of <span className="text-foreground">{table.getPageCount() || 1}</span>
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => table.previousPage()}
+                                    disabled={!table.getCanPreviousPage()}
+                                    className="h-8 px-3 gap-1 border-border/40"
+                                >
+                                    <ChevronLeft size={14} />
+                                    Previous
+                                </Button>
+                                <div className="flex items-center gap-1">
+                                    {[...Array(Math.min(5, table.getPageCount()))].map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => table.setPageIndex(i)}
+                                            className={cn(
+                                                "w-8 h-8 rounded-lg text-xs font-bold transition-all",
+                                                table.getState().pagination.pageIndex === i
+                                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                                    : "hover:bg-muted text-muted-foreground"
+                                            )}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => table.nextPage()}
+                                    disabled={!table.getCanNextPage()}
+                                    className="h-8 px-3 gap-1 border-border/40"
+                                >
+                                    Next
+                                    <ChevronRight size={14} />
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }
+
+const TableIcon = ({ size, className }: { size?: number, className?: string }) => (
+    <svg
+        width={size || 24}
+        height={size || 24}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18" />
+        <line x1="3" y1="9" x2="21" y2="9" />
+        <line x1="3" y1="15" x2="21" y2="15" />
+    </svg>
+);

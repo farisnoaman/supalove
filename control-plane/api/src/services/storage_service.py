@@ -9,7 +9,7 @@ class StorageService:
     """
     
     def __init__(self):
-        self.endpoint = os.getenv("MINIO_ENDPOINT", "minio:9000")
+        self.endpoint = os.getenv("MINIO_ENDPOINT", "localhost:9000")
         self.access_key = os.getenv("MINIO_ROOT_USER", "minioadmin")
         self.secret_key = os.getenv("MINIO_ROOT_PASSWORD", "minioadmin")
         self.secure = os.getenv("MINIO_SECURE", "false").lower() == "true"
