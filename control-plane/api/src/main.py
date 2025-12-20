@@ -16,7 +16,19 @@ from models.project_secret import ProjectSecret
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Supabase Cloud Clone")
+from contextlib import asynccontextmanager
+from services.scheduler_service import SchedulerService
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    scheduler = SchedulerService()
+    scheduler.start()
+    yield
+    # Shutdown
+    scheduler.stop()
+
+app = FastAPI(title="Supabase Cloud Clone", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

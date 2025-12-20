@@ -25,7 +25,7 @@ def get_project_by_id(project_id: str):
     return db.query(Project).filter(Project.id == project_id).first()
 
 
-def create_project():
+def create_project(custom_domain: str = None):
     project_id = uuid.uuid4().hex[:12]
     db: Session = SessionLocal()
 
@@ -65,10 +65,15 @@ def create_project():
     
     secrets.update(storage_config)
     
+
+    if custom_domain:
+        db.add(ProjectSecret(project_id=project_id, key="CUSTOM_DOMAIN", value=custom_domain))
+        secrets["CUSTOM_DOMAIN"] = custom_domain
+
     db.commit()
 
     # 5️⃣ Provision infra using consolidated secrets
-    provision_output = provision_project(project_id, secrets)
+    provision_output = provision_project(project_id, secrets, custom_domain=custom_domain)
 
     # 6️⃣ Mark running
     db.query(Project).filter(Project.id == project_id).update({"status": "running"})

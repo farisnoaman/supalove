@@ -26,14 +26,14 @@ _provider = _get_provider()
 _auth_service = AuthService()
 _storage_service = StorageService()
 
-def provision_project(project_id: str, secrets: dict = None) -> dict:
+def provision_project(project_id: str, secrets: dict = None, custom_domain: str = None) -> dict:
     """
     Orchestrates provisioning of a project runtime.
     """
     if secrets is None:
         secrets = {}
     
-    return _provider.provision_project(project_id, secrets)
+    return _provider.provision_project(project_id, secrets, custom_domain=custom_domain)
 
 def stop_project(project_id: str):
     return _provider.stop_project(project_id)

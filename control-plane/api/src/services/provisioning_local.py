@@ -26,7 +26,7 @@ class LocalProvisioner(ProvisioningProvider):
         # Locate project root from this file
         self.project_root = Path(__file__).resolve().parents[4]
     
-    def provision_project(self, project_id: str, secrets: Optional[dict] = None) -> Dict[str, Any]:
+    def provision_project(self, project_id: str, secrets: Optional[dict] = None, custom_domain: Optional[str] = None) -> Dict[str, Any]:
         """Provisions a new project using local Docker Compose scripts."""
         if secrets is None:
             secrets = {}

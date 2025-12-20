@@ -13,13 +13,18 @@ from services.project_service import (
 from services.database_service import DatabaseService
 from services.auth_service import AuthService
 from services.storage_service import StorageService
+from services.backup_service import BackupService
 
 router = APIRouter()
 auth_service = AuthService()
 storage_service = StorageService()
+backup_service = BackupService()
 
 class SQLQuery(BaseModel):
     sql: str
+
+class ProjectCreate(BaseModel):
+    custom_domain: str = None
 
 @router.get("/projects")
 def list_projects():
@@ -33,8 +38,9 @@ def get_project(project_id: str):
     return project
 
 @router.post("/projects")
-def create():
-    return create_project()
+def create(project: ProjectCreate = None):
+    custom_domain = project.custom_domain if project else None
+    return create_project(custom_domain=custom_domain)
 
 @router.post("/projects/{project_id}/stop")
 def stop(project_id: str):
@@ -188,5 +194,26 @@ def delete_storage_object(project_id: str, bucket_name: str, object_name: str):
     try:
         storage_service.delete_object(project_id, bucket_name, object_name)
         return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Backup Management Endpoints
+
+@router.post("/projects/{project_id}/backups")
+def create_backup(project_id: str):
+    """Trigger a manual backup for database and storage"""
+    try:
+        db_backup = backup_service.backup_database(project_id)
+        backup_service.backup_storage(project_id)
+        return {"status": "success", "db_backup": db_backup}
+    except Exception as e:
+        print(f"[API] Backup failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/projects/{project_id}/backups")
+def list_backups(project_id: str):
+    try:
+        return backup_service.list_backups(project_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

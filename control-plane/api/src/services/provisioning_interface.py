@@ -5,7 +5,7 @@ class ProvisioningProvider(ABC):
     """Abstract base class for infrastructure provisioning providers."""
 
     @abstractmethod
-    def provision_project(self, project_id: str, secrets: Optional[dict] = None) -> Dict[str, Any]:
+    def provision_project(self, project_id: str, secrets: Optional[dict] = None, custom_domain: Optional[str] = None) -> Dict[str, Any]:
         """Provision a new project infrastructure."""
         pass
 

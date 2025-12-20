@@ -14,6 +14,7 @@ import {
     Settings,
     Shield,
     Terminal,
+    Archive,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,7 @@ const sidebarSections = [
         title: "Management",
         items: [
             { href: "/secrets", label: "Secrets", icon: Key },
+            { href: "/backups", label: "Backups", icon: Archive },
             { href: "/logs", label: "Logs", icon: FileText },
             { href: "/api-docs", label: "API Docs", icon: Terminal },
             { href: "/settings", label: "Settings", icon: Settings },
