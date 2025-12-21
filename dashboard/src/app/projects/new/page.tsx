@@ -18,7 +18,7 @@ export default function NewProjectPage() {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
         try {
-            const resp = await fetch(`${API_URL}/v1/projects`, {
+            const resp = await fetch(`${API_URL}/api/v1/projects`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id: projectId }),

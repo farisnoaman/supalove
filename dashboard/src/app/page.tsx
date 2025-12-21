@@ -31,7 +31,7 @@ export default function ProjectsPage() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-      const response = await fetch(`${API_URL}/v1/projects`, {
+      const response = await fetch(`${API_URL}/api/v1/projects`, {
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
@@ -99,22 +99,22 @@ export default function ProjectsPage() {
         <div className="flex justify-center p-12">
           <RefreshCcw className="animate-spin text-muted-foreground" />
         </div>
-       ) : error ? (
-         <Alert variant="destructive">
-           <AlertCircle className="h-4 w-4" />
-           <AlertDescription className="flex items-center justify-between">
-             <span>{error}</span>
-             <Button
-               variant="outline"
-               size="sm"
-               onClick={handleRetry}
-               className="ml-4"
-             >
-               <RefreshCcw className="h-4 w-4 mr-2" />
-               Retry
-             </Button>
-           </AlertDescription>
-         </Alert>
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRetry}
+              className="ml-4"
+            >
+              <RefreshCcw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
       ) : projects.length === 0 ? (
         <div className="bg-card border rounded-lg p-12 text-center space-y-4">
           <div className="text-muted-foreground">No projects found.</div>

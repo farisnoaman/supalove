@@ -39,7 +39,7 @@ export default function ProjectOverviewPage() {
 
     const fetchUserCount = async () => {
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/auth/users`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users`);
             const data = await resp.json();
             setUserCount(Array.isArray(data) ? data.length : 0);
         } catch (err) {
@@ -50,7 +50,7 @@ export default function ProjectOverviewPage() {
 
     const fetchBucketCount = async () => {
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/storage/buckets`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets`);
             const data = await resp.json();
             setBucketCount(Array.isArray(data) ? data.length : 0);
         } catch (err) {
@@ -61,14 +61,14 @@ export default function ProjectOverviewPage() {
 
     const fetchTables = async () => {
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/tables`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables`);
             const data = await resp.json();
             // Fetch row counts for each table
             const tablesWithCounts = await Promise.all(
                 (data || []).map(async (table: any) => {
                     try {
                         const dataResp = await fetch(
-                            `${API_URL}/v1/projects/${projectId}/tables/${table.table_name}/data`
+                            `${API_URL}/api/v1/projects/${projectId}/tables/${table.table_name}/data`
                         );
                         const tableData = await dataResp.json();
                         return {

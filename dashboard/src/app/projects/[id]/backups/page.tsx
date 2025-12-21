@@ -26,7 +26,7 @@ export default function BackupsPage() {
 
     const fetchBackups = async () => {
         try {
-            const res = await fetch(`${API_URL}/v1/projects/${projectId}/backups`);
+            const res = await fetch(`${API_URL}/api/v1/projects/${projectId}/backups`);
             if (res.ok) {
                 const data = await res.json();
                 setBackups(data);
@@ -41,7 +41,7 @@ export default function BackupsPage() {
     const createBackup = async () => {
         setCreating(true);
         try {
-            const res = await fetch(`${API_URL}/v1/projects/${projectId}/backups`, {
+            const res = await fetch(`${API_URL}/api/v1/projects/${projectId}/backups`, {
                 method: "POST",
             });
             if (res.ok) {

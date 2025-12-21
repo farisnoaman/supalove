@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Trash2, X, Database, Shield, Lock, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, ModalClose } from "@/components/ui/modal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -86,7 +86,7 @@ export function TableDesigner({ open, onOpenChange, projectId, onSuccess }: Tabl
 
         setCreating(true);
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/sql`, {
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/sql`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ sql }),
@@ -175,10 +175,20 @@ export function TableDesigner({ open, onOpenChange, projectId, onSuccess }: Tabl
                                         <div className="md:col-span-3 space-y-2">
                                             <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Type</label>
                                             <Select
-                                                options={DATA_TYPES}
                                                 value={column.type}
-                                                onChange={(e) => updateColumn(index, "type", e.target.value)}
-                                            />
+                                                onValueChange={(val) => updateColumn(index, "type", val)}
+                                            >
+                                                <SelectTrigger className="h-10 bg-background border-border/40">
+                                                    <SelectValue placeholder="Select type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {DATA_TYPES.map((type) => (
+                                                        <SelectItem key={type.value} value={type.value}>
+                                                            {type.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
                                         </div>
                                         <div className="md:col-span-4 flex items-center gap-4 mt-8">
                                             <label className="flex items-center gap-2 cursor-pointer group/toggle">

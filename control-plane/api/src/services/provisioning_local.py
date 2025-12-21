@@ -15,18 +15,18 @@ sys.path.append(str(PROJECT_ROOT))
 #     delete_project as script_delete,
 #     restore_project as script_restore,
 # )
-from services.provisioning_interface import ProvisioningProvider
+from services.provisioning_interface import Provisioner
 
 BASE_PROJECTS_DIR = PROJECT_ROOT / "data-plane" / "projects"
 
-class LocalProvisioner(ProvisioningProvider):
+class LocalProvisioner(Provisioner):
     """Local Docker Compose based provisioner"""
 
     def __init__(self):
         # Locate project root from this file
         self.project_root = Path(__file__).resolve().parents[4]
     
-    def provision_project(self, project_id: str, secrets: Optional[dict] = None, custom_domain: Optional[str] = None) -> Dict[str, Any]:
+    def provision(self, project_id: str, secrets: Optional[dict] = None, custom_domain: Optional[str] = None) -> Dict[str, Any]:
         """Provisions a new project using local Docker Compose scripts."""
         if secrets is None:
             secrets = {}
@@ -39,7 +39,7 @@ class LocalProvisioner(ProvisioningProvider):
 
         # Create project directory
         project_dir = BASE_PROJECTS_DIR / project_id
-        project_dir.mkdir(exist_ok=True)
+        project_dir.mkdir(exist_ok=True, parents=True)
 
         # Copy project template
         template_dir = PROJECT_ROOT / "data-plane" / "project-template"
@@ -95,19 +95,19 @@ class LocalProvisioner(ProvisioningProvider):
             "realtime_url": f"ws://localhost:{realtime_port}"
         }
 
-    def stop_project(self, project_id: str) -> None:
+    def stop(self, project_id: str) -> None:
         project_dir = BASE_PROJECTS_DIR / project_id
         if project_dir.exists():
             import subprocess
             subprocess.run(["docker", "compose", "stop"], cwd=project_dir, capture_output=True)
 
-    def start_project(self, project_id: str) -> None:
+    def start(self, project_id: str) -> None:
         project_dir = BASE_PROJECTS_DIR / project_id
         if project_dir.exists():
             import subprocess
             subprocess.run(["docker", "compose", "start"], cwd=project_dir, capture_output=True)
 
-    def delete_project(self, project_id: str) -> None:
+    def destroy(self, project_id: str) -> None:
         project_dir = BASE_PROJECTS_DIR / project_id
         if project_dir.exists():
             import subprocess
@@ -115,7 +115,7 @@ class LocalProvisioner(ProvisioningProvider):
             import shutil
             shutil.rmtree(project_dir)
 
-    def restore_project(self, project_id: str) -> None:
+    def restore(self, project_id: str) -> None:
         project_dir = BASE_PROJECTS_DIR / project_id
         if project_dir.exists():
             import subprocess

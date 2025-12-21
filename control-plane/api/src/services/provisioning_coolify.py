@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 import httpx
 
-from services.provisioning_interface import ProvisioningProvider
+from services.provisioning_interface import Provisioner
 
-class CoolifyProvisioner(ProvisioningProvider):
+class CoolifyProvisioner(Provisioner):
     """Coolify API based provisioner for V4"""
 
     def __init__(self, api_url: str, api_token: str):
@@ -76,7 +76,7 @@ class CoolifyProvisioner(ProvisioningProvider):
                 return res
         return None
 
-    def provision_project(self, project_id: str, secrets: Optional[dict] = None, custom_domain: Optional[str] = None) -> Dict[str, Any]:
+    def provision(self, project_id: str, secrets: Optional[dict] = None, custom_domain: Optional[str] = None) -> Dict[str, Any]:
         """Provisions a new project in Coolify."""
         print(f"[Coolify] Provisioning project: {project_id}")
         
@@ -172,23 +172,23 @@ class CoolifyProvisioner(ProvisioningProvider):
             "db_url": f"postgresql://app:{env_vars['DB_PASSWORD']}@db-{project_id}.{domain_suffix}:5432/app",
         }
 
-    def stop_project(self, project_id: str) -> None:
+    def stop(self, project_id: str) -> None:
         resource = self._find_resource_by_name(f"project-{project_id}")
         if resource:
             print(f"[Coolify] Stopping {resource['name']} ({resource['uuid']})...")
             self._make_request("POST", f"/api/v1/applications/{resource['uuid']}/stop")
 
-    def start_project(self, project_id: str) -> None:
+    def start(self, project_id: str) -> None:
         resource = self._find_resource_by_name(f"project-{project_id}")
         if resource:
             print(f"[Coolify] Starting {resource['name']} ({resource['uuid']})...")
             self._make_request("POST", f"/api/v1/applications/{resource['uuid']}/start")
 
-    def delete_project(self, project_id: str) -> None:
+    def destroy(self, project_id: str) -> None:
         resource = self._find_resource_by_name(f"project-{project_id}")
         if resource:
             print(f"[Coolify] Deleting {resource['name']} ({resource['uuid']})...")
             self._make_request("DELETE", f"/api/v1/applications/{resource['uuid']}")
 
-    def restore_project(self, project_id: str) -> None:
+    def restore(self, project_id: str) -> None:
         print("[Coolify] Restore not supported via API yet")

@@ -1,9 +1,9 @@
 import os
-from services.provisioning_interface import ProvisioningProvider
+from services.provisioning_interface import Provisioner
 from services.provisioning_local import LocalProvisioner
 from services.provisioning_coolify import CoolifyProvisioner
 
-def _get_provider() -> ProvisioningProvider:
+def _get_provider() -> Provisioner:
     """
     Factory function to get the appropriate provisioning provider
     based on environment variables.
@@ -33,16 +33,16 @@ def provision_project(project_id: str, secrets: dict = None, custom_domain: str 
     if secrets is None:
         secrets = {}
     
-    return _provider.provision_project(project_id, secrets, custom_domain=custom_domain)
+    return _provider.provision(project_id, secrets, custom_domain=custom_domain)
 
 def stop_project(project_id: str):
-    return _provider.stop_project(project_id)
+    return _provider.stop(project_id)
 
 def start_project(project_id: str):
-    return _provider.start_project(project_id)
+    return _provider.start(project_id)
 
 def delete_project(project_id: str):
-    return _provider.delete_project(project_id)
+    return _provider.destroy(project_id)
 
 def restore_project(project_id: str):
-    return _provider.restore_project(project_id)
+    return _provider.restore(project_id)

@@ -29,6 +29,7 @@ const sidebarSections = [
         title: "Infrastructure",
         items: [
             { href: "/database", label: "Database", icon: Database },
+            { href: "/sql", label: "SQL Editor", icon: Terminal },
             { href: "/auth", label: "Authentication", icon: Shield },
             { href: "/storage", label: "Storage", icon: Folder },
             { href: "/edge-functions", label: "Edge Functions", icon: Code2 },
@@ -40,7 +41,6 @@ const sidebarSections = [
             { href: "/secrets", label: "Secrets", icon: Key },
             { href: "/backups", label: "Backups", icon: Archive },
             { href: "/logs", label: "Logs", icon: FileText },
-            { href: "/api-docs", label: "API Docs", icon: Terminal },
             { href: "/settings", label: "Settings", icon: Settings },
         ]
     }

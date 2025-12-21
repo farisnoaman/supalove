@@ -1,6 +1,11 @@
-import secrets
 from sqlalchemy.orm import Session
 from models.project_secret import ProjectSecret
+import secrets
+
+def get_project_secrets(db: Session, project_id: str) -> dict:
+    """Fetch existing secrets for a project without regenerating."""
+    secrets = db.query(ProjectSecret).filter(ProjectSecret.project_id == project_id).all()
+    return {s.key: s.value for s in secrets}
 
 def generate_project_secrets(
     db: Session,

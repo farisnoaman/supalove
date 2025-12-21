@@ -5,7 +5,6 @@ import { X, Save, Lock, Terminal, Database, Columns, RefreshCw, Plus } from "luc
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal, ModalContent, ModalHeader, ModalTitle } from "@/components/ui/modal";
-import { Select } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +40,7 @@ export function RowEditor({ open, onOpenChange, projectId, tableName, onSuccess 
     const fetchSchema = async () => {
         setLoading(true);
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/tables/${tableName}/schema`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/schema`);
             if (!resp.ok) throw new Error("Failed to fetch schema");
             const data = await resp.json();
             setSchema(data);
@@ -107,7 +106,7 @@ export function RowEditor({ open, onOpenChange, projectId, tableName, onSuccess 
 
         setSaving(true);
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/sql`, {
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/sql`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ sql }),

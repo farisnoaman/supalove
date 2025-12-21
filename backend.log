@@ -123,3 +123,708 @@ INFO:     127.0.0.1:58466 - "GET /v1/projects/29315029c9e7/tables/verification_f
 INFO:     127.0.0.1:58428 - "GET /v1/projects/29315029c9e7/auth/users HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58428 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58428 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47984 - "GET /v1/projects/29315029c9e7/tables HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47984 - "GET /v1/projects/29315029c9e7/tables HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47984 - "GET /v1/projects/29315029c9e7/tables/one/data HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47984 - "GET /v1/projects/29315029c9e7/tables/one/data HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47984 - "GET /v1/projects/29315029c9e7/tables/one/schema HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'models/project.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [93635]
+INFO:     Started server process [101454]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+[Provisioning] Using Local Docker provider
+[Scheduler] Starting background scheduler...
+INFO:     127.0.0.1:41040 - "OPTIONS /v1/projects/29315029c9e7/sql HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41056 - "POST /v1/projects/29315029c9e7/sql HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41056 - "GET /v1/projects/29315029c9e7/tables/one/data HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'api/v1/database.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101454]
+INFO:     Started server process [101512]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101512]
+INFO:     Started server process [101534]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+[Provisioning] Using Local Docker provider
+[Scheduler] Starting background scheduler...
+INFO:     127.0.0.1:53606 - "GET /v1/projects/29315029c9e7/tables HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53606 - "GET /v1/projects/29315029c9e7/tables HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'api/v1/storage.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101534]
+INFO:     Started server process [101564]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/backups.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101564]
+WARNING:  WatchFiles detected changes in 'api/v1/backups.py'. Reloading...
+INFO:     Started server process [101590]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [101595]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+[Provisioning] Using Local Docker provider
+[Scheduler] Starting background scheduler...
+INFO:     127.0.0.1:53612 - "GET /v1/projects/29315029c9e7/tables/test_table/data HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53612 - "GET /v1/projects/29315029c9e7/tables/test_table/data HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53612 - "GET /v1/projects/29315029c9e7/tables/test_table/data HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53612 - "GET /v1/projects/29315029c9e7/tables HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53612 - "GET /v1/projects/29315029c9e7/tables HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38822 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38822 - "GET /v1/projects/29315029c9e7/backups HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'api/v1/projects.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101595]
+INFO:     Started server process [101744]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+[Provisioning] Using Local Docker provider
+[Scheduler] Starting background scheduler...
+INFO:     127.0.0.1:38826 - "GET /v1/projects/29315029c9e7/storage/buckets HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:38826 - "GET /v1/projects/29315029c9e7/storage/buckets HTTP/1.1" 404 Not Found
+WARNING:  WatchFiles detected changes in 'main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101744]
+INFO:     Started server process [101785]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'services/project_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101785]
+INFO:     Started server process [101850]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/health.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101850]
+INFO:     Started server process [101895]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/health.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101895]
+WARNING:  WatchFiles detected changes in 'main.py'. Reloading...
+INFO:     Started server process [101899]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [101905]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101905]
+INFO:     Started server process [101924]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'services/provisioning_interface.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [101924]
+Process SpawnProcess-15:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 9, in <module>
+    from services.provisioning_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_service.py", line 2, in <module>
+    from services.provisioning_interface import ProvisioningProvider
+ImportError: cannot import name 'ProvisioningProvider' from 'services.provisioning_interface' (/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_interface.py)
+WARNING:  WatchFiles detected changes in 'services/provisioning_local.py'. Reloading...
+Process SpawnProcess-16:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 9, in <module>
+    from services.provisioning_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_service.py", line 2, in <module>
+    from services.provisioning_interface import ProvisioningProvider
+ImportError: cannot import name 'ProvisioningProvider' from 'services.provisioning_interface' (/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_interface.py)
+WARNING:  WatchFiles detected changes in 'services/provisioning_coolify.py'. Reloading...
+Process SpawnProcess-17:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 9, in <module>
+    from services.provisioning_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_service.py", line 2, in <module>
+    from services.provisioning_interface import ProvisioningProvider
+ImportError: cannot import name 'ProvisioningProvider' from 'services.provisioning_interface' (/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_interface.py)
+WARNING:  WatchFiles detected changes in 'services/provisioning_service.py'. Reloading...
+INFO:     Started server process [102035]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'services/secrets_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [102035]
+Process SpawnProcess-19:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 6, in <module>
+    from services.secrets_service import generate_project_secrets
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/secrets_service.py", line 1, in <module>
+    def get_project_secrets(db: Session, project_id: str) -> dict:
+                                ^^^^^^^
+NameError: name 'Session' is not defined
+WARNING:  WatchFiles detected changes in 'services/database_service.py'. Reloading...
+Process SpawnProcess-20:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 6, in <module>
+    from services.secrets_service import generate_project_secrets
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/secrets_service.py", line 1, in <module>
+    def get_project_secrets(db: Session, project_id: str) -> dict:
+                                ^^^^^^^
+NameError: name 'Session' is not defined
+WARNING:  WatchFiles detected changes in 'api/v1/utils.py'. Reloading...
+Process SpawnProcess-21:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 6, in <module>
+    from services.secrets_service import generate_project_secrets
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/secrets_service.py", line 1, in <module>
+    def get_project_secrets(db: Session, project_id: str) -> dict:
+                                ^^^^^^^
+NameError: name 'Session' is not defined
+WARNING:  WatchFiles detected changes in 'api/v1/utils.py'. Reloading...
+Process SpawnProcess-22:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 6, in <module>
+    from services.secrets_service import generate_project_secrets
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/secrets_service.py", line 1, in <module>
+    def get_project_secrets(db: Session, project_id: str) -> dict:
+                                ^^^^^^^
+NameError: name 'Session' is not defined
+WARNING:  WatchFiles detected changes in 'api/v1/database.py'. Reloading...
+Process SpawnProcess-23:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 6, in <module>
+    from services.secrets_service import generate_project_secrets
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/secrets_service.py", line 1, in <module>
+    def get_project_secrets(db: Session, project_id: str) -> dict:
+                                ^^^^^^^
+NameError: name 'Session' is not defined
+WARNING:  WatchFiles detected changes in 'api/v1/auth.py'. Reloading...
+Process SpawnProcess-24:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 6, in <module>
+    from services.secrets_service import generate_project_secrets
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/secrets_service.py", line 1, in <module>
+    def get_project_secrets(db: Session, project_id: str) -> dict:
+                                ^^^^^^^
+NameError: name 'Session' is not defined
+WARNING:  WatchFiles detected changes in 'api/v1/storage.py'. Reloading...
+Process SpawnProcess-25:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 6, in <module>
+    from services.secrets_service import generate_project_secrets
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/secrets_service.py", line 1, in <module>
+    def get_project_secrets(db: Session, project_id: str) -> dict:
+                                ^^^^^^^
+NameError: name 'Session' is not defined
+WARNING:  WatchFiles detected changes in 'api/v1/backups.py'. Reloading...
+Process SpawnProcess-26:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    from services.project_service import (
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 6, in <module>
+    from services.secrets_service import generate_project_secrets
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/secrets_service.py", line 1, in <module>
+    def get_project_secrets(db: Session, project_id: str) -> dict:
+                                ^^^^^^^
+NameError: name 'Session' is not defined
+WARNING:  WatchFiles detected changes in 'api/v1/projects.py'. Reloading...
+Process SpawnProcess-27:
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 10, in <module>
+    from api.v1.projects import router as projects_router
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 3, in <module>
+    @router.get("/{project_id}")
+     ^^^^^^
+NameError: name 'router' is not defined
+INFO:     Stopping reloader process [93633]

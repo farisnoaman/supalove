@@ -19,8 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Modal, ModalContent, ModalHeader, ModalTitle } from "@/components/ui/modal";
-import { toast } from "sonner";
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
+import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface User {
@@ -39,6 +39,8 @@ export default function AuthPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Form state
     const [email, setEmail] = useState("");
@@ -55,7 +57,7 @@ export default function AuthPage() {
         setLoading(true);
         try {
             console.log(`Fetching users for project ${projectId} from ${API_URL}`);
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/auth/users`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users`);
             if (!resp.ok) throw new Error("Failed to fetch users");
             const data = await resp.json();
             setUsers(Array.isArray(data) ? data : []);
@@ -71,7 +73,7 @@ export default function AuthPage() {
         e.preventDefault();
         setIsSaving(true);
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/auth/users`, {
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password })
@@ -93,11 +95,12 @@ export default function AuthPage() {
         }
     };
 
-    const handleDeleteUser = async (userId: string) => {
-        if (!confirm("Are you sure you want to delete this user?")) return;
+    const handleDeleteUser = async () => {
+        if (!userToDelete) return;
+        setIsDeleting(true);
 
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/auth/users/${userId}`, {
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users/${userToDelete}`, {
                 method: "DELETE"
             });
             if (resp.ok) {
@@ -108,6 +111,9 @@ export default function AuthPage() {
             }
         } catch (err) {
             toast.error("Network error");
+        } finally {
+            setIsDeleting(false);
+            setUserToDelete(null);
         }
     };
 
@@ -281,7 +287,7 @@ export default function AuthPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                onClick={() => handleDeleteUser(user.id)}
+                                                onClick={() => setUserToDelete(user.id)}
                                                 className="text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
                                             >
                                                 <Trash2 size={16} />
@@ -357,6 +363,33 @@ export default function AuthPage() {
                     </form>
                 </ModalContent>
             </Modal>
+            {/* Delete Confirmation Modal */}
+            <Modal open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+                <ModalContent className="max-w-md bg-card border-border/40 shadow-2xl glass rounded-2xl p-6">
+                    <ModalHeader className="mb-4">
+                        <ModalTitle className="text-xl font-bold text-destructive">Delete User</ModalTitle>
+                    </ModalHeader>
+                    <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Are you sure you want to delete this user? This action cannot be undone.
+                        </p>
+                        <ModalFooter className="flex items-center justify-end gap-3 mt-8">
+                            <Button variant="ghost" onClick={() => setUserToDelete(null)} disabled={isDeleting} className="rounded-xl">
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleDeleteUser}
+                                disabled={isDeleting}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-6 rounded-xl shadow-lg shadow-destructive/20"
+                            >
+                                {isDeleting ? "Deleting..." : "Delete User"}
+                            </Button>
+                        </ModalFooter>
+                    </div>
+                </ModalContent>
+            </Modal>
+
+            <Toaster position="top-right" />
         </div>
     );
 }

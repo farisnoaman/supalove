@@ -24,7 +24,8 @@ import { Input } from "@/components/ui/input";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
+import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface StorageObject {
@@ -45,6 +46,8 @@ export default function StoragePage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [uploading, setUploading] = useState(false);
+    const [objectToDelete, setObjectToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
@@ -62,7 +65,7 @@ export default function StoragePage() {
         setLoading(true);
         try {
             console.log(`Fetching buckets for project ${projectId} from ${API_URL}`);
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/storage/buckets`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets`);
             if (!resp.ok) throw new Error("Failed to fetch buckets");
             const data = await resp.json();
             const bucketsList = Array.isArray(data) ? data : [];
@@ -83,7 +86,7 @@ export default function StoragePage() {
         setLoading(true);
         try {
             console.log(`Fetching objects for bucket ${bucketName} from ${API_URL}`);
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/storage/buckets/${bucketName}/objects`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets/${bucketName}/objects`);
             if (!resp.ok) throw new Error("Failed to fetch objects");
             const data = await resp.json();
             setObjects(Array.isArray(data) ? data : []);
@@ -104,7 +107,7 @@ export default function StoragePage() {
         formData.append("file", file);
 
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/storage/buckets/${selectedBucket}/objects`, {
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets/${selectedBucket}/objects`, {
                 method: "POST",
                 body: formData,
             });
@@ -126,21 +129,25 @@ export default function StoragePage() {
         }
     };
 
-    const handleDeleteObject = async (objectName: string) => {
-        if (!confirm(`Are you sure you want to delete ${objectName}?`)) return;
+    const handleDeleteObject = async () => {
+        if (!objectToDelete || !selectedBucket) return;
+        setIsDeleting(true);
 
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/storage/buckets/${selectedBucket}/objects/${encodeURIComponent(objectName)}`, {
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets/${selectedBucket}/objects/${encodeURIComponent(objectToDelete)}`, {
                 method: "DELETE"
             });
             if (resp.ok) {
                 toast.success("File deleted");
-                fetchObjects(selectedBucket!);
+                fetchObjects(selectedBucket);
             } else {
                 toast.error("Failed to delete file");
             }
         } catch (err) {
             toast.error("Network error");
+        } finally {
+            setIsDeleting(false);
+            setObjectToDelete(null);
         }
     };
 
@@ -343,7 +350,7 @@ export default function StoragePage() {
                                                         size="icon"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handleDeleteObject(obj.name);
+                                                            setObjectToDelete(obj.name);
                                                         }}
                                                         className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
                                                     >
@@ -359,6 +366,33 @@ export default function StoragePage() {
                     </div>
                 </div>
             </div>
+            {/* Delete Confirmation Modal */}
+            <Modal open={!!objectToDelete} onOpenChange={(open) => !open && setObjectToDelete(null)}>
+                <ModalContent className="max-w-md bg-card border-border/40 shadow-2xl glass rounded-2xl p-6">
+                    <ModalHeader className="mb-4">
+                        <ModalTitle className="text-xl font-bold text-destructive">Delete File</ModalTitle>
+                    </ModalHeader>
+                    <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Are you sure you want to delete <span className="font-mono font-bold text-foreground">"{objectToDelete}"</span>? This action cannot be undone.
+                        </p>
+                        <ModalFooter className="flex items-center justify-end gap-3 mt-8">
+                            <Button variant="ghost" onClick={() => setObjectToDelete(null)} disabled={isDeleting} className="rounded-xl">
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleDeleteObject}
+                                disabled={isDeleting}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-6 rounded-xl shadow-lg shadow-destructive/20"
+                            >
+                                {isDeleting ? "Deleting..." : "Delete File"}
+                            </Button>
+                        </ModalFooter>
+                    </div>
+                </ModalContent>
+            </Modal>
+
+            <Toaster position="top-right" />
         </div>
     );
 }

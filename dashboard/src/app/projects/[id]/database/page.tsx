@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Table as TableIcon, Plus, Search, Filter, SortAsc } from "lucide-react";
+import { Table as TableIcon, Plus, Search, Filter, SortAsc, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { EmptyState } from "@/components/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableDesigner } from "@/components/TableDesigner";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
 
 export default function DatabasePage() {
     const params = useParams();
@@ -21,6 +22,8 @@ export default function DatabasePage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [showDesigner, setShowDesigner] = useState(false);
+    const [tableToDelete, setTableToDelete] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -31,13 +34,37 @@ export default function DatabasePage() {
     const fetchTables = async () => {
         setLoading(true);
         try {
-            const resp = await fetch(`${API_URL}/v1/projects/${projectId}/tables`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables`);
             const data = await resp.json();
             setTables(data);
         } catch (err) {
             console.error("Failed to fetch tables", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const deleteTable = async () => {
+        if (!tableToDelete) return;
+        setDeleting(true);
+        try {
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/sql`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sql: `DROP TABLE public."${tableToDelete}" CASCADE;` }),
+            });
+            const result = await resp.json();
+            if (result.success !== false) {
+                toast.success(`Table "${tableToDelete}" deleted`);
+                fetchTables();
+            } else {
+                toast.error(result.error || "Failed to delete table");
+            }
+        } catch (err) {
+            toast.error("Network error while deleting table");
+        } finally {
+            setDeleting(false);
+            setTableToDelete(null);
         }
     };
 
@@ -133,9 +160,22 @@ export default function DatabasePage() {
                                 <div className="p-2.5 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                                     <TableIcon size={22} className="text-emerald-600 dark:text-emerald-400" />
                                 </div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 px-2 py-0.5 border border-border/30 rounded-full">
-                                    {table.table_type}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 px-2 py-0.5 border border-border/30 rounded-full">
+                                        {table.table_type}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setTableToDelete(table.table_name);
+                                        }}
+                                        className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all rounded-md"
+                                    >
+                                        <Trash2 size={14} />
+                                    </Button>
+                                </div>
                             </div>
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate mb-1">
@@ -164,6 +204,31 @@ export default function DatabasePage() {
                 projectId={projectId}
                 onSuccess={fetchTables}
             />
+            {/* Delete Confirmation Modal */}
+            <Modal open={!!tableToDelete} onOpenChange={(open) => !open && setTableToDelete(null)}>
+                <ModalContent className="max-w-md bg-card border-border/40 shadow-2xl glass rounded-2xl p-6">
+                    <ModalHeader className="mb-4">
+                        <ModalTitle className="text-xl font-bold text-destructive">Delete Table</ModalTitle>
+                    </ModalHeader>
+                    <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Are you sure you want to delete <span className="font-mono font-bold text-foreground">"{tableToDelete}"</span>? This action cannot be undone and will delete all stored data.
+                        </p>
+                        <ModalFooter className="flex items-center justify-end gap-3 mt-8">
+                            <Button variant="ghost" onClick={() => setTableToDelete(null)} disabled={deleting} className="rounded-xl">
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={deleteTable}
+                                disabled={deleting}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-6 rounded-xl shadow-lg shadow-destructive/20"
+                            >
+                                {deleting ? "Deleting..." : "Delete Table"}
+                            </Button>
+                        </ModalFooter>
+                    </div>
+                </ModalContent>
+            </Modal>
 
             {/* Toast Notifications */}
             <Toaster position="top-right" />

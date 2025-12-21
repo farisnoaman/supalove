@@ -23,5 +23,17 @@ services:
     depends_on:
       - postgres
 
+  functions:
+    image: denoland/deno:latest
+    user: "deno"
+    environment:
+      - PROJECT_ID=${PROJECT_ID}
+    ports:
+      - "${FUNCTIONS_PORT}:8000"
+    volumes:
+      - ./functions:/functions
+    working_dir: /functions
+    command: [ "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "--watch", "server.ts" ]
+
 volumes:
   postgres_data:
