@@ -55,45 +55,6 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
   SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid;
 $$ LANGUAGE sql STABLE;
 
--- Create auth.users table for compatibility
-CREATE TABLE IF NOT EXISTS auth.users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    aud VARCHAR(255),
-    role VARCHAR(255),
-    email VARCHAR(255),
-    encrypted_password VARCHAR(255),
-    email_confirmed_at TIMESTAMP WITH TIME ZONE,
-    invited_at TIMESTAMP WITH TIME ZONE,
-    confirmation_token VARCHAR(255),
-    confirmation_sent_at TIMESTAMP WITH TIME ZONE,
-    recovery_token VARCHAR(255),
-    recovery_sent_at TIMESTAMP WITH TIME ZONE,
-    email_change_token_new VARCHAR(255),
-    email_change VARCHAR(255),
-    email_change_sent_at TIMESTAMP WITH TIME ZONE,
-    last_sign_in_at TIMESTAMP WITH TIME ZONE,
-    raw_app_meta_data JSONB,
-    raw_user_meta_data JSONB,
-    is_super_admin BOOLEAN,
-    created_at TIMESTAMP WITH TIME ZONE,
-    updated_at TIMESTAMP WITH TIME ZONE,
-    phone VARCHAR(15),
-    phone_confirmed_at TIMESTAMP WITH TIME ZONE,
-    phone_change VARCHAR(15),
-    phone_change_token VARCHAR(255),
-    phone_change_sent_at TIMESTAMP WITH TIME ZONE,
-    confirmed_at TIMESTAMP WITH TIME ZONE,
-    email_change_token_current VARCHAR(255),
-    email_change_confirm_status SMALLINT DEFAULT 0,
-    banned_until TIMESTAMP WITH TIME ZONE,
-    reauthentication_token VARCHAR(255),
-    reauthentication_sent_at TIMESTAMP WITH TIME ZONE,
-    is_sso_user BOOLEAN DEFAULT FALSE,
-    deleted_at TIMESTAMP WITH TIME ZONE
-);
-
-GRANT ALL ON TABLE auth.users TO service_role;
-
 CREATE OR REPLACE FUNCTION auth.role() RETURNS text AS $$
   SELECT NULLIF(current_setting('request.jwt.claim.role', true), '')::text;
 $$ LANGUAGE sql STABLE;

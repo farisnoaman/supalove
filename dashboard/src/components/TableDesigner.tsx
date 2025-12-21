@@ -39,7 +39,9 @@ const DATA_TYPES = [
 export function TableDesigner({ open, onOpenChange, projectId, onSuccess }: TableDesignerProps) {
     const [tableName, setTableName] = useState("");
     const [columns, setColumns] = useState<Column[]>([
-        { name: "id", type: "BIGINT", isPrimaryKey: true, isUnique: false, isNotNull: true, defaultValue: "" },
+        { name: "id", type: "UUID", isPrimaryKey: true, isUnique: false, isNotNull: true, defaultValue: "gen_random_uuid()" },
+        { name: "created_at", type: "TIMESTAMPTZ", isPrimaryKey: false, isUnique: false, isNotNull: true, defaultValue: "now()" },
+        { name: "updated_at", type: "TIMESTAMPTZ", isPrimaryKey: false, isUnique: false, isNotNull: true, defaultValue: "now()" },
     ]);
     const [creating, setCreating] = useState(false);
 
@@ -100,7 +102,11 @@ export function TableDesigner({ open, onOpenChange, projectId, onSuccess }: Tabl
                 onOpenChange(false);
                 if (onSuccess) onSuccess();
                 setTableName("");
-                setColumns([{ name: "id", type: "BIGINT", isPrimaryKey: true, isUnique: false, isNotNull: true, defaultValue: "" }]);
+                setColumns([
+                    { name: "id", type: "UUID", isPrimaryKey: true, isUnique: false, isNotNull: true, defaultValue: "gen_random_uuid()" },
+                    { name: "created_at", type: "TIMESTAMPTZ", isPrimaryKey: false, isUnique: false, isNotNull: true, defaultValue: "now()" },
+                    { name: "updated_at", type: "TIMESTAMPTZ", isPrimaryKey: false, isUnique: false, isNotNull: true, defaultValue: "now()" },
+                ]);
             } else {
                 toast.error(result.error || "Failed to create table");
             }
