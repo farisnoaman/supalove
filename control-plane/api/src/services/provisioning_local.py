@@ -3,21 +3,18 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-# Adjust path to find scripts
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
-sys.path.append(str(PROJECT_ROOT))
-
-# TODO: Import script functions when scripts are implemented
-# from scripts.provision_project import provision_project as script_provision
-# from scripts.lifecycle import (
-#     stop_project as script_stop,
-#     start_project as script_start,
-#     delete_project as script_delete,
-#     restore_project as script_restore,
-# )
-from services.provisioning_interface import Provisioner
-
-BASE_PROJECTS_DIR = PROJECT_ROOT / "data-plane" / "projects"
+# Decoupled Configuration
+# In a real app, these should be loaded from os.environ or a config module
+# For now, we default to the relative path but allow override via env var
+env_projects_dir = os.getenv("DATA_PLANE_BASE_DIR")
+if env_projects_dir:
+    BASE_PROJECTS_DIR = Path(env_projects_dir)
+else:
+    # Fallback to relative path for development convenience
+    PROJECT_ROOT = Path(__file__).resolve().parents[4]
+    BASE_PROJECTS_DIR = PROJECT_ROOT / "data-plane" / "projects"
+    
+TEMPLATE_DIR_NAME = "project-template"
 
 class LocalProvisioner(Provisioner):
     """Local Docker Compose based provisioner"""
@@ -56,6 +53,8 @@ class LocalProvisioner(Provisioner):
 
         # Create .env file for the project
         env_content = f"# Project: {project_id}\n"
+        # Always inject PROJECT_ID for docker network isolation
+        env_content += f"PROJECT_ID={project_id}\n"
         for key, value in secrets.items():
             env_content += f"{key}={value}\n"
             

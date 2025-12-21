@@ -87,3 +87,8 @@ project_secrets WHERE project_id = 'fa254754371f';"
 
 cd data-plane/projects/fa254754371f && docker compose down -v && cd ../../.. && rm -rf data-plane/projects/fa254754371f
 
+---------
+## to create repo tree:
+# Show only source files, ignore all build/generated folders
+
+tree -I 'node_modules|.git|dist|build|.next|.nuxt|.venv|coverage|*.log|*.tmp' > repo_structure.txt

@@ -37,3 +37,9 @@ services:
 
 volumes:
   postgres_data:
+
+
+networks:
+  default:
+    name: project_${PROJECT_ID}_net
+    driver: bridge

@@ -4,13 +4,13 @@ from datetime import datetime
 from core.database import Base
 
 class ProjectStatus(str, enum.Enum):
-    pending = "pending"
-    provisioning = "provisioning"
-    running = "running"
-    failed = "failed"
-    deleting = "deleting"
-    deleted = "deleted"
-    stopped = "stopped"
+    CREATING = "creating"         # Initial state, db record created
+    PROVISIONING = "provisioning" # Infrastructure being set up
+    RUNNING = "running"           # Fully operational
+    FAILED = "failed"             # Provisioning or runtime error
+    STOPPED = "stopped"           # Intentionally stopped by user
+    DELETING = "deleting"         # Cleanup in progress
+    DELETED = "deleted"           # Soft deleted / fully removed
 
 class Project(Base):
     __tablename__ = "projects"

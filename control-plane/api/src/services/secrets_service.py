@@ -11,6 +11,10 @@ def get_project_env_path(project_id: str) -> Path:
     return BASE_PROJECTS_DIR / project_id / ".env"
 
 def get_secrets(project_id: str) -> dict:
+    """
+    Retrieves secrets from the file system. 
+    WARNING: For authoritative secrets, query the database. This is for Provisioner use.
+    """
     env_path = get_project_env_path(project_id)
     if not env_path.exists():
         return {}
@@ -76,3 +80,29 @@ def generate_project_secrets(db: Session, project_id: str) -> dict:
         
     db.commit()
     return generated_secrets
+
+def reconcile_secrets(db: Session, project_id: str) -> bool:
+    """
+    Ensures that the secrets in the database are present in the project's .env file.
+    Control Plane DB is the Source of Truth.
+    Data Plane .env is the Projection.
+    """
+    # 1. Fetch all secrets for this project from DB
+    db_secrets = db.query(ProjectSecret).filter(ProjectSecret.project_id == project_id).all()
+    if not db_secrets:
+        return False
+
+    # 2. Convert to dictionary
+    secrets_map = {s.key: s.value for s.dict() in db_secrets} if hasattr(db_secrets[0], 'dict') else {s.key: s.value for s in db_secrets}
+
+    # 3. Write to .env file (idempotent, overwrites local with DB truth)
+    project_dir = BASE_PROJECTS_DIR / project_id
+    project_dir.mkdir(parents=True, exist_ok=True)
+    env_file = project_dir / ".env"
+    
+    env_content = f"# Project: {project_id}\n# Managed by Control Plane\n"
+    for key, value in secrets_map.items():
+        env_content += f"{key}={value}\n"
+    
+    env_file.write_text(env_content)
+    return True
