@@ -149,12 +149,19 @@ export default function DatabasePage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredTables.map((table) => (
-                        <button
+                        <div
                             key={table.table_name}
                             onClick={() =>
                                 router.push(`/projects/${projectId}/database/${table.table_name}`)
                             }
-                            className="group relative flex flex-col p-6 bg-card border border-border/40 rounded-xl hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all text-left glass"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    router.push(`/projects/${projectId}/database/${table.table_name}`);
+                                }
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            className="group relative flex flex-col p-6 bg-card border border-border/40 rounded-xl hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all text-left glass cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="p-2.5 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
@@ -192,7 +199,7 @@ export default function DatabasePage() {
                                     <span>Active</span>
                                 </div>
                             </div>
-                        </button>
+                        </div>
                     ))}
                 </div>
             )}

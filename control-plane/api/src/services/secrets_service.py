@@ -1,37 +1,78 @@
+import os
+import secrets as py_secrets
+import socket
+from pathlib import Path
 from sqlalchemy.orm import Session
 from models.project_secret import ProjectSecret
-import secrets
+from dotenv import dotenv_values, set_key, unset_key
+from services.provisioning_local import BASE_PROJECTS_DIR
 
-def get_project_secrets(db: Session, project_id: str) -> dict:
-    """Fetch existing secrets for a project without regenerating."""
-    secrets = db.query(ProjectSecret).filter(ProjectSecret.project_id == project_id).all()
-    return {s.key: s.value for s in secrets}
+def get_project_env_path(project_id: str) -> Path:
+    return BASE_PROJECTS_DIR / project_id / ".env"
 
-def generate_project_secrets(
-    db: Session,
-    project_id: str
-):
-    # Generate a unique port for this project (starting from 5433 to avoid conflicts)
-    # Use the last 4 characters of project_id to generate a port number
-    port_suffix = abs(hash(project_id)) % 1000 + 5433
-    db_port = str(port_suffix)
+def get_secrets(project_id: str) -> dict:
+    env_path = get_project_env_path(project_id)
+    if not env_path.exists():
+        return {}
+    return dotenv_values(env_path)
 
-    secrets_map = {
-        "JWT_SECRET": secrets.token_hex(32),
-        "DB_PASSWORD": secrets.token_urlsafe(24),
-        "ANON_KEY": secrets.token_urlsafe(32),
-        "SERVICE_ROLE_KEY": secrets.token_urlsafe(48),
-        "DB_PORT": db_port,
-        "REST_PORT": str(int(db_port) + 1000),  # REST port is DB port + 1000
-        "REALTIME_PORT": str(int(db_port) + 2000),  # Realtime port is DB port + 2000
+def set_secret(project_id: str, key: str, value: str):
+    env_path = get_project_env_path(project_id)
+    if not env_path.exists():
+        # Create if not exists
+        env_path.parent.mkdir(parents=True, exist_ok=True)
+        env_path.touch()
+    
+    set_key(env_path, key, value)
+    return get_secrets(project_id)
+
+def delete_secret(project_id: str, key: str):
+    env_path = get_project_env_path(project_id)
+    if not env_path.exists():
+        return {}
+        
+    unset_key(env_path, key)
+    return get_secrets(project_id)
+
+def find_free_port(start_port: int = 5000) -> int:
+    port = start_port
+    while port < 65535:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("0.0.0.0", port))
+                return port
+            except socket.error:
+                port += 1
+    raise Exception("No free ports available")
+
+def generate_project_secrets(db: Session, project_id: str) -> dict:
+    """Generates and persists base project secrets: ports, passwords, JWT secrets."""
+    
+    # Generate random strings
+    db_password = py_secrets.token_hex(16)
+    jwt_secret = py_secrets.token_urlsafe(32)
+    
+    # Allocate ports
+    db_port = find_free_port(5500)
+    rest_port = find_free_port(db_port + 1)
+    realtime_port = find_free_port(rest_port + 1)
+    storage_port = find_free_port(realtime_port + 1)
+    
+    generated_secrets = {
+        "DB_PASSWORD": db_password,
+        "JWT_SECRET": jwt_secret,
+        "DB_PORT": str(db_port),
+        "REST_PORT": str(rest_port),
+        "REALTIME_PORT": str(realtime_port),
+        "STORAGE_PORT": str(storage_port),
+        "POSTGRES_DB": "app",
+        "POSTGRES_USER": "app"
     }
-
-    for key, value in secrets_map.items():
-        db.add(ProjectSecret(
-            project_id=project_id,
-            key=key,
-            value=value
-        ))
-
+    
+    # Persist to database
+    for key, value in generated_secrets.items():
+        db_secret = ProjectSecret(project_id=project_id, key=key, value=value)
+        db.add(db_secret)
+        
     db.commit()
-    return secrets_map
+    return generated_secrets
