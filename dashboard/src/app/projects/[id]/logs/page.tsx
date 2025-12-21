@@ -9,7 +9,8 @@ import {
     Pause,
     Download,
     Search,
-    Filter
+    Filter,
+    Key
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,12 +21,32 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const SERVICES = [
-    { value: "database", label: "Database" },
-    { value: "auth", label: "Auth" },
-    { value: "api", label: "API Gateway" },
-    { value: "realtime", label: "Realtime" },
-    { value: "storage", label: "Storage" },
+    { value: "database", label: "Database", icon: <Terminal size={14} /> },
+    { value: "auth", label: "Auth", icon: <Key size={14} /> },
+    { value: "api", label: "API Gateway", icon: <Key size={14} /> },
+    { value: "realtime", label: "Realtime", icon: <Terminal size={14} /> },
+    { value: "storage", label: "Storage", icon: <Terminal size={14} /> },
 ];
+
+const LogLine = ({ line }: { line: string }) => {
+    let colorClass = "text-muted-foreground";
+    if (line.toUpperCase().includes("ERROR") || line.toUpperCase().includes("FATAL") || line.toUpperCase().includes("FAIL")) {
+        colorClass = "text-destructive font-bold";
+    } else if (line.toUpperCase().includes("WARN") || line.toUpperCase().includes("WARNING")) {
+        colorClass = "text-amber-500 font-semibold";
+    } else if (line.toUpperCase().includes("INFO") || line.toUpperCase().includes("LOG")) {
+        colorClass = "text-foreground";
+    } else if (line.toUpperCase().includes("SUCCESS") || line.toUpperCase().includes("OK")) {
+        colorClass = "text-emerald-500";
+    }
+
+    return (
+        <div className={cn("py-0.5 border-l-2 border-transparent hover:border-primary/30 pl-2 transition-all", colorClass)}>
+            <span className="opacity-40 mr-4 select-none">[{new Date().toLocaleTimeString()}]</span>
+            {line}
+        </div>
+    );
+};
 
 export default function LogsPage() {
     const params = useParams();
@@ -48,7 +69,6 @@ export default function LogsPage() {
                 const data = await resp.json();
                 setLogs(data.logs);
             } else {
-                // If 404 or other error, might be service not running or project issue
                 console.error("Failed to fetch logs");
             }
         } catch (err) {
@@ -95,8 +115,8 @@ export default function LogsPage() {
     };
 
     const filteredLogs = logs.split('\n').filter(line =>
-        line.toLowerCase().includes(filter.toLowerCase())
-    ).join('\n');
+        line.toLowerCase().includes(filter.toLowerCase()) && line.trim() !== ""
+    );
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500 h-[calc(100vh-8rem)] flex flex-col">
@@ -110,29 +130,29 @@ export default function LogsPage() {
 
                 <div className="flex items-center gap-2">
                     <Button
-                        variant={isLive ? "destructive" : "default"}
+                        variant={isLive ? "danger" : "default"}
                         onClick={() => setIsLive(!isLive)}
-                        className="gap-2 w-32"
+                        className="gap-2 w-32 shadow-lg transition-all active:scale-95"
                     >
                         {isLive ? <Pause size={16} /> : <Play size={16} />}
                         {isLive ? "Stop Live" : "Go Live"}
                     </Button>
-                    <Button variant="outline" size="icon" onClick={fetchLogs} title="Refresh Now">
+                    <Button variant="outline" size="icon" onClick={fetchLogs} title="Refresh Now" className="glass">
                         <RefreshCw size={16} className={cn(loading && "animate-spin")} />
                     </Button>
-                    <Button variant="outline" size="icon" onClick={handleDownload} title="Download Logs">
+                    <Button variant="outline" size="icon" onClick={handleDownload} title="Download Logs" className="glass">
                         <Download size={16} />
                     </Button>
                 </div>
             </div>
 
-            <Card className="flex-1 flex flex-col overflow-hidden border-border/50 shadow-md">
-                <div className="border-b border-border/50 p-4 bg-muted/20 flex flex-col md:flex-row items-center justify-between gap-4">
+            <Card className="flex-1 flex flex-col overflow-hidden border-border/50 shadow-2xl glass">
+                <div className="border-b border-border/50 p-4 bg-muted/30 flex flex-col md:flex-row items-center justify-between gap-4">
                     <Tabs value={service} onValueChange={setService} className="w-full md:w-auto">
-                        <TabsList className="bg-background border border-border/50">
+                        <TabsList className="bg-background/50 border border-border/50">
                             {SERVICES.map(s => (
-                                <TabsTrigger key={s.value} value={s.value} className="px-4">
-                                    {s.label}
+                                <TabsTrigger key={s.value} value={s.value} className="px-4 gap-2">
+                                    {s.icon} {s.label}
                                 </TabsTrigger>
                             ))}
                         </TabsList>
@@ -144,20 +164,28 @@ export default function LogsPage() {
                             placeholder="Filter logs..."
                             value={filter}
                             onChange={(e) => setFilter(e.target.value)}
-                            className="pl-9 bg-background border-border/50"
+                            className="pl-9 bg-background/50 border-border/50 focus:border-primary/50"
                         />
                     </div>
                 </div>
 
-                <div className="flex-1 bg-[#0d1117] text-gray-300 font-mono text-xs md:text-sm p-4 overflow-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+                <div className="flex-1 bg-card border-t border-border/40 font-mono text-xs md:text-sm p-4 overflow-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                     {loading && !logs ? (
                         <div className="h-full flex items-center justify-center text-muted-foreground gap-2">
                             <RefreshCw className="animate-spin" /> Fetching logs...
                         </div>
                     ) : (
-                        <pre className="whitespace-pre-wrap">
-                            {filteredLogs || (filter ? "No matching logs found." : "No logs available.")}
-                        </pre>
+                        <div className="space-y-0.5">
+                            {filteredLogs.length > 0 ? (
+                                filteredLogs.map((line, idx) => (
+                                    <LogLine key={idx} line={line} />
+                                ))
+                            ) : (
+                                <div className="p-8 text-center text-muted-foreground opacity-50 italic">
+                                    {filter ? "No matching logs found." : "No logs available."}
+                                </div>
+                            )}
+                        </div>
                     )}
                     <div ref={logsEndRef} />
                 </div>

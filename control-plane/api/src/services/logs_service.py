@@ -22,14 +22,13 @@ def get_project_logs(project_id: str, service_name: str, lines: int = 100) -> st
     # realtime -> realtime
     
     service_map = {
-        "database": "db",
+        "database": "postgres",
         "auth": "auth",
-        "api": "rest",
-        "rest": "rest",
+        "api": "api",
+        "rest": "api",
+        "functions": "functions",
         "realtime": "realtime",
-        "storage": "storage",
-        "kong": "kong",
-        "meta": "meta"
+        "storage": "storage"
     }
     
     docker_service = service_map.get(service_name, service_name)

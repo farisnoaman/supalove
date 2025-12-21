@@ -126,14 +126,14 @@ export default function SecretsPage() {
         <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
             <Toaster richColors position="top-right" />
 
-            <div className="flex justify-between items-start">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Secrets & Environment Variables</h1>
-                    <p className="text-muted-foreground mt-1">
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Secrets & Environment Variables</h1>
+                    <p className="text-sm text-muted-foreground mt-1">
                         Securely manage API keys and configuration for your project.
                     </p>
                 </div>
-                <Button onClick={() => setShowAddModal(true)} className="gap-2">
+                <Button onClick={() => setShowAddModal(true)} className="gap-2 w-full sm:w-auto">
                     <Plus size={16} />
                     Add Secret
                 </Button>
@@ -165,12 +165,12 @@ export default function SecretsPage() {
                     ) : (
                         <div className="divide-y divide-border/40">
                             {Object.entries(secrets).map(([key, value]) => (
-                                <div key={key} className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors group">
-                                    <div className="font-mono text-sm font-medium min-w-[200px] text-foreground/90">
+                                <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-muted/30 transition-colors group gap-3">
+                                    <div className="font-mono text-sm font-medium text-foreground/90 break-all">
                                         {key}
                                     </div>
 
-                                    <div className="flex-1 mx-8 flex items-center bg-muted/50 rounded-md px-3 h-9 border border-border/20">
+                                    <div className="flex-1 flex items-center bg-muted/50 rounded-md px-3 h-9 border border-border/20">
                                         <div className="flex-1 font-mono text-xs truncate mr-2 text-muted-foreground">
                                             {revealed[key] ? value : "••••••••••••••••••••••••••••••"}
                                         </div>
@@ -196,7 +196,7 @@ export default function SecretsPage() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => handleDeleteSecret(key)}
-                                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all"
+                                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 sm:opacity-0 group-hover:opacity-100 transition-all self-end sm:self-auto"
                                     >
                                         <Trash2 size={16} />
                                     </Button>

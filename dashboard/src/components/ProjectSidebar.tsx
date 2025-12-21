@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import {
@@ -15,6 +16,8 @@ import {
     Shield,
     Terminal,
     Archive,
+    Menu,
+    X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,20 +53,28 @@ export function ProjectSidebar() {
     const params = useParams();
     const pathname = usePathname();
     const projectId = params.id as string;
+    const [isOpen, setIsOpen] = useState(false);
 
-    return (
-        <aside className="w-64 border-r border-border bg-card/50 backdrop-blur-sm sticky top-0 h-screen overflow-y-auto flex flex-col">
+    const sidebarContent = (
+        <>
             <div className="p-4 border-b border-border mb-4 flex items-center gap-2">
                 <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg shadow-primary/20">
                     S
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                     <h1 className="font-bold text-sm truncate">Supalove</h1>
                     <p className="text-[10px] text-muted-foreground font-mono truncate">{projectId}</p>
                 </div>
+                {/* Close button for mobile */}
+                <button
+                    onClick={() => setIsOpen(false)}
+                    className="lg:hidden p-1 rounded-md hover:bg-muted"
+                >
+                    <X size={20} />
+                </button>
             </div>
 
-            <nav className="flex-1 px-3 space-y-6">
+            <nav className="flex-1 px-3 space-y-6 overflow-y-auto">
                 {sidebarSections.map((section) => (
                     <div key={section.title} className="space-y-1">
                         <h3 className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">
@@ -79,21 +90,22 @@ export function ProjectSidebar() {
                                 <Link
                                     key={item.href}
                                     href={href}
+                                    onClick={() => setIsOpen(false)}
                                     className={cn(
-                                        "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-all group",
+                                        "flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all group",
                                         isActive
                                             ? "bg-primary/10 text-primary font-medium shadow-sm"
                                             : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                     )}
                                 >
                                     <item.icon
-                                        size={16}
+                                        size={18}
                                         className={cn(
-                                            "transition-colors",
+                                            "transition-colors flex-shrink-0",
                                             isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                                         )}
                                     />
-                                    {item.label}
+                                    <span className="truncate">{item.label}</span>
                                 </Link>
                             );
                         })}
@@ -110,6 +122,41 @@ export function ProjectSidebar() {
                     All Projects
                 </Link>
             </div>
-        </aside>
+        </>
+    );
+
+    return (
+        <>
+            {/* Mobile Menu Button */}
+            <button
+                onClick={() => setIsOpen(true)}
+                className="lg:hidden fixed top-3 left-3 z-50 p-2 rounded-lg bg-card border border-border shadow-lg"
+            >
+                <Menu size={20} />
+            </button>
+
+            {/* Mobile Overlay */}
+            {isOpen && (
+                <div
+                    className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
+
+            {/* Sidebar - Desktop */}
+            <aside className="hidden lg:flex w-64 border-r border-border bg-card/50 backdrop-blur-sm sticky top-0 h-screen flex-col">
+                {sidebarContent}
+            </aside>
+
+            {/* Sidebar - Mobile Drawer */}
+            <aside
+                className={cn(
+                    "lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border flex flex-col transform transition-transform duration-300 ease-in-out",
+                    isOpen ? "translate-x-0" : "-translate-x-full"
+                )}
+            >
+                {sidebarContent}
+            </aside>
+        </>
     );
 }

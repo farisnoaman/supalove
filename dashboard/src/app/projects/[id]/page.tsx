@@ -91,25 +91,25 @@ export default function ProjectOverviewPage() {
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-5xl">
             {/* Hero Section */}
-            <div className="relative p-8 rounded-3xl bg-card border border-border/40 overflow-hidden shadow-2xl glass">
+            <div className="relative p-5 md:p-8 rounded-2xl md:rounded-3xl bg-card border border-border/40 overflow-hidden shadow-2xl glass">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="relative z-10 flex flex-col gap-6">
                     <div>
                         <Badge variant="outline" className="mb-4 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1">
                             <Zap size={12} className="mr-1.5 fill-emerald-500" />
                             Project Active
                         </Badge>
-                        <h1 className="text-4xl font-black tracking-tight text-gradient">Project Overview</h1>
-                        <p className="text-muted-foreground mt-2 max-w-md">
+                        <h1 className="text-2xl md:text-4xl font-black tracking-tight text-gradient">Project Overview</h1>
+                        <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-md">
                             Manage your backend infrastructure, browse your data, and configure authentication for your application.
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Button variant="outline" className="border-border/50">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <Button variant="outline" className="border-border/50 w-full sm:w-auto">
                             <Settings size={16} className="mr-2" />
                             Settings
                         </Button>
-                        <Button className="primary-gradient shadow-lg shadow-emerald-500/20">
+                        <Button className="primary-gradient shadow-lg shadow-emerald-500/20 w-full sm:w-auto">
                             Go to Docs
                             <ArrowRight size={16} className="ml-2" />
                         </Button>

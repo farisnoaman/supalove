@@ -101,14 +101,14 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <Toaster richColors position="top-right" />
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
-          <p className="text-muted-foreground">Manage your Supabase instances.</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Projects</h2>
+          <p className="text-sm text-muted-foreground">Manage your Supabase instances.</p>
         </div>
         <button
           onClick={() => window.location.href = "/projects/new"}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:opacity-90 transition-all shadow-lg hover:shadow-primary/20"
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg hover:shadow-primary/20 w-full sm:w-auto"
         >
           <Plus size={18} />
           New Project
