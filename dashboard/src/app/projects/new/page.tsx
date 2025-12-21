@@ -21,7 +21,7 @@ export default function NewProjectPage() {
             const resp = await fetch(`${API_URL}/api/v1/projects`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: projectId }),
+                body: JSON.stringify({ name: projectId }),
             });
 
             if (!resp.ok) {

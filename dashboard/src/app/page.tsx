@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, RefreshCcw, ExternalLink, AlertCircle } from "lucide-react";
+import { Plus, RefreshCcw, ExternalLink, AlertCircle, Trash2, RotateCcw, Power, Play, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
+import { toast } from "sonner";
+import { Toaster } from "sonner";
 
 interface Project {
   id: string;
@@ -19,68 +22,85 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   const fetchProjects = async () => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     setLoading(true);
     setError(null);
-
     try {
-      // Add timeout to prevent hanging requests
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const response = await fetch(`${API_URL}/api/v1/projects`, {
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
+      const response = await fetch(`${API_URL}/api/v1/projects`);
+      if (!response.ok) throw new Error("Failed to fetch projects");
       const data = await response.json();
       setProjects(Array.isArray(data) ? data : []);
     } catch (err: any) {
-      if (err.name === 'AbortError') {
-        setError('Request timeout - API may not be running');
-      } else {
-        setError(`Failed to load projects: ${err.message}`);
-      }
-      console.error('Projects fetch error:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Prevent infinite re-renders with proper dependency management
   useEffect(() => {
-    let isMounted = true;
-
-    const loadProjects = async () => {
-      if (!isMounted) return;
-      await fetchProjects();
-    };
-
-    loadProjects();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []); // Empty dependency array - only run once on mount
-
-  const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
     fetchProjects();
+  }, []);
+
+  const handleDelete = async () => {
+    if (!projectToDelete) return;
+    setActionLoading(projectToDelete.id);
+    try {
+      const resp = await fetch(`${API_URL}/api/v1/projects/${projectToDelete.id}`, {
+        method: "DELETE",
+      });
+      if (resp.ok) {
+        toast.success("Project deleted successfully");
+        setProjects(projects.filter(p => p.id !== projectToDelete.id));
+      } else {
+        const res = await resp.json();
+        toast.error(res.detail || "Failed to delete project");
+      }
+    } catch (err) {
+      toast.error("Network error");
+    } finally {
+      setActionLoading(null);
+      setProjectToDelete(null);
+    }
+  };
+
+  const handleRestore = async (project: Project) => {
+    setActionLoading(project.id);
+    try {
+      const resp = await fetch(`${API_URL}/api/v1/projects/${project.id}/restore`, {
+        method: "POST",
+      });
+      if (resp.ok) {
+        toast.success("Project restored");
+        fetchProjects(); // Refresh to get updated status
+      } else {
+        const res = await resp.json();
+        toast.error(res.detail || "Failed to restore project");
+      }
+    } catch (err) {
+      toast.error("Network error");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "running": return "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400";
+      case "stopped": return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400";
+      case "failed": return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400";
+      case "provisioning": return "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400";
+      default: return "bg-slate-100 text-slate-600";
+    }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <Toaster richColors position="top-right" />
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
@@ -88,7 +108,7 @@ export default function ProjectsPage() {
         </div>
         <button
           onClick={() => window.location.href = "/projects/new"}
-          className="bg-primary text-white px-4 py-2 rounded-md font-medium flex items-center gap-2 hover:opacity-90 transition-opacity"
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:opacity-90 transition-all shadow-lg hover:shadow-primary/20"
         >
           <Plus size={18} />
           New Project
@@ -104,66 +124,114 @@ export default function ProjectsPage() {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
             <span>{error}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRetry}
-              className="ml-4"
-            >
-              <RefreshCcw className="h-4 w-4 mr-2" />
-              Retry
+            <Button variant="outline" size="sm" onClick={fetchProjects} className="ml-4">
+              <RefreshCcw className="h-4 w-4 mr-2" /> Retry
             </Button>
           </AlertDescription>
         </Alert>
       ) : projects.length === 0 ? (
-        <div className="bg-card border rounded-lg p-12 text-center space-y-4">
+        <div className="bg-card border border-dashed rounded-xl p-16 text-center space-y-4">
           <div className="text-muted-foreground">No projects found.</div>
-          <button
-            onClick={() => window.location.href = "/projects/new"}
-            className="text-primary font-medium hover:underline"
-          >
+          <Button variant="ghost" className="text-primary hover:underline hover:bg-transparent p-0 h-auto" onClick={() => window.location.href = "/projects/new"}>
             Create your first project
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <div key={project.id} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div key={project.id} className="bg-card border border-border/40 rounded-xl p-6 hover:border-primary/40 hover:shadow-md transition-all group flex flex-col h-full">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="font-semibold text-lg">{project.name || `project-${project.id.slice(0, 8)}`}</h3>
-                <span className={`px-2 py-0.5 rounded text-xs font-medium ${project.status === "active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
-                  }`}>
+                <div className="space-y-1">
+                  <h3 className="font-bold text-lg leading-none tracking-tight">
+                    {project.name || "Untitled Project"}
+                  </h3>
+                  <p className="text-xs font-mono text-muted-foreground">ID: {project.id.substring(0, 8)}</p>
+                </div>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusColor(project.status)}`}>
                   {project.status}
                 </span>
               </div>
 
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">ID:</span>
-                  <span className="font-mono text-xs">{project.id.slice(0, 8)}...</span>
-                </div>
+              <div className="space-y-4 flex-1">
                 {project.api_url && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">API:</span>
-                    <a href={project.api_url} target="_blank" className="text-primary hover:underline flex items-center gap-1">
-                      Link <ExternalLink size={12} />
+                  <div className="flex items-center justify-between p-2 bg-muted/40 rounded-md border border-border/20">
+                    <span className="text-xs font-medium text-muted-foreground">API Endpoint</span>
+                    <a href={project.api_url} target="_blank" className="text-xs text-primary hover:underline flex items-center gap-1">
+                      Open <ExternalLink size={10} />
                     </a>
                   </div>
                 )}
               </div>
 
-              <div className="mt-6 flex gap-2">
-                <button
+              <div className="mt-6 flex items-center gap-2 pt-4 border-t border-border/40">
+                <Button
+                  className="flex-1 bg-muted/50 hover:bg-muted text-foreground border-border/40"
+                  variant="outline"
                   onClick={() => window.location.href = `/projects/${project.id}`}
-                  className="flex-1 text-center bg-muted py-2 rounded text-sm font-medium hover:bg-slate-200 transition-colors"
                 >
                   Manage
-                </button>
+                </Button>
+
+                {project.status === "deleted" ? (
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => handleRestore(project)}
+                    disabled={actionLoading === project.id}
+                    title="Restore Project"
+                    className="text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                  >
+                    {actionLoading === project.id ? <RefreshCcw size={16} className="animate-spin" /> : <RotateCcw size={16} />}
+                  </Button>
+                ) : (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setProjectToDelete(project)}
+                    title="Delete Project"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal open={!!projectToDelete} onOpenChange={(open) => !open && setProjectToDelete(null)}>
+        <ModalContent className="max-w-md">
+          <ModalHeader>
+            <ModalTitle className="text-destructive flex items-center gap-2">
+              <AlertCircle size={20} />
+              Delete Project
+            </ModalTitle>
+          </ModalHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete <span className="font-bold text-foreground">{projectToDelete?.name || "this project"}</span>?
+            </p>
+            <p className="text-xs text-red-500 mt-2 font-medium">
+              This action is destructive and will remove all data associated with this project.
+            </p>
+          </div>
+          <ModalFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setProjectToDelete(null)} disabled={!!actionLoading}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleDelete}
+              disabled={!!actionLoading}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {actionLoading === projectToDelete?.id ? "Deleting..." : "Delete Project"}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

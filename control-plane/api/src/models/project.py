@@ -16,6 +16,7 @@ class Project(Base):
     __tablename__ = "projects"
 
     id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=True)
     owner_id = Column(String, nullable=True) # For future multi-tenant support
     status = Column(Enum(ProjectStatus), default=ProjectStatus.pending)
     last_error = Column(Text, nullable=True)

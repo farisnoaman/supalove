@@ -31,13 +31,13 @@ def get_project_by_id(project_id: str):
         db.close()
 
 
-def create_project(custom_domain: str = None):
+def create_project(custom_domain: str = None, name: str = None):
     project_id = uuid.uuid4().hex[:12]
     db: Session = SessionLocal()
 
     try:
         # 1️⃣ Create project in 'pending' state
-        project = Project(id=project_id, status=ProjectStatus.pending)
+        project = Project(id=project_id, name=name, status=ProjectStatus.pending)
         db.add(project)
         db.commit()
 

@@ -15,6 +15,7 @@ router = APIRouter()
 
 class ProjectCreate(BaseModel):
     custom_domain: str = None
+    name: str = None
 
 @router.get("")
 def list_projects():
@@ -31,7 +32,8 @@ def get_project(project_id: str):
 @router.post("")
 def create(project: ProjectCreate = None):
     custom_domain = project.custom_domain if project else None
-    return create_project(custom_domain=custom_domain)
+    name = project.name if project else None
+    return create_project(custom_domain=custom_domain, name=name)
 
 @router.post("/{project_id}/stop")
 def stop(project_id: str):
