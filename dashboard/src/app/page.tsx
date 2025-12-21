@@ -139,7 +139,7 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <div key={project.id} className="bg-card border border-border/40 rounded-xl p-6 hover:border-primary/40 hover:shadow-md transition-all group flex flex-col h-full">
+            <div key={project.id} className="bg-card/80 dark:bg-card border-2 border-border rounded-xl p-5 md:p-6 hover:border-primary/50 hover:shadow-lg transition-all group flex flex-col h-full shadow-md">
               <div className="flex justify-between items-start mb-4">
                 <div className="space-y-1">
                   <h3 className="font-bold text-lg leading-none tracking-tight">

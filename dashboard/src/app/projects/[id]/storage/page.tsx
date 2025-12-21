@@ -210,14 +210,14 @@ export default function StoragePage() {
                 </div>
             </div>
 
-            <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
+            <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-0 overflow-hidden">
                 {/* Buckets Sidebar */}
-                <div className="w-64 flex flex-col gap-4">
+                <div className="lg:w-64 flex flex-col gap-4">
                     <div className="p-4 bg-card border border-border/40 rounded-2xl glass">
                         <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 pl-1">Buckets</h3>
-                        <div className="space-y-1">
+                        <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
                             {loading && buckets.length === 0 ? (
-                                [...Array(3)].map((_, i) => <Skeleton key={i} className="h-10 w-full rounded-xl" />)
+                                [...Array(3)].map((_, i) => <Skeleton key={i} className="h-10 w-24 lg:w-full flex-shrink-0 rounded-xl" />)
                             ) : buckets.length === 0 ? (
                                 <p className="text-xs text-muted-foreground text-center py-4">No buckets found</p>
                             ) : (
@@ -226,7 +226,7 @@ export default function StoragePage() {
                                         key={bucket}
                                         onClick={() => setSelectedBucket(bucket)}
                                         className={cn(
-                                            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group",
+                                            "flex items-center gap-2 lg:gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group flex-shrink-0 lg:flex-shrink lg:w-full",
                                             selectedBucket === bucket
                                                 ? "bg-primary/10 text-primary font-bold shadow-sm"
                                                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -234,21 +234,22 @@ export default function StoragePage() {
                                     >
                                         <HardDrive size={18} className={cn(selectedBucket === bucket ? "text-primary" : "text-muted-foreground/60")} />
                                         <span className="truncate">{bucket.replace(`project-${projectId}-`, '')}</span>
-                                        {selectedBucket === bucket && <ChevronRight size={14} className="ml-auto opacity-50" />}
+                                        {selectedBucket === bucket && <ChevronRight size={14} className="ml-auto opacity-50 hidden lg:block" />}
                                     </button>
                                 ))
                             )}
                         </div>
                     </div>
 
-                    <div className="mt-auto p-4 bg-muted/30 border border-border/20 rounded-2xl flex flex-col gap-2">
+                    <div className="hidden lg:flex mt-auto p-4 bg-muted/30 border border-border/20 rounded-2xl flex-col gap-2">
                         <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">
                             <span>Usage</span>
-                            <span>Limited</span>
+                            <span className="text-foreground">33%</span>
                         </div>
-                        <div className="h-1.5 w-full bg-border/20 rounded-full overflow-hidden">
+                        <div className="h-2 w-full bg-border/30 rounded-full overflow-hidden">
                             <div className="h-full w-1/3 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
                         </div>
+                        <p className="text-[10px] text-muted-foreground/60 mt-1">1.2 GB of 5 GB used</p>
                     </div>
                 </div>
 
@@ -278,12 +279,12 @@ export default function StoragePage() {
 
                     <div className="flex-1 overflow-y-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-muted/50 border-b border-border/40 sticky top-0 z-10 backdrop-blur-md">
+                            <thead className="bg-muted/50 border-b border-border/40 sticky top-0 z-10 backdrop-blur-md hidden md:table-header-group">
                                 <tr>
-                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Name</th>
-                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Size</th>
-                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Last Modified</th>
-                                    <th className="px-6 py-3 text-right"></th>
+                                    <th className="px-4 md:px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Name</th>
+                                    <th className="px-4 md:px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Size</th>
+                                    <th className="px-4 md:px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hidden lg:table-cell">Last Modified</th>
+                                    <th className="px-4 md:px-6 py-3 text-right"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/20">
@@ -321,27 +322,28 @@ export default function StoragePage() {
                                     </tr>
                                 ) : (
                                     filteredObjects.map((obj) => (
-                                        <tr key={obj.name} className="hover:bg-emerald-50/20 dark:hover:bg-emerald-500/5 transition-colors group cursor-pointer">
-                                            <td className="px-6 py-4 text-sm font-medium">
+                                        <tr key={obj.name} className="hover:bg-emerald-50/20 dark:hover:bg-emerald-500/5 transition-colors group cursor-pointer flex flex-col md:table-row p-3 md:p-0 border-b md:border-0 border-border/20">
+                                            <td className="px-2 md:px-4 lg:px-6 py-2 md:py-4 text-sm font-medium">
                                                 <div className="flex items-center gap-3">
                                                     {getFileIcon(obj.name, obj.is_dir)}
-                                                    <span className="group-hover:text-primary transition-colors truncate max-w-[300px]">
+                                                    <span className="group-hover:text-primary transition-colors truncate max-w-[200px] md:max-w-[300px]">
                                                         {obj.name}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-xs font-mono text-muted-foreground">
+                                            <td className="px-2 md:px-4 lg:px-6 py-1 md:py-4 text-xs font-mono text-muted-foreground">
+                                                <span className="md:hidden text-muted-foreground/60 mr-2">Size:</span>
                                                 {obj.is_dir ? '-' : formatSize(obj.size)}
                                             </td>
-                                            <td className="px-6 py-4 text-xs text-muted-foreground">
+                                            <td className="px-2 md:px-4 lg:px-6 py-1 md:py-4 text-xs text-muted-foreground hidden lg:table-cell">
                                                 {new Date(obj.last_modified).toLocaleString()}
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-2 md:px-4 lg:px-6 py-2 md:py-4 text-right">
                                                 <div className="flex items-center justify-end gap-1">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
+                                                        className="h-8 w-8 text-muted-foreground md:opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
                                                     >
                                                         <MoreHorizontal size={14} />
                                                     </Button>
@@ -352,7 +354,7 @@ export default function StoragePage() {
                                                             e.stopPropagation();
                                                             setObjectToDelete(obj.name);
                                                         }}
-                                                        className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
+                                                        className="h-8 w-8 text-muted-foreground hover:text-destructive md:opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
                                                     >
                                                         <Trash2 size={14} />
                                                     </Button>
