@@ -37,9 +37,7 @@ Base.metadata.create_all(bind=engine)
 
 # ... (omitted)
 
-app.include_router(users_router, prefix=f"{api_v1_prefix}/users", tags=["Users"])
-app.include_router(orgs_router, prefix=f"{api_v1_prefix}/orgs", tags=["Organizations"])
-app.include_router(billing_router, prefix=f"{api_v1_prefix}/billing", tags=["Billing"])
+
 
 from contextlib import asynccontextmanager
 from services.scheduler_service import SchedulerService
@@ -104,6 +102,7 @@ from api.v1.users import router as users_router
 
 app.include_router(users_router, prefix=f"{api_v1_prefix}/users", tags=["Users"])
 app.include_router(orgs_router, prefix=f"{api_v1_prefix}/orgs", tags=["Organizations"])
+app.include_router(billing_router, prefix=f"{api_v1_prefix}/billing", tags=["Billing"])
 
 # ============================================
 # PROMETHEUS METRICS

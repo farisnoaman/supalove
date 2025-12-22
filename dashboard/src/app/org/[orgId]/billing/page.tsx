@@ -20,7 +20,7 @@ interface Subscription {
 
 export default function BillingPage() {
     const params = useParams();
-    const orgId = params.id as string;
+    const orgId = params.orgId as string;
 
     const [sub, setSub] = useState<Subscription | null>(null);
     const [loading, setLoading] = useState(true);
