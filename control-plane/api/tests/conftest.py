@@ -66,20 +66,33 @@ async def client(db) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides.clear()
 
 @pytest.fixture
-def auth_headers():
-    """
-    Returns headers for an authenticated user (mocked token).
-    """
-    # In integration tests, we might want to generate a real valid JWT
-    # For now, we can rely on our auth verification logic
-    # Let's generate a real token for a test user
+def auth_headers(db):
+    """Create a test user and return auth headers with JWT"""
+    from services.auth_service import AuthService
+    from models.user import User
+    import uuid
+    
+    email = "faris1@faris.com"
+    password = "123123123"
+    
+    # Check if user exists first
+    user = db.query(User).filter(User.email == email).first()
+    
+    if not user:
+        # Create user if not exists (fallback)
+        hashed = AuthService.get_password_hash(password)
+        user = User(id=str(uuid.uuid4()), email=email, hashed_password=hashed, is_active=True)
+        db.add(user)
+        db.flush()
+    
+    # Generate JWT for this user
     from jose import jwt
     import datetime
     
     secret = os.getenv("PLATFORM_JWT_SECRET", "super-secret-test-key")
     payload = {
-        "sub": "test-user-id",
-        "email": "test@supalove.local",
+        "sub": user.id,
+        "email": email,
         "role": "authenticated",
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }
