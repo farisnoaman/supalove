@@ -18,6 +18,7 @@ import {
     Archive,
     Menu,
     X,
+    Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrg } from "@/components/providers/org-provider";
@@ -37,6 +38,7 @@ const sidebarSections = [
             { href: "/auth", label: "Authentication", icon: Shield },
             { href: "/storage", label: "Storage", icon: Folder },
             { href: "/edge-functions", label: "Edge Functions", icon: Code2 },
+            { href: "/realtime", label: "Realtime", icon: Bell },
         ]
     },
     {

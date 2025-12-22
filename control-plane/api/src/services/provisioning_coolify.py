@@ -126,22 +126,27 @@ class CoolifyProvisioner(Provisioner):
         # Set Environment Variables
         # /api/v1/applications/{uuid}/envs
         print(f"[Coolify] Setting environment variables for {app_uuid}...")
+        
+        # All required environment variables for Supabase stack
         env_vars = {
             "PROJECT_ID": project_id,
             "DB_PASSWORD": secrets.get("DB_PASSWORD", "postgres"),
             "JWT_SECRET": secrets.get("JWT_SECRET", "super-secret-jwt-token"),
-            # Coolify handles ports internally for ingress usually, 
-            # but if we use host networking or specific ports in compose:
-            # "DB_PORT": ... 
+            "SECRET_KEY_BASE": secrets.get("SECRET_KEY_BASE", secrets.get("JWT_SECRET", "super-secret")),
+            "ANON_KEY": secrets.get("ANON_KEY", ""),
+            "SERVICE_ROLE_KEY": secrets.get("SERVICE_ROLE_KEY", ""),
+            "API_EXTERNAL_URL": custom_domain if custom_domain else f"https://project-{project_id}.{domain_suffix}",
+            "SITE_URL": custom_domain if custom_domain else f"https://project-{project_id}.{domain_suffix}",
         }
         
         for key, value in env_vars.items():
-            self._make_request("POST", f"/api/v1/applications/{app_uuid}/envs", {
-                "key": key,
-                "value": str(value),
-                "is_build_time": False,
-                "is_literal": True
-            })
+            if value:  # Only set if value is not empty
+                self._make_request("POST", f"/api/v1/applications/{app_uuid}/envs", {
+                    "key": key,
+                    "value": str(value),
+                    "is_build_time": False,
+                    "is_literal": True
+                })
 
         # Deploy
         # Deploy

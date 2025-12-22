@@ -225,3 +225,108 @@ def get_project_config(
         "service_role_key": service_role_key,
         "jwt_secret": jwt_secret
     }
+
+
+# ============================================
+# DEPLOYMENT ENDPOINTS
+# ============================================
+
+import os
+
+@router.get("/{project_id}/deployment")
+def get_deployment_config(
+    project_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get deployment configuration and status for a project."""
+    verify_project_access(project_id, db, current_user)
+    
+    # Check if Coolify is configured
+    coolify_url = os.getenv("COOLIFY_API_URL")
+    coolify_token = os.getenv("COOLIFY_API_TOKEN")
+    coolify_connected = bool(coolify_url and coolify_token)
+    
+    # Determine environment
+    environment = "coolify" if coolify_connected else "local"
+    
+    # Get custom domain from secrets
+    from models.project_secret import ProjectSecret
+    domain_secret = db.query(ProjectSecret).filter(
+        ProjectSecret.project_id == project_id,
+        ProjectSecret.key == "CUSTOM_DOMAIN"
+    ).first()
+    
+    return {
+        "environment": environment,
+        "coolify_connected": coolify_connected,
+        "custom_domain": domain_secret.value if domain_secret else None,
+        "ssl_enabled": coolify_connected and domain_secret is not None,
+        "deployment_url": f"https://{domain_secret.value}" if domain_secret else None
+    }
+
+
+class DomainConfig(BaseModel):
+    domain: str
+
+
+@router.post("/{project_id}/deployment/domain")
+def set_custom_domain(
+    project_id: str,
+    config: DomainConfig,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Set a custom domain for the project."""
+    verify_project_access(project_id, db, current_user)
+    
+    from models.project_secret import ProjectSecret
+    
+    # Upsert the custom domain
+    existing = db.query(ProjectSecret).filter(
+        ProjectSecret.project_id == project_id,
+        ProjectSecret.key == "CUSTOM_DOMAIN"
+    ).first()
+    
+    if existing:
+        existing.value = config.domain
+    else:
+        db.add(ProjectSecret(
+            project_id=project_id,
+            key="CUSTOM_DOMAIN",
+            value=config.domain
+        ))
+    
+    db.commit()
+    
+    return {"status": "saved", "domain": config.domain}
+
+
+@router.post("/{project_id}/deployment/redeploy")
+def redeploy_project(
+    project_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Trigger a redeployment of the project (Coolify only)."""
+    verify_project_access(project_id, db, current_user)
+    
+    coolify_url = os.getenv("COOLIFY_API_URL")
+    coolify_token = os.getenv("COOLIFY_API_TOKEN")
+    
+    if not coolify_url or not coolify_token:
+        raise HTTPException(status_code=400, detail="Coolify not configured")
+    
+    from services.provisioning_coolify import CoolifyProvisioner
+    
+    provisioner = CoolifyProvisioner(coolify_url, coolify_token)
+    resource = provisioner._find_resource_by_name(f"project-{project_id}")
+    
+    if not resource:
+        raise HTTPException(status_code=404, detail="Project not found in Coolify")
+    
+    # Trigger deploy
+    provisioner._make_request("POST", f"/api/v1/applications/{resource['uuid']}/deploy")
+    
+    return {"status": "deploying"}
+

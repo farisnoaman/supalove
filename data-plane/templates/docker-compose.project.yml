@@ -1,48 +1,152 @@
 version: "3.9"
 
+# Supalove Project Stack for Coolify Deployment
+# This template is used when deploying projects via Coolify
+
 services:
-  db:
-    image: postgres:15
+  # ============================================
+  # DATABASE - Supabase Postgres
+  # ============================================
+  postgres:
+    image: supabase/postgres:15.8.1.085
     container_name: project_${PROJECT_ID}_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: app
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${DB_PORT}:5432"
+      POSTGRES_DB: postgres
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: 3600
     volumes:
-      - ./volumes/db:/var/lib/postgresql/data
-    command: [ "postgres", "-c", "wal_level=logical" ]
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  realtime:
-    image: supabase/realtime:v2.28.32
-    container_name: project_${PROJECT_ID}_realtime
-    depends_on:
-      - db
+  # ============================================
+  # REST API - PostgREST
+  # ============================================
+  api:
+    image: postgrest/postgrest:v12.2.3
+    container_name: project_${PROJECT_ID}_api
+    restart: unless-stopped
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: app
-      DB_USER: app
-      DB_PASSWORD: ${DB_PASSWORD}
-      jwt_secret: ${JWT_SECRET}
-      REPLICATION_MODE: RLS
-      REPLICATION_POLL_INTERVAL: 100
-      SECURE_CHANNELS: "true"
-      SLOT_NAME: supabase_realtime_replication_slot
-      TEMPORARY_SLOT: "true"
-    ports:
-      - "${REALTIME_PORT}:4000"
-
-  rest:
-    image: postgrest/postgrest
-    container_name: project_${PROJECT_ID}_rest
-    depends_on:
-      - db
-    environment:
-      PGRST_DB_URI: postgres://app:${DB_PASSWORD}@db:5432/app
-      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_URI: postgresql://authenticator:${DB_PASSWORD}@postgres:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage,graphql_public
       PGRST_DB_ANON_ROLE: anon
-    ports:
-      - "${REST_PORT}:3000"
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ============================================
+  # AUTH - Supabase GoTrue
+  # ============================================
+  auth:
+    image: supabase/gotrue:v2.184.0
+    container_name: project_${PROJECT_ID}_auth
+    restart: unless-stopped
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${API_EXTERNAL_URL:-http://localhost}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${DB_PASSWORD}@postgres:5432/postgres
+      GOTRUE_SITE_URL: ${SITE_URL:-http://localhost:3000}
+      GOTRUE_URI_ALLOW_LIST: "*"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ============================================
+  # REALTIME - Supabase Realtime
+  # ============================================
+  realtime:
+    image: supabase/realtime:v2.68.0
+    container_name: project_${PROJECT_ID}_realtime
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+      DB_ENC_KEY: supabaserealtime
+      API_JWT_SECRET: ${JWT_SECRET}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-ChangeThisToAVeryLongRandomString}
+      ERL_AFLAGS: -proto_dist inet_tcp
+      DNS_NODES: "''"
+      APP_NAME: realtime
+      SEED_SELF_HOST: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ============================================
+  # STORAGE - Supabase Storage API
+  # ============================================
+  storage:
+    image: supabase/storage-api:v1.33.0
+    container_name: project_${PROJECT_ID}_storage
+    restart: unless-stopped
+    volumes:
+      - storage_data:/var/lib/storage
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      POSTGREST_URL: http://api:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${DB_PASSWORD}@postgres:5432/postgres
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+
+  # ============================================
+  # EDGE FUNCTIONS - Deno Runtime
+  # ============================================
+  functions:
+    image: denoland/deno:latest
+    container_name: project_${PROJECT_ID}_functions
+    restart: unless-stopped
+    user: "deno"
+    environment:
+      PROJECT_ID: ${PROJECT_ID}
+      SUPABASE_URL: http://api:3000
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+    volumes:
+      - ./functions:/functions
+    working_dir: /functions
+    command: [ "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "server.ts" ]
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  storage_data:
+
+
+networks:
+  default:
+    name: project_${PROJECT_ID}_net
+    driver: bridge
