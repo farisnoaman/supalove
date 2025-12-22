@@ -19,11 +19,13 @@ async def test_project_lifecycle(client: AsyncClient, auth_headers, db):
     org_id = str(uuid.uuid4())
     
     # Sync insert to DB using the session fixture
-    user = User(id=user_id, email="test@supalove.local", is_active=True)
-    db.merge(user) # Merge in case exists
+    user = User(id=user_id, email="test@supalove.local", is_active=True, hashed_password="dummy")
+    db.merge(user)
+    db.flush() # Ensure user exists
     
-    org = Organization(id=org_id, name="Test Org", plan="free", created_by_user_id=user_id)
+    org = Organization(id=org_id, name="Test Org", plan="free", slug="test-org")
     db.add(org)
+    db.flush() # Ensure org exists
     
     member = OrgMember(org_id=org_id, user_id=user_id, role="owner")
     db.add(member)
@@ -33,7 +35,7 @@ async def test_project_lifecycle(client: AsyncClient, auth_headers, db):
     quota = ResourceQuota(org_id=org_id, max_projects=3, max_db_size_mb=500, max_storage_mb=1000)
     db.add(quota)
     
-    db.flush() # Send to DB so API can see it (if sharing session)
+    db.flush() # Rest
     # Note: For `client` to see this, it MUST share the same db session. 
     # Our `client` fixture overrides `get_db` to use `yield db` (the test session).
     # So this data is visible!

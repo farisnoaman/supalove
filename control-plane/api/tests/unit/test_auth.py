@@ -19,7 +19,7 @@ async def test_health_check(client):
 
 @pytest.mark.asyncio
 async def test_login_fail_no_creds(client):
-    response = await client.post("/api/v1/auth/token", data={})
+    response = await client.post("/api/v1/auth/login", json={})
     assert response.status_code == 422 # Validation error
 
 @pytest.mark.asyncio

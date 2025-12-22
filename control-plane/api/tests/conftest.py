@@ -8,12 +8,13 @@ from httpx import AsyncClient, ASGITransport
 
 # Set env vars for testing before imports
 os.environ["TESTING"] = "true"
-os.environ["DATABASE_URL"] = "postgresql://postgres:postgres@localhost:5432/postgres" 
+os.environ["DATABASE_URL"] = "postgresql://platform:platform@localhost:5433/control_plane"
+os.environ["PLATFORM_JWT_SECRET"] = "super-secret-test-key" 
 # NOTE: In a real CI, we'd use a separate test DB. For MVP, we use the local dev DB but with transaction rollbacks.
 
 from main import app
 from api.v1.deps import get_db
-from database import Base
+from core.database import Base
 
 # Setup DB connection
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
@@ -75,7 +76,7 @@ def auth_headers():
     from jose import jwt
     import datetime
     
-    secret = os.getenv("JWT_SECRET", "super-secret-test-key")
+    secret = os.getenv("PLATFORM_JWT_SECRET", "super-secret-test-key")
     payload = {
         "sub": "test-user-id",
         "email": "test@supalove.local",
