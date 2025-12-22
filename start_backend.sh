@@ -15,4 +15,4 @@ echo "🐍 Starting Backend in Virtual Environment..."
 cd control-plane/api/src
 
 # Run uvicorn from the virtual environment
-../.venv/bin/uvicorn main:app --reload --port 8000
+../.venv/bin/uvicorn main:app --reload --host 0.0.0.0 --port 8000
