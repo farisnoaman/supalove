@@ -1,5 +1,32 @@
 "use client";
 
+import { LayoutGrid, Database, HardDrive } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+
+function UsageCard({ title, icon: Icon, used, limit, unit }: any) {
+    const isUnlimited = limit === -1;
+    const percent = isUnlimited ? 0 : Math.min(100, Math.round((used / limit) * 100));
+
+    return (
+        <Card className="border border-border/40">
+            <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Icon size={16} />
+                    {title}
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="flex items-end justify-between mb-2">
+                    <span className="text-2xl font-bold">{used}{unit}</span>
+                    <span className="text-xs text-muted-foreground">
+                        of {isUnlimited ? "Unlimited" : `${limit}${unit}`}
+                    </span>
+                </div>
+                {!isUnlimited && <Progress value={percent} className="h-2" />}
+            </CardContent>
+        </Card>
+    );
+}
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
@@ -23,6 +50,7 @@ export default function BillingPage() {
     const orgId = params.orgId as string;
 
     const [sub, setSub] = useState<Subscription | null>(null);
+    const [usage, setUsage] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
 
@@ -40,6 +68,14 @@ export default function BillingPage() {
             });
             if (resp.ok) {
                 setSub(await resp.json());
+            }
+
+            // Fetch usage
+            const usageResp = await fetch(`${API_URL}/api/v1/billing/orgs/${orgId}/usage`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (usageResp.ok) {
+                setUsage(await usageResp.json());
             }
         } catch (err) {
             console.error("Failed to fetch subscription", err);
@@ -157,6 +193,31 @@ export default function BillingPage() {
                         Manage Billing
                     </Button>
                 )}
+            </div>
+
+            {/* Resource Usage */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <UsageCard
+                    title="Projects"
+                    icon={LayoutGrid}
+                    used={usage?.projects?.used || 0}
+                    limit={usage?.projects?.limit || 3}
+                    unit=""
+                />
+                <UsageCard
+                    title="Database"
+                    icon={Database}
+                    used={usage?.db_size?.used_mb || 0}
+                    limit={usage?.db_size?.limit_mb || 500}
+                    unit="MB"
+                />
+                <UsageCard
+                    title="Storage"
+                    icon={HardDrive}
+                    used={usage?.storage?.used_mb || 0}
+                    limit={usage?.storage?.limit_mb || 1024}
+                    unit="MB"
+                />
             </div>
 
             {/* Plans Grid */}

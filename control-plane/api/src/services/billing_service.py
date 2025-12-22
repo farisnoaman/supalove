@@ -96,6 +96,19 @@ class BillingService:
             if org:
                 # Assuming simple mapping for now
                 org.plan = "pro"
+                
+                # Update Resource Quotas
+                from models.resource_quota import ResourceQuota
+                quotas = db.query(ResourceQuota).filter(ResourceQuota.org_id == org.id).first()
+                if not quotas:
+                    quotas = ResourceQuota(org_id=org.id)
+                    db.add(quotas)
+                
+                defaults = ResourceQuota.get_defaults("pro")
+                quotas.max_projects = defaults["max_projects"]
+                quotas.max_db_size_mb = defaults["max_db_size_mb"]
+                quotas.max_storage_mb = defaults["max_storage_mb"]
+                quotas.max_api_requests_daily = defaults["max_api_requests_daily"]
             
             db.commit()
 
@@ -106,10 +119,25 @@ class BillingService:
             sub.current_period_end = datetime.fromtimestamp(stripe_sub["current_period_end"])
             
             # If changed to cancel/past_due, consider downgrading org plan if needed
-            if sub.status != "active":
-                 org = db.query(Organization).filter(Organization.id == sub.org_id).first()
-                 if org:
-                     org.plan = "free" # Logic might be more complex
+            org = db.query(Organization).filter(Organization.id == sub.org_id).first()
+            if org:
+                if sub.status == "active":
+                    org.plan = "pro"
+                else:
+                    org.plan = "free"
+
+                # Update Resource Quotas
+                from models.resource_quota import ResourceQuota
+                quotas = db.query(ResourceQuota).filter(ResourceQuota.org_id == org.id).first()
+                if not quotas:
+                    quotas = ResourceQuota(org_id=org.id)
+                    db.add(quotas)
+                
+                defaults = ResourceQuota.get_defaults(org.plan)
+                quotas.max_projects = defaults["max_projects"]
+                quotas.max_db_size_mb = defaults["max_db_size_mb"]
+                quotas.max_storage_mb = defaults["max_storage_mb"]
+                quotas.max_api_requests_daily = defaults["max_api_requests_daily"]
             
             db.commit()
 

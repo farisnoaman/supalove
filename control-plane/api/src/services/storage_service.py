@@ -54,6 +54,26 @@ class StorageService:
             print(f"[StorageService] Error creating bucket: {e}")
             raise
     
+    def create_new_bucket(self, project_id: str, name: str) -> str:
+        """
+        Creates a new specific bucket for the project.
+        Bucket name will be 'project-{project_id}-{name}'.
+        """
+        # Validate name (simple check)
+        if not name.isalnum() and '-' not in name:
+            raise ValueError("Bucket name must be alphanumeric")
+            
+        full_bucket_name = f"project-{project_id}-{name}"
+        
+        try:
+            if not self.client.bucket_exists(full_bucket_name):
+                self.client.make_bucket(full_bucket_name)
+                print(f"[StorageService] Created bucket: {full_bucket_name}")
+            return full_bucket_name
+        except S3Error as e:
+            print(f"[StorageService] Error creating bucket: {e}")
+            raise
+    
     def list_buckets(self, project_id: str):
         """Lists all buckets for a project (structured as prefix for now)"""
         buckets = self.client.list_buckets()

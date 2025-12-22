@@ -49,6 +49,11 @@ export default function StoragePage() {
     const [objectToDelete, setObjectToDelete] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Bucket creation state
+    const [isCreatingBucket, setIsCreatingBucket] = useState(false);
+    const [newBucketName, setNewBucketName] = useState("");
+    const [creatingBucket, setCreatingBucket] = useState(false);
+
     const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
     useEffect(() => {
@@ -169,6 +174,36 @@ export default function StoragePage() {
         }
     };
 
+    const handleCreateBucket = async () => {
+        if (!newBucketName.trim()) return;
+        setCreatingBucket(true);
+        try {
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name: newBucketName })
+            });
+
+            if (resp.ok) {
+                toast.success("Bucket created successfully");
+                setNewBucketName("");
+                setIsCreatingBucket(false);
+                fetchBuckets();
+            } else {
+                const data = await resp.json();
+                toast.error(data.detail || "Failed to create bucket");
+            }
+        } catch (err) {
+            toast.error("Network error");
+        } finally {
+            setCreatingBucket(false);
+        }
+    };
+
     const formatSize = (bytes: number) => {
         if (bytes === 0) return '0 B';
         const k = 1024;
@@ -207,7 +242,11 @@ export default function StoragePage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" className="gap-2 border-border/40 rounded-xl h-10">
+                    <Button
+                        variant="outline"
+                        className="gap-2 border-border/40 rounded-xl h-10"
+                        onClick={() => setIsCreatingBucket(true)}
+                    >
                         <FolderPlus size={18} />
                         New Bucket
                     </Button>
@@ -386,6 +425,41 @@ export default function StoragePage() {
                     </div>
                 </div>
             </div>
+            {/* Create Bucket Modal */}
+            <Modal open={isCreatingBucket} onOpenChange={(open) => !open && setIsCreatingBucket(false)}>
+                <ModalContent className="max-w-md bg-card border-border/40 shadow-2xl glass rounded-2xl p-6">
+                    <ModalHeader className="mb-4">
+                        <ModalTitle className="text-xl font-bold">New Storage Bucket</ModalTitle>
+                    </ModalHeader>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Bucket Name</label>
+                            <Input
+                                placeholder="e.g. avatars, images, backups"
+                                value={newBucketName}
+                                onChange={(e) => setNewBucketName(e.target.value)}
+                                className="bg-background/50"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Only alphanumeric characters and hyphens allowed.
+                            </p>
+                        </div>
+                        <ModalFooter className="flex items-center justify-end gap-3 mt-8">
+                            <Button variant="ghost" onClick={() => setIsCreatingBucket(false)} disabled={creatingBucket} className="rounded-xl">
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleCreateBucket}
+                                disabled={creatingBucket || !newBucketName.trim()}
+                                className="primary-gradient px-6 rounded-xl shadow-lg"
+                            >
+                                {creatingBucket ? "Creating..." : "Create Bucket"}
+                            </Button>
+                        </ModalFooter>
+                    </div>
+                </ModalContent>
+            </Modal>
+
             {/* Delete Confirmation Modal */}
             <Modal open={!!objectToDelete} onOpenChange={(open) => !open && setObjectToDelete(null)}>
                 <ModalContent className="max-w-md bg-card border-border/40 shadow-2xl glass rounded-2xl p-6">

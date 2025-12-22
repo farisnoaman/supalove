@@ -32,6 +32,7 @@ from models.resource_quota import ResourceQuota
 from models.project_user import ProjectUser # Import new model
 from models.subscription import Subscription
 from models.invoice import Invoice
+from models.usage_record import UsageRecord
 
 Base.metadata.create_all(bind=engine)
 

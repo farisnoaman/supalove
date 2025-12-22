@@ -94,6 +94,25 @@ def get_subscription(
         "current_period_end": sub.current_period_end if sub else None
     }
 
+@router.get("/orgs/{org_id}/usage")
+def get_usage(
+    org_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    member = db.query(OrgMember).filter(
+        OrgMember.org_id == org_id,
+        OrgMember.user_id == current_user.id
+    ).first()
+    
+    if not member:
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    from services.usage_service import UsageService
+    usage_service = UsageService(db)
+    
+    return usage_service.get_usage_summary(org_id)
+
 @router.post("/webhook")
 async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     payload = await request.body()

@@ -1,6 +1,6 @@
 import io
 from fastapi import APIRouter, HTTPException, File, UploadFile, Depends
-from services.storage_service import StorageService
+from pydantic import BaseModel
 from services.storage_service import StorageService
 from api.v1.utils import verify_project_access
 from api.v1.deps import get_db, get_current_user
@@ -10,7 +10,6 @@ from models.user import User
 router = APIRouter()
 storage_service = StorageService()
 
-@router.get("/{project_id}/storage/buckets")
 @router.get("/{project_id}/storage/buckets")
 def list_storage_buckets(
     project_id: str,
@@ -23,7 +22,25 @@ def list_storage_buckets(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{project_id}/storage/buckets/{bucket_name}/objects")
+class CreateBucketRequest(BaseModel):
+    name: str
+
+@router.post("/{project_id}/storage/buckets")
+def create_storage_bucket(
+    project_id: str,
+    body: CreateBucketRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    verify_project_access(project_id, db, current_user)
+    try:
+        bucket_name = storage_service.create_new_bucket(project_id, body.name)
+        return {"name": bucket_name}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/{project_id}/storage/buckets/{bucket_name}/objects")
 def list_storage_objects(
     project_id: str, 
@@ -38,7 +55,6 @@ def list_storage_objects(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/{project_id}/storage/buckets/{bucket_name}/objects")
 @router.post("/{project_id}/storage/buckets/{bucket_name}/objects")
 async def upload_storage_object(
     project_id: str, 
@@ -62,7 +78,6 @@ async def upload_storage_object(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.delete("/{project_id}/storage/buckets/{bucket_name}/objects/{object_name:path}")
 @router.delete("/{project_id}/storage/buckets/{bucket_name}/objects/{object_name:path}")
 def delete_storage_object(
     project_id: str, 

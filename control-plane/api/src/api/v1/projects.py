@@ -84,13 +84,11 @@ def create(
         target_org_id = member_record.org_id
 
     # Check quotas
-    quota = db.query(ResourceQuota).filter(ResourceQuota.org_id == target_org_id).first()
-    # Default quotas if not defined: 3 projects
-    max_projects = quota.max_projects if quota else 3
+    from services.usage_service import UsageService
+    usage_service = UsageService(db)
     
-    current_count = db.query(Project).filter(Project.org_id == target_org_id).count()
-    if current_count >= max_projects:
-        raise HTTPException(status_code=400, detail=f"Project quota reached ({max_projects})")
+    if not usage_service.check_limit(target_org_id, "projects"):
+        raise HTTPException(status_code=402, detail="Project limit reached. Please upgrade your plan.")
 
     custom_domain = project.custom_domain if project else None
     name = project.name if project else None
