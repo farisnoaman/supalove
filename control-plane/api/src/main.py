@@ -17,6 +17,7 @@ from api.v1.functions import router as functions_router
 from api.v1.secrets import router as secrets_router
 from api.v1.logs import router as logs_router
 from api.v1.orgs import router as orgs_router
+from api.v1.billing import router as billing_router
 
 from core.database import Base, engine
 
@@ -29,8 +30,16 @@ from models.organization import Organization
 from models.org_member import OrgMember
 from models.resource_quota import ResourceQuota
 from models.project_user import ProjectUser # Import new model
+from models.subscription import Subscription
+from models.invoice import Invoice
 
 Base.metadata.create_all(bind=engine)
+
+# ... (omitted)
+
+app.include_router(users_router, prefix=f"{api_v1_prefix}/users", tags=["Users"])
+app.include_router(orgs_router, prefix=f"{api_v1_prefix}/orgs", tags=["Organizations"])
+app.include_router(billing_router, prefix=f"{api_v1_prefix}/billing", tags=["Billing"])
 
 from contextlib import asynccontextmanager
 from services.scheduler_service import SchedulerService
@@ -95,3 +104,77 @@ from api.v1.users import router as users_router
 
 app.include_router(users_router, prefix=f"{api_v1_prefix}/users", tags=["Users"])
 app.include_router(orgs_router, prefix=f"{api_v1_prefix}/orgs", tags=["Organizations"])
+
+# ============================================
+# PROMETHEUS METRICS
+# ============================================
+from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from fastapi import Response
+from core.database import SessionLocal
+
+# Custom metrics
+http_requests_total = Counter(
+    'http_requests_total', 
+    'Total HTTP requests',
+    ['method', 'endpoint', 'status']
+)
+
+http_request_duration_seconds = Histogram(
+    'http_request_duration_seconds',
+    'HTTP request duration in seconds',
+    ['method', 'endpoint']
+)
+
+supalove_projects_total = Gauge(
+    'supalove_projects_total',
+    'Total number of projects'
+)
+
+supalove_users_total = Gauge(
+    'supalove_users_total', 
+    'Total number of platform users'
+)
+
+@app.get("/metrics")
+def metrics():
+    """Prometheus metrics endpoint."""
+    # Update gauges with current counts
+    try:
+        from sqlalchemy.orm import Session
+        from core.database import SessionLocal
+        db = SessionLocal()
+        
+        project_count = db.query(Project).count()
+        user_count = db.query(User).count()
+        
+        supalove_projects_total.set(project_count)
+        supalove_users_total.set(user_count)
+        
+        db.close()
+    except Exception as e:
+        print(f"Metrics update error: {e}")
+    
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST
+    )
+
+# Middleware to track requests
+import time
+
+@app.middleware("http")
+async def track_requests(request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+    
+    # Track metrics
+    endpoint = request.url.path
+    method = request.method
+    status = response.status_code
+    
+    http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
+    http_request_duration_seconds.labels(method=method, endpoint=endpoint).observe(duration)
+    
+    return response
+

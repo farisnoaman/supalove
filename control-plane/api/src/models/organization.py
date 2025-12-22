@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, DateTime, Integer
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from core.database import Base
 import uuid
@@ -12,3 +13,6 @@ class Organization(Base):
     billing_email = Column(String, nullable=True)
     plan = Column(String, default="free")
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    subscription = relationship("Subscription", uselist=False, back_populates="organization")

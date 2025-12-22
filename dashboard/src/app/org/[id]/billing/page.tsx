@@ -1,0 +1,241 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import {
+    CreditCard, Check, Zap, Shield, Crown,
+    Loader2, AlertCircle, ExternalLink
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast, Toaster } from "sonner";
+import { cn } from "@/lib/utils";
+
+interface Subscription {
+    status: string;
+    plan: string;
+    current_period_end: string | null;
+}
+
+export default function BillingPage() {
+    const params = useParams();
+    const orgId = params.id as string;
+
+    const [sub, setSub] = useState<Subscription | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+    useEffect(() => {
+        fetchSubscription();
+    }, [orgId]);
+
+    const fetchSubscription = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/billing/orgs/${orgId}/subscription`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (resp.ok) {
+                setSub(await resp.json());
+            }
+        } catch (err) {
+            console.error("Failed to fetch subscription", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpgrade = async (planId: string) => {
+        setProcessing(true);
+        try {
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/billing/orgs/${orgId}/checkout`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    plan_id: planId,
+                    return_url: window.location.href
+                })
+            });
+
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.mock) {
+                    toast.success("Mock checkout successful! (Dev Mode)");
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    window.location.href = data.url;
+                }
+            } else {
+                toast.error("Failed to start checkout");
+            }
+        } catch (err) {
+            toast.error("Network error");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const manageSubscription = async () => {
+        setProcessing(true);
+        try {
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/billing/orgs/${orgId}/portal`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    return_url: window.location.href
+                })
+            });
+
+            if (resp.ok) {
+                const data = await resp.json();
+                window.location.href = data.url;
+            } else {
+                toast.error("Failed to open billing portal");
+            }
+        } catch (err) {
+            toast.error("Network error");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="animate-spin" size={32} />
+            </div>
+        );
+    }
+
+    const isPro = sub?.status === "active" || sub?.plan === "pro";
+
+    return (
+        <div className="space-y-8 p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <Toaster richColors position="top-right" />
+
+            <div>
+                <h1 className="text-3xl font-bold flex items-center gap-3">
+                    Billing & Plans
+                    {isPro && (
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 border-0">
+                            PRO
+                        </Badge>
+                    )}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                    Manage your organization's subscription and billing details
+                </p>
+            </div>
+
+            {/* Current Plan Status */}
+            <div className="p-6 bg-card border border-border/40 rounded-2xl flex items-center justify-between">
+                <div>
+                    <h3 className="font-bold text-lg">Current Subscription</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        You are currently on the <span className="font-bold text-foreground">{isPro ? "Pro" : "Free"}</span> plan.
+                    </p>
+                    {sub?.current_period_end && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                            Renews on {new Date(sub.current_period_end).toLocaleDateString()}
+                        </p>
+                    )}
+                </div>
+                {isPro && (
+                    <Button onClick={manageSubscription} disabled={processing} variant="outline">
+                        {processing ? <Loader2 className="animate-spin mr-2" size={16} /> : <CreditCard className="mr-2" size={16} />}
+                        Manage Billing
+                    </Button>
+                )}
+            </div>
+
+            {/* Plans Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
+                {/* Free Plan */}
+                <Card className={cn("relative border-2", !isPro ? "border-primary" : "border-border/40")}>
+                    {!isPro && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold">
+                            Current Plan
+                        </div>
+                    )}
+                    <CardHeader>
+                        <CardTitle className="text-2xl">Free</CardTitle>
+                        <CardDescription>Perfect for hobby projects</CardDescription>
+                        <div className="mt-4">
+                            <span className="text-4xl font-bold">$0</span>
+                            <span className="text-muted-foreground">/month</span>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <ul className="space-y-2 text-sm">
+                            <li className="flex items-center gap-2"><Check size={16} className="text-green-500" /> 2 Projects</li>
+                            <li className="flex items-center gap-2"><Check size={16} className="text-green-500" /> 500MB Database</li>
+                            <li className="flex items-center gap-2"><Check size={16} className="text-green-500" /> 1GB Bandwidth</li>
+                            <li className="flex items-center gap-2"><Check size={16} className="text-green-500" /> Community Support</li>
+                        </ul>
+                    </CardContent>
+                    <CardFooter>
+                        <Button className="w-full" variant="outline" disabled>
+                            {isPro ? "Downgrade" : "Current Plan"}
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                {/* Pro Plan */}
+                <Card className={cn("relative border-2", isPro ? "border-purple-500" : "border-border/40")}>
+                    {isPro && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                            Current Plan
+                        </div>
+                    )}
+                    <CardHeader>
+                        <CardTitle className="text-2xl flex items-center justify-between">
+                            Pro
+                            <Crown size={24} className="text-purple-500" />
+                        </CardTitle>
+                        <CardDescription>Power for scaling apps</CardDescription>
+                        <div className="mt-4">
+                            <span className="text-4xl font-bold">$25</span>
+                            <span className="text-muted-foreground">/month</span>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <ul className="space-y-2 text-sm">
+                            <li className="flex items-center gap-2"><Check size={16} className="text-purple-500" /> Unlimited Projects</li>
+                            <li className="flex items-center gap-2"><Check size={16} className="text-purple-500" /> 8GB Database</li>
+                            <li className="flex items-center gap-2"><Check size={16} className="text-purple-500" /> 50GB Bandwidth</li>
+                            <li className="flex items-center gap-2"><Check size={16} className="text-purple-500" /> Priority Support</li>
+                            <li className="flex items-center gap-2"><Check size={16} className="text-purple-500" /> Daily Backups</li>
+                        </ul>
+                    </CardContent>
+                    <CardFooter>
+                        {isPro ? (
+                            <Button className="w-full bg-purple-500/10 text-purple-600 hover:bg-purple-500/20" variant="ghost" disabled>
+                                Active Plan
+                            </Button>
+                        ) : (
+                            <Button
+                                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 transition-opacity"
+                                onClick={() => handleUpgrade("price_pro_monthly")}
+                                disabled={processing}
+                            >
+                                {processing ? <Loader2 className="animate-spin mr-2" size={16} /> : <Zap className="mr-2" size={16} />}
+                                Upgrade to Pro
+                            </Button>
+                        )}
+                    </CardFooter>
+                </Card>
+            </div>
+        </div>
+    );
+}

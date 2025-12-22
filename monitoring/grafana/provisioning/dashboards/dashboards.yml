@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'Supalove Dashboards'
+    orgId: 1
+    folder: 'Supalove'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

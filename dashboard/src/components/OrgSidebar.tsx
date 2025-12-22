@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutGrid, Users, Settings, Plus, Menu, X } from "lucide-react";
+import { LayoutGrid, Users, Settings, Plus, Menu, X, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OrgSwitcher } from "@/components/OrgSwitcher";
 import { useOrg } from "@/components/providers/org-provider";
@@ -29,10 +29,16 @@ export function OrgSidebar() {
             isActive: (path: string) => path.includes("/team"),
         },
         {
+            label: "Billing",
+            icon: CreditCard,
+            href: `/org/${currentOrg.id}/billing`,
+            isActive: (path: string) => path.includes("/billing"),
+        },
+        {
             label: "Settings",
             icon: Settings,
             href: `/org/${currentOrg.id}/settings`,
-            isActive: (path: string) => path.includes("/settings") && !path.includes("/team") && !path.includes("/projects"),
+            isActive: (path: string) => path.includes("/settings") && !path.includes("/team") && !path.includes("/projects") && !path.includes("/billing"),
         },
     ];
 
