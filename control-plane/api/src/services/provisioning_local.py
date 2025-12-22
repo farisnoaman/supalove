@@ -84,10 +84,10 @@ class LocalProvisioner(Provisioner):
             raise Exception("Docker compose startup timed out")
         except Exception as e:
             # Clean up on failure
-            try:
-                subprocess.run(["docker", "compose", "down"], cwd=project_dir, capture_output=True)
-            except:
-                pass
+            # try:
+            #     subprocess.run(["docker", "compose", "down"], cwd=project_dir, capture_output=True)
+            # except:
+            #     pass
             raise e
 
         return {

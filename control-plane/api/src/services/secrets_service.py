@@ -66,6 +66,7 @@ def generate_project_secrets(db: Session, project_id: str) -> dict:
     storage_port = find_free_port(realtime_port + 1)
     auth_port = find_free_port(storage_port + 1)
     functions_port = find_free_port(auth_port + 1)
+    gateway_port = find_free_port(functions_port + 1)
     
     # Generate Supabase-compatible JWT keys
     def generate_supabase_key(role: str, secret: str) -> str:
@@ -90,6 +91,7 @@ def generate_project_secrets(db: Session, project_id: str) -> dict:
         "STORAGE_PORT": str(storage_port),
         "AUTH_PORT": str(auth_port),
         "FUNCTIONS_PORT": str(functions_port),
+        "GATEWAY_PORT": str(gateway_port),
         "ANON_KEY": anon_key,
         "SERVICE_ROLE_KEY": service_role_key,
         "POSTGRES_DB": "postgres",

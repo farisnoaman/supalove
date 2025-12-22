@@ -59,7 +59,7 @@ services:
     container_name: supalove_prometheus
     restart: unless-stopped
     ports:
-      - "9090:9090"
+      - "9990:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus

@@ -162,6 +162,7 @@ def get_project_config(
     from models.project_secret import ProjectSecret
     secrets = db.query(ProjectSecret).filter(ProjectSecret.project_id == project_id).all()
     secrets_map = {s.key: s.value for s in secrets}
+    print(f"DEBUG: Project {project_id} secrets: {list(secrets_map.keys())}")
     
     if not secrets_map:
          raise HTTPException(status_code=404, detail="Project configuration not found")
@@ -197,21 +198,35 @@ def get_project_config(
     realtime_port = secrets_map.get("REALTIME_PORT", "4000")
     storage_port = secrets_map.get("STORAGE_PORT", "5000")
     functions_port = secrets_map.get("FUNCTIONS_PORT", "8000")
+    gateway_port = secrets_map.get("GATEWAY_PORT")
     
-    # Use stored keys if available, otherwise generate on the fly
-    anon_key = secrets_map.get("ANON_KEY") or generate_token("anon", jwt_secret)
-    service_role_key = secrets_map.get("SERVICE_ROLE_KEY") or generate_token("service_role", jwt_secret)
-    
+    if gateway_port:
+        base_url = f"http://localhost:{gateway_port}"
+        api_url = f"{base_url}/rest/v1"
+        auth_url = f"{base_url}/auth/v1"
+        realtime_url = f"ws://localhost:{gateway_port}/realtime/v1"
+        storage_url = f"{base_url}/storage/v1"
+        functions_url = f"{base_url}/functions/v1"
+    else:
+        # Fallback for old projects without gateway
+        api_url = f"http://localhost:{rest_port}"
+        auth_url = f"http://localhost:{auth_port}"
+        realtime_url = f"ws://localhost:{realtime_port}"
+        storage_url = f"http://localhost:{storage_port}"
+        functions_url = f"http://localhost:{functions_port}"
+
     # Masked DB URL for display
     db_url = f"postgresql://postgres:[YOUR-PASSWORD]@localhost:{db_port}/postgres"
-    
+
     return {
         # API URLs
-        "api_url": f"http://localhost:{rest_port}",
-        "auth_url": f"http://localhost:{auth_port}",
-        "realtime_url": f"ws://localhost:{realtime_port}",
-        "storage_url": f"http://localhost:{storage_port}",
-        "functions_url": f"http://localhost:{functions_port}",
+        "api_url": base_url if gateway_port else api_url, # For Supabase Client, this is the main URL
+        # Specific service endpoints (useful for debugging or internal routing if needed)
+        "rest_url": api_url,
+        "auth_url": auth_url,
+        "realtime_url": realtime_url,
+        "storage_url": storage_url,
+        "functions_url": functions_url,
         # Database
         "db_url": db_url,
         "db_host": "localhost",

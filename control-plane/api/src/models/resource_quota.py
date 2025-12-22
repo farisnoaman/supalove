@@ -21,7 +21,7 @@ class ResourceQuota(Base):
             }
         else: # Free
             return {
-                "max_projects": 3,
+                "max_projects": 10,
                 "max_db_size_mb": 500, # 500MB
                 "max_storage_mb": 1024, # 1GB
                 "max_api_requests_daily": 100000

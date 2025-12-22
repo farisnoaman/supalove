@@ -1,0 +1,16 @@
+{
+    "api_url": "http://localhost:5522",
+    "rest_url": "http://localhost:5522/rest/v1",
+    "auth_url": "http://localhost:5522/auth/v1",
+    "realtime_url": "ws://localhost:5522/realtime/v1",
+    "storage_url": "http://localhost:5522/storage/v1",
+    "functions_url": "http://localhost:5522/functions/v1",
+    "db_url": "postgresql://postgres:57eeea5afd48d2b5c2fa24f0298a53d5@localhost:5516/postgres",
+    "db_host": "localhost",
+    "db_port": "5516",
+    "db_user": "postgres",
+    "db_pass": "57eeea5afd48d2b5c2fa24f0298a53d5",
+    "anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFsb3ZlIiwiaWF0IjoxNzY2NDMyMDgwLCJleHAiOjIwODE3OTIwODB9.okGYeaamKpxlDcKJfTZzQotS03T0FXR6ed6T8bdoOE0",
+    "service_role_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWxvdmUiLCJpYXQiOjE3NjY0MzIwODAsImV4cCI6MjA4MTc5MjA4MH0.lVHIppF4BjrrStb1Bf0Tyk1YIIo_k7ZrdpmhvPVz3Ts",
+    "jwt_secret": "EJiUyuK8YV-nKLB373sSX_UCCaUU3Wo6p_syvt92Ng0"
+}

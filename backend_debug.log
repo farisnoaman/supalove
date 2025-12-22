@@ -1,0 +1,221 @@
+🚀 Starting Infrastructure (PostgreSQL, MinIO, Keycloak)...
+time="2025-12-22T21:56:46+03:00" level=warning msg="/home/faris/Documents/MyApps/supalove/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container supalove-control-plane-db-1 Running 
+ Container supalove-keycloak-1 Running 
+ Container supalove-minio-1 Running 
+⏳ Waiting for infrastructure to warm up...
+🐍 Starting Backend in Virtual Environment...
+INFO:     Will watch for changes in these directories: ['/home/faris/Documents/MyApps/supalove/control-plane/api/src']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [86616] using WatchFiles
+/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+INFO:     Started server process [86620]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+[Provisioning] Using Local Docker provider
+[Scheduler] Starting background scheduler...
+INFO:     127.0.0.1:47732 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47744 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47746 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+(trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+INFO:     127.0.0.1:42050 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42052 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42066 - "GET /api/v1/orgs HTTP/1.1" 200 OK
+DEBUG: Loading usage_service from /home/faris/Documents/MyApps/supalove/control-plane/api/src/services/usage_service.py
+DEBUG: usage_service.check_limit called for projects
+Failed to start containers: time="2025-12-22T21:57:40+03:00" level=warning msg="/home/faris/Documents/MyApps/supalove/data-plane/projects/7701f060c6ef/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network project_7701f060c6ef_net Creating 
+ Network project_7701f060c6ef_net Created 
+ Volume 7701f060c6ef_storage_data Creating 
+ Volume 7701f060c6ef_storage_data Created 
+ Volume 7701f060c6ef_postgres_data Creating 
+ Volume 7701f060c6ef_postgres_data Created 
+ Container 7701f060c6ef-postgres-1 Creating 
+ Container 7701f060c6ef-postgres-1 Created 
+ Container 7701f060c6ef-api-1 Creating 
+ Container 7701f060c6ef-auth-1 Creating 
+ Container 7701f060c6ef-realtime-1 Creating 
+ Container 7701f060c6ef-api-1 Created 
+ Container 7701f060c6ef-storage-1 Creating 
+ Container 7701f060c6ef-functions-1 Creating 
+ Container 7701f060c6ef-auth-1 Created 
+ Container 7701f060c6ef-realtime-1 Created 
+ Container 7701f060c6ef-functions-1 Created 
+ Container 7701f060c6ef-storage-1 Created 
+ Container 7701f060c6ef-gateway-1 Creating 
+ Container 7701f060c6ef-gateway-1 Created 
+ Container 7701f060c6ef-postgres-1 Starting 
+ Container 7701f060c6ef-postgres-1 Started 
+ Container 7701f060c6ef-postgres-1 Waiting 
+ Container 7701f060c6ef-postgres-1 Waiting 
+ Container 7701f060c6ef-postgres-1 Waiting 
+ Container 7701f060c6ef-postgres-1 Error dependency postgres failed to start
+ Container 7701f060c6ef-postgres-1 Error dependency postgres failed to start
+ Container 7701f060c6ef-postgres-1 Error dependency postgres failed to start
+dependency failed to start: container 7701f060c6ef-postgres-1 exited (3)
+
+INFO:     127.0.0.1:42082 - "POST /api/v1/projects HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+  File "/usr/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/main.py", line 168, in track_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 118, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 104, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 428, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 316, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/to_thread.py", line 61, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2525, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/api/v1/projects.py", line 97, in create
+    return create_project(db, custom_domain=custom_domain, name=name, org_id=target_org_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 108, in create_project
+    raise e
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/project_service.py", line 87, in create_project
+    provision_output = provision_project(project_id, secrets, custom_domain=custom_domain)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_service.py", line 36, in provision_project
+    return _provider.provision(project_id, secrets, custom_domain=custom_domain)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_local.py", line 91, in provision
+    raise e
+  File "/home/faris/Documents/MyApps/supalove/control-plane/api/src/services/provisioning_local.py", line 79, in provision
+    raise Exception(f"Docker compose failed: {result.stderr}")
+Exception: Docker compose failed: time="2025-12-22T21:57:40+03:00" level=warning msg="/home/faris/Documents/MyApps/supalove/data-plane/projects/7701f060c6ef/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network project_7701f060c6ef_net Creating 
+ Network project_7701f060c6ef_net Created 
+ Volume 7701f060c6ef_storage_data Creating 
+ Volume 7701f060c6ef_storage_data Created 
+ Volume 7701f060c6ef_postgres_data Creating 
+ Volume 7701f060c6ef_postgres_data Created 
+ Container 7701f060c6ef-postgres-1 Creating 
+ Container 7701f060c6ef-postgres-1 Created 
+ Container 7701f060c6ef-api-1 Creating 
+ Container 7701f060c6ef-auth-1 Creating 
+ Container 7701f060c6ef-realtime-1 Creating 
+ Container 7701f060c6ef-api-1 Created 
+ Container 7701f060c6ef-storage-1 Creating 
+ Container 7701f060c6ef-functions-1 Creating 
+ Container 7701f060c6ef-auth-1 Created 
+ Container 7701f060c6ef-realtime-1 Created 
+ Container 7701f060c6ef-functions-1 Created 
+ Container 7701f060c6ef-storage-1 Created 
+ Container 7701f060c6ef-gateway-1 Creating 
+ Container 7701f060c6ef-gateway-1 Created 
+ Container 7701f060c6ef-postgres-1 Starting 
+ Container 7701f060c6ef-postgres-1 Started 
+ Container 7701f060c6ef-postgres-1 Waiting 
+ Container 7701f060c6ef-postgres-1 Waiting 
+ Container 7701f060c6ef-postgres-1 Waiting 
+ Container 7701f060c6ef-postgres-1 Error dependency postgres failed to start
+ Container 7701f060c6ef-postgres-1 Error dependency postgres failed to start
+ Container 7701f060c6ef-postgres-1 Error dependency postgres failed to start
+dependency failed to start: container 7701f060c6ef-postgres-1 exited (3)
+
+DEBUG: Project c0aa8fc8fd92 secrets: ['DB_PASSWORD', 'JWT_SECRET', 'SECRET_KEY_BASE', 'DB_PORT', 'REST_PORT', 'REALTIME_PORT', 'STORAGE_PORT', 'AUTH_PORT', 'FUNCTIONS_PORT', 'ANON_KEY', 'SERVICE_ROLE_KEY', 'POSTGRES_DB', 'POSTGRES_USER']
+INFO:     127.0.0.1:42094 - "GET /api/v1/projects/c0aa8fc8fd92/config HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'services/provisioning_local.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [86620]
+/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+/home/faris/Documents/MyApps/supalove/control-plane/api/.venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+INFO:     Started server process [87664]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [87664]
+INFO:     Stopping reloader process [86616]
