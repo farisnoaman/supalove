@@ -1,8 +1,12 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from services.functions_service import FunctionsService
-from api.v1.utils import validate_project_access
+from services.functions_service import FunctionsService
+from api.v1.utils import verify_project_access
+from api.v1.deps import get_db, get_current_user
+from sqlalchemy.orm import Session
+from models.user import User
 
 router = APIRouter()
 
@@ -21,9 +25,14 @@ class FunctionInvoke(BaseModel):
     headers: Optional[Dict[str, str]] = None
 
 @router.get("/{project_id}/functions")
-def list_functions(project_id: str):
+@router.get("/{project_id}/functions")
+def list_functions(
+    project_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """List all edge functions for a project"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         service = FunctionsService(project_id)
         return service.list_functions()
@@ -31,9 +40,15 @@ def list_functions(project_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{project_id}/functions")
-def create_function(project_id: str, function: FunctionCreate):
+@router.post("/{project_id}/functions")
+def create_function(
+    project_id: str,
+    function: FunctionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Deploy a new edge function"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         service = FunctionsService(project_id)
         return service.create_function(
@@ -48,9 +63,15 @@ def create_function(project_id: str, function: FunctionCreate):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/functions/{function_name}")
-def get_function(project_id: str, function_name: str):
+@router.get("/{project_id}/functions/{function_name}")
+def get_function(
+    project_id: str,
+    function_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Get function details and code"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         service = FunctionsService(project_id)
         func = service.get_function(function_name)
@@ -63,9 +84,16 @@ def get_function(project_id: str, function_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{project_id}/functions/{function_name}")
-def update_function(project_id: str, function_name: str, function: FunctionUpdate):
+@router.put("/{project_id}/functions/{function_name}")
+def update_function(
+    project_id: str,
+    function_name: str,
+    function: FunctionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Update function code"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         service = FunctionsService(project_id)
         return service.update_function(
@@ -79,9 +107,15 @@ def update_function(project_id: str, function_name: str, function: FunctionUpdat
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{project_id}/functions/{function_name}")
-def delete_function(project_id: str, function_name: str):
+@router.delete("/{project_id}/functions/{function_name}")
+def delete_function(
+    project_id: str,
+    function_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Delete an edge function"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         service = FunctionsService(project_id)
         return service.delete_function(function_name)
@@ -91,9 +125,16 @@ def delete_function(project_id: str, function_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{project_id}/functions/{function_name}/invoke")
-def invoke_function(project_id: str, function_name: str, invoke: FunctionInvoke):
+@router.post("/{project_id}/functions/{function_name}/invoke")
+def invoke_function(
+    project_id: str,
+    function_name: str,
+    invoke: FunctionInvoke,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Test invoke a function"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         service = FunctionsService(project_id)
         result = service.invoke_function(

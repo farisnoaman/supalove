@@ -20,6 +20,7 @@ import {
     X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useOrg } from "@/components/providers/org-provider";
 
 const sidebarSections = [
     {
@@ -54,6 +55,7 @@ export function ProjectSidebar() {
     const pathname = usePathname();
     const projectId = params.id as string;
     const [isOpen, setIsOpen] = useState(false);
+    const { currentOrg } = useOrg();
 
     const sidebarContent = (
         <>
@@ -72,6 +74,16 @@ export function ProjectSidebar() {
                 >
                     <X size={20} />
                 </button>
+            </div>
+
+            <div className="px-3 mb-2">
+                <Link
+                    href={`/org/${currentOrg?.id}/projects`}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-muted"
+                >
+                    <LayoutGrid size={16} />
+                    Back to Projects
+                </Link>
             </div>
 
             <nav className="flex-1 px-3 space-y-6 overflow-y-auto">
@@ -115,7 +127,7 @@ export function ProjectSidebar() {
 
             <div className="p-4 border-t border-border mt-auto">
                 <Link
-                    href="/projects"
+                    href={`/org/${currentOrg?.id}/projects`}
                     className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <LayoutGrid size={14} />

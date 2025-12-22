@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: app
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  api:
+    image: postgrest/postgrest
+    environment:
+      PGRST_DB_URI: postgresql://app:${DB_PASSWORD}@postgres:5432/app
+      PGRST_DB_ANON_ROLE: app
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${REST_PORT}:3000"
+    depends_on:
+      - postgres
+
+  functions:
+    image: denoland/deno:latest
+    user: "deno"
+    environment:
+      - PROJECT_ID=${PROJECT_ID}
+    ports:
+      - "${FUNCTIONS_PORT}:8000"
+    volumes:
+      - ./functions:/functions
+    working_dir: /functions
+    command: [ "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "--watch", "server.ts" ]
+
+volumes:
+  postgres_data:
+
+
+networks:
+  default:
+    name: project_${PROJECT_ID}_net
+    driver: bridge

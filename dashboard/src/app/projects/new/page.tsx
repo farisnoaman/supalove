@@ -18,9 +18,15 @@ export default function NewProjectPage() {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
         try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("Not authenticated");
+
             const resp = await fetch(`${API_URL}/api/v1/projects`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ name: projectId }),
             });
 

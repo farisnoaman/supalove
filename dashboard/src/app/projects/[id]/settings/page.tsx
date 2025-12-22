@@ -16,7 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/select";
+
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
 import { toast } from "sonner";
 import { Toaster } from "sonner";
@@ -35,7 +35,12 @@ export default function SettingsPage() {
 
     const fetchProject = async () => {
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (resp.ok) {
                 const data = await resp.json();
                 setProject(data);
@@ -58,8 +63,14 @@ export default function SettingsPage() {
             if (action !== 'delete') endpoint += `/${action}`;
 
             const method = action === 'delete' ? 'DELETE' : 'POST';
+            const token = localStorage.getItem("token");
 
-            const resp = await fetch(endpoint, { method });
+            const resp = await fetch(endpoint, {
+                method,
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
 
             if (resp.ok) {
                 toast.success(`Project ${action} successful`);

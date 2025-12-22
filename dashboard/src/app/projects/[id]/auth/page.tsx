@@ -57,7 +57,12 @@ export default function AuthPage() {
         setLoading(true);
         try {
             console.log(`Fetching users for project ${projectId} from ${API_URL}`);
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (!resp.ok) throw new Error("Failed to fetch users");
             const data = await resp.json();
             setUsers(Array.isArray(data) ? data : []);
@@ -73,9 +78,13 @@ export default function AuthPage() {
         e.preventDefault();
         setIsSaving(true);
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ email, password })
             });
 
@@ -100,8 +109,12 @@ export default function AuthPage() {
         setIsDeleting(true);
 
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users/${userToDelete}`, {
-                method: "DELETE"
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             });
             if (resp.ok) {
                 toast.success("User deleted");

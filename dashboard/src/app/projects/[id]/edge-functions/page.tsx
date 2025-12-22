@@ -35,7 +35,12 @@ export default function EdgeFunctionsPage() {
     const fetchFunctions = async () => {
         setLoading(true);
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/functions`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/functions`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             const data = await resp.json();
             setFunctions(Array.isArray(data) ? data : []);
         } catch (err) {
@@ -80,9 +85,13 @@ export default function EdgeFunctionsPage() {
 
             const method = editingFunction ? "PUT" : "POST";
 
+            const token = localStorage.getItem("token");
             const resp = await fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     name: functionName,
                     code: functionCode,
@@ -110,9 +119,15 @@ export default function EdgeFunctionsPage() {
 
         setDeleting(true);
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(
                 `${API_URL}/api/v1/projects/${projectId}/functions/${functionToDelete}`,
-                { method: "DELETE" }
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
             );
 
             if (resp.ok) {

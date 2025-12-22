@@ -65,7 +65,12 @@ export default function StoragePage() {
         setLoading(true);
         try {
             console.log(`Fetching buckets for project ${projectId} from ${API_URL}`);
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (!resp.ok) throw new Error("Failed to fetch buckets");
             const data = await resp.json();
             const bucketsList = Array.isArray(data) ? data : [];
@@ -86,7 +91,12 @@ export default function StoragePage() {
         setLoading(true);
         try {
             console.log(`Fetching objects for bucket ${bucketName} from ${API_URL}`);
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets/${bucketName}/objects`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets/${bucketName}/objects`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (!resp.ok) throw new Error("Failed to fetch objects");
             const data = await resp.json();
             setObjects(Array.isArray(data) ? data : []);
@@ -107,8 +117,12 @@ export default function StoragePage() {
         formData.append("file", file);
 
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets/${selectedBucket}/objects`, {
                 method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
                 body: formData,
             });
 
@@ -134,8 +148,12 @@ export default function StoragePage() {
         setIsDeleting(true);
 
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets/${selectedBucket}/objects/${encodeURIComponent(objectToDelete)}`, {
-                method: "DELETE"
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             });
             if (resp.ok) {
                 toast.success("File deleted");

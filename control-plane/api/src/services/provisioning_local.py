@@ -16,6 +16,8 @@ else:
     
 TEMPLATE_DIR_NAME = "project-template"
 
+from services.provisioning_interface import Provisioner
+
 class LocalProvisioner(Provisioner):
     """Local Docker Compose based provisioner"""
 
@@ -69,7 +71,7 @@ class LocalProvisioner(Provisioner):
                 cwd=project_dir,
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=300  # Increased from 60s to 300s to allow image pull
             )
 
             if result.returncode != 0:

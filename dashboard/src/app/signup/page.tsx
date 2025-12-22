@@ -15,11 +15,33 @@ export default function SignupPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Simulate auth delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setLoading(false);
-        toast.success("Account created! Redirecting...");
-        setTimeout(() => window.location.href = "/projects", 1000);
+
+        const full_name = (document.getElementById("name") as HTMLInputElement).value;
+        const email = (document.getElementById("email") as HTMLInputElement).value;
+        const password = (document.getElementById("password") as HTMLInputElement).value;
+
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const res = await fetch(`${API_URL}/api/v1/auth/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password, full_name }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.detail || "Signup failed");
+            }
+
+            const data = await res.json();
+            localStorage.setItem("token", data.access_token);
+            toast.success("Account created! Redirecting...");
+            setTimeout(() => window.location.href = "/projects", 1000);
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

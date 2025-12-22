@@ -45,7 +45,12 @@ export default function SecretsPage() {
 
     const fetchSecrets = async () => {
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/secrets`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/secrets`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (resp.ok) {
                 const data = await resp.json();
                 setSecrets(data);
@@ -80,9 +85,13 @@ export default function SecretsPage() {
 
         setAdding(true);
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/secrets`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ key: newKey.toUpperCase(), value: newValue }),
             });
 
@@ -107,8 +116,12 @@ export default function SecretsPage() {
         if (!confirm(`Are you sure you want to delete ${key}? This might break your application.`)) return;
 
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/secrets/${key}`, {
                 method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             });
 
             if (resp.ok) {

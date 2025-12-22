@@ -6,3 +6,6 @@ httpx
 python-keycloak
 minio
 requests
+python-dotenv
+passlib[bcrypt]
+python-jose[cryptography]

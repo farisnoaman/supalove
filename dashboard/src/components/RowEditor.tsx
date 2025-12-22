@@ -40,7 +40,12 @@ export function RowEditor({ open, onOpenChange, projectId, tableName, onSuccess 
     const fetchSchema = async () => {
         setLoading(true);
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/schema`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/schema`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (!resp.ok) throw new Error("Failed to fetch schema");
             const data = await resp.json();
             setSchema(data);
@@ -106,9 +111,13 @@ export function RowEditor({ open, onOpenChange, projectId, tableName, onSuccess 
 
         setSaving(true);
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/sql`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ sql }),
             });
             const result = await resp.json();

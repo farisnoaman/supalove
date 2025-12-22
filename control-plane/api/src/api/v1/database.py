@@ -1,8 +1,12 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
 from services.database_service import DatabaseService
-from api.v1.utils import validate_project_access
+from services.database_service import DatabaseService
+from api.v1.utils import verify_project_access
+from api.v1.deps import get_db, get_current_user
+from sqlalchemy.orm import Session
+from models.user import User
 
 router = APIRouter()
 
@@ -24,9 +28,14 @@ class PolicyUpdate(BaseModel):
     check_expression: Optional[str] = None
 
 @router.get("/{project_id}/tables")
-def list_tables(project_id: str):
+@router.get("/{project_id}/tables")
+def list_tables(
+    project_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """List all tables in the project database"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_tables()
@@ -34,9 +43,15 @@ def list_tables(project_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{project_id}/sql")
-def execute_sql(project_id: str, query: SQLQuery):
+@router.post("/{project_id}/sql")
+def execute_sql(
+    project_id: str,
+    query: SQLQuery,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Execute SQL query on project database"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         result = db_service.execute_query(query.sql)
@@ -47,9 +62,15 @@ def execute_sql(project_id: str, query: SQLQuery):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/tables/{table_name}/schema")
-def get_table_schema(project_id: str, table_name: str):
+@router.get("/{project_id}/tables/{table_name}/schema")
+def get_table_schema(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Get schema for a specific table"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_table_schema(table_name)
@@ -57,9 +78,16 @@ def get_table_schema(project_id: str, table_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/tables/{table_name}/data")
-def get_table_data(project_id: str, table_name: str, limit: int = 50):
+@router.get("/{project_id}/tables/{table_name}/data")
+def get_table_data(
+    project_id: str,
+    table_name: str,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Get sample data from a table"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_table_data(table_name, limit)
@@ -69,9 +97,15 @@ def get_table_data(project_id: str, table_name: str, limit: int = 50):
 # RLS Policy Management
 
 @router.get("/{project_id}/tables/{table_name}/policies")
-def list_rls_policies(project_id: str, table_name: str):
+@router.get("/{project_id}/tables/{table_name}/policies")
+def list_rls_policies(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """List all RLS policies for a table"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_rls_policies(table_name)
@@ -79,9 +113,16 @@ def list_rls_policies(project_id: str, table_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{project_id}/tables/{table_name}/policies")
-def create_rls_policy(project_id: str, table_name: str, policy: PolicyCreate):
+@router.post("/{project_id}/tables/{table_name}/policies")
+def create_rls_policy(
+    project_id: str,
+    table_name: str,
+    policy: PolicyCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Create a new RLS policy"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         result = db_service.create_rls_policy(
@@ -99,9 +140,16 @@ def create_rls_policy(project_id: str, table_name: str, policy: PolicyCreate):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/tables/{table_name}/policies/{policy_name}")
-def get_rls_policy(project_id: str, table_name: str, policy_name: str):
+@router.get("/{project_id}/tables/{table_name}/policies/{policy_name}")
+def get_rls_policy(
+    project_id: str,
+    table_name: str,
+    policy_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Get details of a specific RLS policy"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         policies = db_service.get_rls_policies(table_name)
@@ -115,9 +163,17 @@ def get_rls_policy(project_id: str, table_name: str, policy_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{project_id}/tables/{table_name}/policies/{policy_name}")
-def update_rls_policy(project_id: str, table_name: str, policy_name: str, policy: PolicyUpdate):
+@router.put("/{project_id}/tables/{table_name}/policies/{policy_name}")
+def update_rls_policy(
+    project_id: str,
+    table_name: str,
+    policy_name: str,
+    policy: PolicyUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Update an RLS policy"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         result = db_service.update_rls_policy(
@@ -136,9 +192,16 @@ def update_rls_policy(project_id: str, table_name: str, policy_name: str, policy
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{project_id}/tables/{table_name}/policies/{policy_name}")
-def delete_rls_policy(project_id: str, table_name: str, policy_name: str):
+@router.delete("/{project_id}/tables/{table_name}/policies/{policy_name}")
+def delete_rls_policy(
+    project_id: str,
+    table_name: str,
+    policy_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Delete an RLS policy"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         result = db_service.delete_rls_policy(table_name, policy_name)
@@ -149,9 +212,15 @@ def delete_rls_policy(project_id: str, table_name: str, policy_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{project_id}/tables/{table_name}/rls/enable")
-def enable_rls(project_id: str, table_name: str):
+@router.post("/{project_id}/tables/{table_name}/rls/enable")
+def enable_rls(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Enable RLS on a table"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         result = db_service.enable_rls(table_name)
@@ -162,9 +231,15 @@ def enable_rls(project_id: str, table_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{project_id}/tables/{table_name}/rls/disable")
-def disable_rls(project_id: str, table_name: str):
+@router.post("/{project_id}/tables/{table_name}/rls/disable")
+def disable_rls(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Disable RLS on a table"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         result = db_service.disable_rls(table_name)
@@ -177,9 +252,15 @@ def disable_rls(project_id: str, table_name: str):
 # Table Exploration
 
 @router.get("/{project_id}/tables/{table_name}/constraints")
-def get_table_constraints(project_id: str, table_name: str):
+@router.get("/{project_id}/tables/{table_name}/constraints")
+def get_table_constraints(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Get all constraints for a table"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_table_constraints(table_name)
@@ -187,9 +268,15 @@ def get_table_constraints(project_id: str, table_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/tables/{table_name}/indexes")
-def get_table_indexes(project_id: str, table_name: str):
+@router.get("/{project_id}/tables/{table_name}/indexes")
+def get_table_indexes(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Get all indexes for a table"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_table_indexes(table_name)
@@ -197,9 +284,15 @@ def get_table_indexes(project_id: str, table_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/tables/{table_name}/size")
-def get_table_size(project_id: str, table_name: str):
+@router.get("/{project_id}/tables/{table_name}/size")
+def get_table_size(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Get size information for a table"""
-    validate_project_access(project_id)
+    verify_project_access(project_id, db, current_user)
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_table_size(table_name)

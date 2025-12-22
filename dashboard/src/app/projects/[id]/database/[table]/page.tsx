@@ -77,8 +77,11 @@ export default function TableDetailPage() {
     const fetchTableData = async () => {
         setLoadingData(true);
         try {
+            const token = localStorage.getItem("token");
             // 1. Fetch Schema to find PKs
-            const schemaResp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/schema`);
+            const schemaResp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/schema`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
             const schema = await schemaResp.json();
 
             // Heuristic for PKs
@@ -89,7 +92,8 @@ export default function TableDetailPage() {
 
             // 2. Fetch Data
             const resp = await fetch(
-                `${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/data`
+                `${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/data`,
+                { headers: { "Authorization": `Bearer ${token}` } }
             );
             const result = await resp.json();
 
@@ -139,9 +143,14 @@ export default function TableDetailPage() {
     const fetchMetadata = async () => {
         setLoadingMeta(true);
         try {
+            const token = localStorage.getItem("token");
             const [constResp, idxResp] = await Promise.all([
-                fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/constraints`),
-                fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/indexes`)
+                fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/constraints`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                }),
+                fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/indexes`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                })
             ]);
 
             if (constResp.ok) setConstraints(await constResp.json());
@@ -155,10 +164,13 @@ export default function TableDetailPage() {
 
     const fetchPolicies = async () => {
         try {
+            const token = localStorage.getItem("token");
             // Check if RLS is enabled (via pg_class/pg_tables or try to fetch policies)
             // For now, we'll infer RLS status from whether we can fetch policies successfully
             // A better way would be a dedicated endpoint for table status, but let's use what we have
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/policies`);
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/policies`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
             if (resp.ok) {
                 const data = await resp.json();
                 setPolicies(data);
@@ -178,9 +190,11 @@ export default function TableDetailPage() {
 
     const toggleRLS = async (enable: boolean) => {
         try {
+            const token = localStorage.getItem("token");
             const endpoint = enable ? 'enable' : 'disable';
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/rls/${endpoint}`, {
-                method: 'POST'
+                method: 'POST',
+                headers: { "Authorization": `Bearer ${token}` }
             });
 
             if (resp.ok) {
@@ -198,8 +212,10 @@ export default function TableDetailPage() {
     const deletePolicy = async () => {
         if (!deletingPolicy) return;
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/policies/${deletingPolicy}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: { "Authorization": `Bearer ${token}` }
             });
 
             if (resp.ok) {
@@ -219,9 +235,13 @@ export default function TableDetailPage() {
     const deleteTable = async () => {
         setIsDeletingTable(true);
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/sql`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ sql: `DROP TABLE public."${tableName}" CASCADE;` }),
             });
             const result = await resp.json();
@@ -257,9 +277,13 @@ export default function TableDetailPage() {
 
             const sql = `DELETE FROM public."${tableName}" WHERE "${pk}" IN (${valuesToDelete.join(', ')});`;
 
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/sql`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ sql }),
             });
             const result = await resp.json();

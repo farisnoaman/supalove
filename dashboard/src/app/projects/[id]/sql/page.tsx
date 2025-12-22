@@ -19,9 +19,13 @@ export default function SQLPage() {
         setExecuting(true);
         setResult(null);
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/sql`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ sql }),
             });
             const res = await resp.json();

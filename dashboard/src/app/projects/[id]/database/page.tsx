@@ -34,9 +34,18 @@ export default function DatabasePage() {
     const fetchTables = async () => {
         setLoading(true);
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables`);
-            const data = await resp.json();
-            setTables(data);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                setTables(Array.isArray(data) ? data : []);
+            } else {
+                setTables([]);
+            }
         } catch (err) {
             console.error("Failed to fetch tables", err);
         } finally {
@@ -48,9 +57,13 @@ export default function DatabasePage() {
         if (!tableToDelete) return;
         setDeleting(true);
         try {
+            const token = localStorage.getItem("token");
             const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/sql`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ sql: `DROP TABLE public."${tableToDelete}" CASCADE;` }),
             });
             const result = await resp.json();

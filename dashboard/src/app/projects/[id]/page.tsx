@@ -27,7 +27,12 @@ export default function ProjectOverviewPage() {
 
         const loadProject = async () => {
             try {
-                const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}`);
+                const token = localStorage.getItem("token");
+                const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
                 if (!resp.ok) {
                     if (resp.status === 404) {
                         // Handle 404
@@ -81,7 +86,12 @@ export default function ProjectOverviewPage() {
 
     const fetchUserCount = async () => {
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/auth/users`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             const data = await resp.json();
             setUserCount(Array.isArray(data) ? data.length : 0);
         } catch (err) {
@@ -92,7 +102,12 @@ export default function ProjectOverviewPage() {
 
     const fetchBucketCount = async () => {
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/storage/buckets`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             const data = await resp.json();
             setBucketCount(Array.isArray(data) ? data.length : 0);
         } catch (err) {
@@ -103,14 +118,24 @@ export default function ProjectOverviewPage() {
 
     const fetchTables = async () => {
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             const data = await resp.json();
             // Fetch row counts for each table
             const tablesWithCounts = await Promise.all(
                 (data || []).map(async (table: any) => {
                     try {
                         const dataResp = await fetch(
-                            `${API_URL}/api/v1/projects/${projectId}/tables/${table.table_name}/data`
+                            `${API_URL}/api/v1/projects/${projectId}/tables/${table.table_name}/data`,
+                            {
+                                headers: {
+                                    "Authorization": `Bearer ${token}`
+                                }
+                            }
                         );
                         const tableData = await dataResp.json();
                         return {

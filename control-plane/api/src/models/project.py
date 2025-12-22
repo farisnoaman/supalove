@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, String, DateTime, Enum, Text
+from sqlalchemy import Column, String, DateTime, Enum, Text, ForeignKey
 from datetime import datetime
 from core.database import Base
 
@@ -17,7 +17,9 @@ class Project(Base):
 
     id = Column(String, primary_key=True, index=True)
     name = Column(String, nullable=True)
-    owner_id = Column(String, nullable=True) # For future multi-tenant support
-    status = Column(Enum(ProjectStatus), default=ProjectStatus.pending)
+    # Multi-tenancy
+    org_id = Column(String, ForeignKey("organizations.id"), nullable=True) # Nullable for migration
+    # owner_id = Column(String, nullable=True) # Deprecated in favor of org_id
+    status = Column(Enum(ProjectStatus), default=ProjectStatus.CREATING)
     last_error = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

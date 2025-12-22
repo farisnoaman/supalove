@@ -64,7 +64,12 @@ export default function LogsPage() {
 
     const fetchLogs = async () => {
         try {
-            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/logs?service=${service}&lines=500`);
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/logs?service=${service}&lines=500`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (resp.ok) {
                 const data = await resp.json();
                 setLogs(data.logs);

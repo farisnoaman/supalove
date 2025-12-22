@@ -26,7 +26,12 @@ export default function BackupsPage() {
 
     const fetchBackups = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/v1/projects/${projectId}/backups`);
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/v1/projects/${projectId}/backups`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setBackups(data);
@@ -41,8 +46,12 @@ export default function BackupsPage() {
     const createBackup = async () => {
         setCreating(true);
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/v1/projects/${projectId}/backups`, {
                 method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             });
             if (res.ok) {
                 toast.success("Backup created successfully");
