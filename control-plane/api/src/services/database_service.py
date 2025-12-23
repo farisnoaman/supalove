@@ -43,7 +43,7 @@ class DatabaseService:
             
             # Use host.docker.internal if in Docker, otherwise localhost
             # For local development, use localhost directly
-            return f"postgresql://app:{db_password}@localhost:{db_port}/app"
+            return f"postgresql://postgres:{db_password}@localhost:{db_port}/postgres"
         finally:
             db.close()
     
