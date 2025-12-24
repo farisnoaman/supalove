@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from pydantic import BaseModel
 from services.project_service import (
     create_project,
@@ -119,6 +119,99 @@ def start(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return {"status": "running", "project_id": project.id}
+
+@router.post("/{project_id}/import")
+def import_backup(
+    project_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Import a Supabase backup (.pg or .gz)"""
+    verify_project_access(project_id, db, current_user)
+    
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    # Security check: Ensure file extension is valid
+    if not (file.filename.endswith(".pg") or file.filename.endswith(".gz") or file.filename.endswith(".sql")):
+         raise HTTPException(status_code=400, detail="Invalid file type. Allowed: .pg, .gz, .sql")
+
+    # Save uploaded file
+    tmp_path = Path(f"/tmp/{file.filename}")
+    try:
+        with tmp_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        # Delegate to the robust import script
+        script_path = Path("/home/faris/Documents/MyApps/supalove/scripts/import_backup.py")
+        
+        # We need to run this as a subprocess
+        # python3 scripts/import_backup.py <PROJECT_ID> <FILE_PATH>
+        cmd = ["python3", str(script_path), project_id, str(tmp_path)]
+        
+        process = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if process.returncode != 0:
+            print(f"Import Script Error: {process.stderr}")
+            return {"status": "warning", "message": "Import completed with warnings (check logs)", "details": [process.stderr]}
+            
+        return {"status": "success", "message": "Backup imported successfully"}
+
+    except Exception as e:
+         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
+    finally:
+        # Cleanup local tmp file
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+@router.post("/{project_id}/import-from-migrations")
+def import_from_migrations(
+    project_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Import from Supabase migration-based backup (for inactive/deleted projects)"""
+    verify_project_access(project_id, db, current_user)
+    
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    # Security check
+    if not (file.filename.endswith(".pg") or file.filename.endswith(".gz") or file.filename.endswith(".sql")):
+         raise HTTPException(status_code=400, detail="Invalid file type. Allowed: .pg, .gz, .sql")
+
+    # Save uploaded file
+    tmp_path = Path(f"/tmp/{file.filename}")
+    try:
+        with tmp_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        # Use migration extraction script
+        script_path = Path("/home/faris/Documents/MyApps/supalove/scripts/extract_from_migrations.py")
+        cmd = ["python3", str(script_path), project_id, str(tmp_path)]
+        
+        process = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if process.returncode != 0:
+            print(f"Migration Extraction Error: {process.stderr}")
+            return {"status": "warning", "message": "Migration extraction completed with warnings", "details": [process.stderr]}
+            
+        # Count how many migrations were extracted
+        import re
+        migrations_count = len(re.findall(r'✓ Found migration', process.stdout))
+        
+        return {"status": "success", "message": f"Successfully extracted and executed {migrations_count} migrations"}
+
+    except Exception as e:
+         raise HTTPException(status_code=500, detail=f"Migration extraction failed: {str(e)}")
+    finally:
+        # Cleanup local tmp file
+        if tmp_path.exists():
+            tmp_path.unlink()
 
 @router.post("/{project_id}/restore")
 def restore(

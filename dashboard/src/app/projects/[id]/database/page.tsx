@@ -12,6 +12,7 @@ import { TableDesigner } from "@/components/TableDesigner";
 import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
+import { ImportProject } from "@/components/ImportProject";
 
 export default function DatabasePage() {
     const params = useParams();
@@ -249,6 +250,12 @@ export default function DatabasePage() {
                     </div>
                 </ModalContent>
             </Modal>
+
+            {/* Import Project */}
+            <div className="pt-8 border-t border-border/40">
+                <h3 className="text-lg font-semibold mb-4">Database Tools</h3>
+                <ImportProject projectId={projectId} />
+            </div>
 
             {/* Toast Notifications */}
             <Toaster position="top-right" />

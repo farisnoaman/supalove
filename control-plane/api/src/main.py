@@ -42,14 +42,52 @@ Base.metadata.create_all(bind=engine)
 
 from contextlib import asynccontextmanager
 from services.scheduler_service import SchedulerService
+from services.provisioning_service import start_project as provision_start
+from models.project import ProjectStatus
+import logging
+
+logger = logging.getLogger(__name__)
+
+def startup_projects():
+    """Start all projects that were in RUNNING state on backend boot."""
+    db = SessionLocal()
+    try:
+        running_projects = db.query(Project).filter(
+            Project.status == ProjectStatus.RUNNING
+        ).all()
+        
+        if not running_projects:
+            logger.info("No running projects found to start")
+            return
+        
+        logger.info(f"🚀 Starting {len(running_projects)} project(s)...")
+        for project in running_projects:
+            try:
+                logger.info(f"  ▶️  Starting project: {project.name} ({project.id})")
+                provision_start(project.id)
+            except Exception as e:
+                logger.error(f"  ❌ Failed to start project {project.id}: {e}")
+        
+        logger.info("✅ Project startup complete")
+    except Exception as e:
+        logger.error(f"Error during project startup: {e}")
+    finally:
+        db.close()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
+    logger.info("🏁 Backend starting up...")
     scheduler = SchedulerService()
     scheduler.start()
+    
+    # Auto-start running projects
+    startup_projects()
+    
+    logger.info("✨ Backend ready!")
     yield
     # Shutdown
+    logger.info("🛑 Backend shutting down...")
     scheduler.stop()
 
 app = FastAPI(title="Supabase Cloud Clone", lifespan=lifespan)

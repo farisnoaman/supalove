@@ -23,27 +23,22 @@ class DatabaseService:
             if not project:
                 raise ValueError(f"Project {self.project_id} does not exist in control plane.")
 
-            # Get DB_PASSWORD
-            password_secret = db.query(ProjectSecret).filter(
-                ProjectSecret.project_id == self.project_id,
-                ProjectSecret.key == "DB_PASSWORD"
-            ).first()
+            # Get secrets
+            secrets = db.query(ProjectSecret).filter(
+                ProjectSecret.project_id == self.project_id
+            ).all()
+            secrets_map = {s.key: s.value for s in secrets}
             
-            if not password_secret:
+            db_password = secrets_map.get("DB_PASSWORD")
+            if not db_password:
                 raise ValueError(f"Database credentials not found for project {self.project_id}")
             
-            # Get DB_PORT
-            port_secret = db.query(ProjectSecret).filter(
-                ProjectSecret.project_id == self.project_id,
-                ProjectSecret.key == "DB_PORT"
-            ).first()
+            db_port = secrets_map.get("DB_PORT", "5432")
+            db_user = secrets_map.get("POSTGRES_USER", "postgres")
+            db_name = secrets_map.get("POSTGRES_DB", "postgres")
             
-            db_port = port_secret.value if port_secret else "5432"
-            db_password = password_secret.value
-            
-            # Use host.docker.internal if in Docker, otherwise localhost
-            # For local development, use localhost directly
-            return f"postgresql://postgres:{db_password}@localhost:{db_port}/postgres"
+            # Use localhost for local development
+            return f"postgresql://{db_user}:{db_password}@localhost:{db_port}/{db_name}"
         finally:
             db.close()
     
