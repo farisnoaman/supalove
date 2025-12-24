@@ -12,6 +12,11 @@ services:
       - "5433:5432"
     volumes:
       - control_plane_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
 
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
@@ -27,6 +32,11 @@ services:
       - "8080:8080"
     depends_on:
       - control-plane-db
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
 
   minio:
     image: minio/minio:latest
@@ -39,6 +49,11 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   dashboard:
     build:
@@ -49,6 +64,11 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - control-plane-db
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   # ============================================
   # OBSERVABILITY STACK
@@ -69,6 +89,11 @@ services:
       - '--web.enable-lifecycle'
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   grafana:
     image: grafana/grafana:latest
@@ -87,6 +112,11 @@ services:
     depends_on:
       - prometheus
       - loki
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   loki:
     image: grafana/loki:latest
@@ -98,6 +128,11 @@ services:
       - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
 volumes:
   control_plane_data:
