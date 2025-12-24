@@ -1,9 +1,0 @@
-#!/bin/bash
-set -e
-
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-    CREATE USER supabase_admin WITH CREATEROLE CREATEDB REPLICATION BYPASSRLS PASSWORD '$POSTGRES_PASSWORD';
-    
-    CREATE SCHEMA IF NOT EXISTS _realtime;
-    ALTER SCHEMA _realtime OWNER TO supabase_admin;
-EOSQL

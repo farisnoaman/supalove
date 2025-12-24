@@ -57,7 +57,7 @@ services:
 
   dashboard:
     build:
-      context: ./control-plane/dashboard
+      context: ./dashboard
     ports:
       - "3000:3000"
     environment:
