@@ -92,7 +92,7 @@ def create_project(db: Session, custom_domain: str = None, name: str = None, org
         db.refresh(project)
 
         return {
-            "project_id": project_id,
+            "id": project_id,
             "status": project.status,
             "api_url": provision_output["api_url"],
             "db_url": provision_output["db_url"],

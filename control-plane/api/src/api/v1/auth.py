@@ -39,7 +39,7 @@ class UserResponse(BaseModel):
     full_name: Optional[str] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 @router.post("/register", response_model=Token)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):

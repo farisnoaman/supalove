@@ -23,7 +23,7 @@ class OrgResponse(BaseModel):
     role: str = None # User's role in this org
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MemberAdd(BaseModel):
     email: str

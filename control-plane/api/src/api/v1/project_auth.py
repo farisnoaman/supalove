@@ -39,7 +39,7 @@ class ProjectUserResponse(BaseModel):
     createdTimestamp: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @router.get("", response_model=List[ProjectUserResponse])

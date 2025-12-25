@@ -1,5 +1,4 @@
 # Root docker-compose
-version: "3.9"
 
 services:
   control-plane-db:

@@ -23,7 +23,7 @@ class UserProfile(BaseModel):
     preferences: Optional[dict]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 @router.get("/me", response_model=UserProfile)
 def get_me(
