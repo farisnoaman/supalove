@@ -3,7 +3,13 @@ import sys
 import os
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
+# In Docker: /app/src/main.py -> parents[1] = /app
+# Locally: .../supalove/control-plane/api/src/main.py -> parents[3] = .../supalove
+# We try parents[3] first (local), fallback to parents[1] (Docker)
+try:
+    ROOT = Path(__file__).resolve().parents[3]
+except IndexError:
+    ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
 from fastapi import FastAPI
