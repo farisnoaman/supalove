@@ -1,0 +1,100 @@
+# Docker Compose for Coolify Deployment
+# This file is intended for deployment on Coolify or similar VPS environments.
+# It exposes only the Dashboard port (3000) by default. API and other services run internally.
+
+services:
+  # ============================================
+  # CONTROL PLANE (Back-office)
+  # ============================================
+
+  control-plane-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-platform}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-platform}
+      POSTGRES_DB: ${POSTGRES_DB:-control_plane}
+    volumes:
+      - control_plane_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U platform -d control_plane" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./control-plane/api
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-platform}:${POSTGRES_PASSWORD:-platform}@control-plane-db:5432/${POSTGRES_DB:-control_plane}
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_ADMIN_USER=${KEYCLOAK_ADMIN_USER:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      - MINIO_URL=http://minio:9000
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - NEXT_PUBLIC_API_URL=${URL:-http://localhost:8000} # Coolify injects URL
+    depends_on:
+      control-plane-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      minio:
+        condition: service_started
+
+  dashboard:
+    build:
+      context: ./dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${URL:-http://localhost:3000}/api/v1 # Assuming unified proxy or direct access
+      # On Coolify, we might usually put Nginx in front, or expose API separately.
+      # For simplicity in V1: Dashboard talks to API container internally for SSR, 
+      # but Client-side fetch needs public URL.
+      # If deploying as single stack, Dashboard is the entrypoint. 
+      # complex setup might need Nginx reverse proxy. 
+      # For now, let's assume API is accessible via internal network for SSR 
+      # and we might need to expose API on a different port or path if client hits it directly.
+      # WAITING: For this iteration, we assume the user might expose API service in Coolify UI 
+      # or use the Dashboard as the main entry. 
+      # Let's direct client-side calls to the relative path /api/v1 if we had a reverse proxy, 
+      # but without it, we might need the API public URL.
+      - INTERNAL_API_URL=http://api:8000
+    depends_on:
+      - api
+
+  # ============================================
+  # INFRASTRUCTURE
+  # ============================================
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://control-plane-db:5432/control_plane
+      KC_DB_USERNAME: ${POSTGRES_USER:-platform}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-platform}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: "edge"
+    depends_on:
+      control-plane-db:
+        condition: service_healthy
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+
+volumes:
+  control_plane_data:
+  minio_data:
