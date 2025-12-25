@@ -101,9 +101,18 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Supabase Cloud Clone", lifespan=lifespan)
 
+# Parse ALLOWED_ORIGINS and explicitly add production domains to ensure they are always trusted
+origins = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "").split(",") if origin.strip()]
+origins.extend([
+    "https://supalove.hayataxi.online",
+    "https://api.hayataxi.online",
+    "http://localhost:3000",
+    "http://localhost:8000"
+])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "").split(","),
+    allow_origins=origins,
     allow_origin_regex=r"https?://.*\.hayataxi\.online|http://localhost.*",
     allow_credentials=True,
     allow_methods=["*"],
