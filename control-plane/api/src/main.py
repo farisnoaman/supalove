@@ -95,7 +95,8 @@ app = FastAPI(title="Supabase Cloud Clone", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "").split(","),
+    allow_origin_regex=r"https?://.*\.hayataxi\.online|http://localhost.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
