@@ -9,3 +9,7 @@ requests
 python-dotenv
 passlib[bcrypt]
 python-jose[cryptography]
+python-multipart
+stripe
+prometheus_client
+APScheduler

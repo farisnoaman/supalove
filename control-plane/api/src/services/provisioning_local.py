@@ -6,12 +6,16 @@ from typing import Dict, Any, Optional
 # Decoupled Configuration
 # In a real app, these should be loaded from os.environ or a config module
 # For now, we default to the relative path but allow override via env var
+# Determine PROJECT_ROOT safely for both Local and Docker environments
+try:
+    PROJECT_ROOT = Path(__file__).resolve().parents[4]  # Local: .../supalove/
+except IndexError:
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Docker: /app
+
 env_projects_dir = os.getenv("DATA_PLANE_BASE_DIR")
 if env_projects_dir:
     BASE_PROJECTS_DIR = Path(env_projects_dir)
 else:
-    # Fallback to relative path for development convenience
-    PROJECT_ROOT = Path(__file__).resolve().parents[4]
     BASE_PROJECTS_DIR = PROJECT_ROOT / "data-plane" / "projects"
     
 TEMPLATE_DIR_NAME = "project-template"
@@ -23,7 +27,7 @@ class LocalProvisioner(Provisioner):
 
     def __init__(self):
         # Locate project root from this file
-        self.project_root = Path(__file__).resolve().parents[4]
+        self.project_root = PROJECT_ROOT
     
     def provision(self, project_id: str, secrets: Optional[dict] = None, custom_domain: Optional[str] = None) -> Dict[str, Any]:
         """Provisions a new project using local Docker Compose scripts."""
