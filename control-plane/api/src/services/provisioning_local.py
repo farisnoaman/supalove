@@ -47,6 +47,27 @@ class LocalProvisioner(Provisioner):
         # Copy project template
         template_dir = PROJECT_ROOT / "data-plane" / "project-template"
         if not template_dir.exists():
+            # DEBUG LOGGING FOR DEPLOYMENT
+            print(f"DEBUG: PROJECT_ROOT = {PROJECT_ROOT}")
+            print(f"DEBUG: CWD = {os.getcwd()}")
+            print(f"DEBUG: Contents of PROJECT_ROOT ({PROJECT_ROOT}):")
+            try:
+                for p in PROJECT_ROOT.iterdir():
+                    print(f" - {p}")
+            except Exception as e:
+                print(f" Error listing PROJECT_ROOT: {e}")
+            
+            print(f"DEBUG: Checking {PROJECT_ROOT / 'data-plane'}:")
+            try:
+                if (PROJECT_ROOT / 'data-plane').exists():
+                    print(" 'data-plane' exists. Contents:")
+                    for p in (PROJECT_ROOT / 'data-plane').iterdir():
+                        print(f" - {p}")
+                else:
+                    print(" 'data-plane' DOES NOT EXIST.")
+            except Exception as e:
+                print(f" Error listing data-plane: {e}")
+
             raise FileNotFoundError(f"Project template not found at {template_dir}")
 
         # Copy all files from template to project directory
