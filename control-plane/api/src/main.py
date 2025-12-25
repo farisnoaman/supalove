@@ -119,6 +119,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Global exception handler to ensure CORS headers are present on all error responses
+# Without this, unhandled exceptions bypass CORSMiddleware and browsers block them
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Ensure CORS headers are present on all error responses."""
+    origin = request.headers.get("origin", "")
+    # Check if origin is allowed
+    allowed = any(o in origin for o in ["hayataxi.online", "localhost"])
+    
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc)},
+        headers={
+            "Access-Control-Allow-Origin": origin if allowed else "",
+            "Access-Control-Allow-Credentials": "true",
+        } if allowed else {}
+    )
+
 # V2 API Normalization
 api_v1_prefix = "/api/v1"
 app.include_router(projects_router, prefix=f"{api_v1_prefix}/projects", tags=["Projects"])

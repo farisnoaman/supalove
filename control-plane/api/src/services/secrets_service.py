@@ -39,14 +39,45 @@ def delete_secret(project_id: str, key: str):
     return get_secrets(project_id)
 
 def find_free_port(start_port: int = 5000) -> int:
+    """Find a port that's free on the HOST Docker daemon.
+    
+    Important: We can't use socket.bind() because that checks the container's
+    network namespace, but project containers run on the host Docker daemon.
+    Instead, we query Docker for currently bound ports.
+    """
+    import subprocess
+    import re
+    
+    # Get all ports currently bound by Docker containers on the host
+    used_ports = set()
+    try:
+        result = subprocess.run(
+            ["docker", "ps", "--format", "{{.Ports}}"],
+            capture_output=True, text=True, timeout=10
+        )
+        for line in result.stdout.split('\n'):
+            # Parse port mappings like "0.0.0.0:5500->5432/tcp" or ":::5500->5432/tcp"
+            for match in re.findall(r'(?:0\.0\.0\.0|:::):(\d+)->', line):
+                used_ports.add(int(match))
+    except Exception as e:
+        print(f"Warning: Could not query Docker ports: {e}")
+        # Fallback to socket check if Docker query fails
+        port = start_port
+        while port < 65535:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                try:
+                    s.bind(("0.0.0.0", port))
+                    return port
+                except socket.error:
+                    port += 1
+        raise Exception("No free ports available")
+    
+    # Find first available port not in use by Docker
     port = start_port
     while port < 65535:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("0.0.0.0", port))
-                return port
-            except socket.error:
-                port += 1
+        if port not in used_ports:
+            return port
+        port += 1
     raise Exception("No free ports available")
 
 def generate_project_secrets(db: Session, project_id: str) -> dict:
