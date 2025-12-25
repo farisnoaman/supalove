@@ -70,9 +70,11 @@ export function UserNav({ className }: UserNavProps) {
                         <span>Account preferences</span>
                     </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                    <FlaskConical className="mr-2 h-4 w-4" />
-                    <span>Feature previews</span>
+                <DropdownMenuItem asChild>
+                    <Link href="/docs" className="w-full cursor-pointer flex items-center">
+                        <FlaskConical className="mr-2 h-4 w-4" />
+                        <span>Documentation</span>
+                    </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Theme</DropdownMenuLabel>
