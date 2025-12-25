@@ -7,9 +7,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface ImportProjectProps {
     projectId: string;
+    onSuccess?: () => void;
 }
 
-export function ImportProject({ projectId }: ImportProjectProps) {
+export function ImportProject({ projectId, onSuccess }: ImportProjectProps) {
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [result, setResult] = useState<{ status: 'success' | 'warning' | 'error'; message: string; details?: string[] } | null>(null);
@@ -64,6 +65,7 @@ export function ImportProject({ projectId }: ImportProjectProps) {
 
             if (data.status === 'success') {
                 toast.success(data.message);
+                if (onSuccess) onSuccess();
             } else {
                 toast.warning(data.message);
             }
@@ -111,6 +113,7 @@ export function ImportProject({ projectId }: ImportProjectProps) {
 
             if (data.status === 'success') {
                 toast.success(data.message);
+                if (onSuccess) onSuccess();
             } else {
                 toast.warning(data.message);
             }

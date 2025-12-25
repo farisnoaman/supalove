@@ -133,6 +133,9 @@ def import_backup(
     import shutil
     import subprocess
     from pathlib import Path
+    import logging
+
+    logger = logging.getLogger(__name__)
 
     # Security check: Ensure file extension is valid
     if not (file.filename.endswith(".pg") or file.filename.endswith(".gz") or file.filename.endswith(".sql")):
@@ -141,30 +144,63 @@ def import_backup(
     # Save uploaded file
     tmp_path = Path(f"/tmp/{file.filename}")
     try:
+        logger.info(f"Starting import for project {project_id} with file {file.filename}")
+        
         with tmp_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+        
+        logger.info(f"File saved to {tmp_path}, size: {tmp_path.stat().st_size} bytes")
             
         # Delegate to the robust import script
         script_path = Path("/home/faris/Documents/MyApps/supalove/scripts/import_backup.py")
         
+        if not script_path.exists():
+            logger.error(f"Import script not found at {script_path}")
+            raise HTTPException(status_code=500, detail=f"Import script not found at {script_path}")
+        
         # We need to run this as a subprocess
         # python3 scripts/import_backup.py <PROJECT_ID> <FILE_PATH>
         cmd = ["python3", str(script_path), project_id, str(tmp_path)]
+        logger.info(f"Executing command: {' '.join(cmd)}")
         
-        process = subprocess.run(cmd, capture_output=True, text=True)
+        process = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        
+        # Log the output for debugging
+        logger.info(f"Import script stdout: {process.stdout}")
+        if process.stderr:
+            logger.warning(f"Import script stderr: {process.stderr}")
         
         if process.returncode != 0:
-            print(f"Import Script Error: {process.stderr}")
-            return {"status": "warning", "message": "Import completed with warnings (check logs)", "details": [process.stderr]}
+            error_msg = f"Import script failed with exit code {process.returncode}"
+            logger.error(f"{error_msg}\nStderr: {process.stderr}\nStdout: {process.stdout}")
             
-        return {"status": "success", "message": "Backup imported successfully"}
+            # Provide more specific error details
+            details = []
+            if process.stderr:
+                details.append(f"Error output: {process.stderr[:500]}")
+            if process.stdout:
+                details.append(f"Script output: {process.stdout[:500]}")
+            
+            return {
+                "status": "error", 
+                "message": f"Import failed: {error_msg}", 
+                "details": details
+            }
+        
+        logger.info(f"Import completed successfully for project {project_id}")
+        return {"status": "success", "message": "Backup imported successfully", "details": [process.stdout[-200:] if process.stdout else ""]}
 
+    except subprocess.TimeoutExpired:
+        logger.error(f"Import script timed out for project {project_id}")
+        raise HTTPException(status_code=500, detail="Import operation timed out (max 5 minutes)")
     except Exception as e:
-         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
+        logger.exception(f"Import failed for project {project_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
     finally:
         # Cleanup local tmp file
         if tmp_path.exists():
             tmp_path.unlink()
+            logger.info(f"Cleaned up temporary file {tmp_path}")
 
 @router.post("/{project_id}/import-from-migrations")
 def import_from_migrations(
@@ -179,6 +215,10 @@ def import_from_migrations(
     import shutil
     import subprocess
     from pathlib import Path
+    import logging
+    import re
+
+    logger = logging.getLogger(__name__)
 
     # Security check
     if not (file.filename.endswith(".pg") or file.filename.endswith(".gz") or file.filename.endswith(".sql")):
@@ -187,31 +227,76 @@ def import_from_migrations(
     # Save uploaded file
     tmp_path = Path(f"/tmp/{file.filename}")
     try:
+        logger.info(f"Starting migration extraction for project {project_id} with file {file.filename}")
+        
         with tmp_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+        
+        logger.info(f"File saved to {tmp_path}, size: {tmp_path.stat().st_size} bytes")
             
         # Use migration extraction script
         script_path = Path("/home/faris/Documents/MyApps/supalove/scripts/extract_from_migrations.py")
-        cmd = ["python3", str(script_path), project_id, str(tmp_path)]
         
-        process = subprocess.run(cmd, capture_output=True, text=True)
+        if not script_path.exists():
+            logger.error(f"Migration extraction script not found at {script_path}")
+            raise HTTPException(status_code=500, detail=f"Migration extraction script not found at {script_path}")
+        
+        cmd = ["python3", str(script_path), project_id, str(tmp_path)]
+        logger.info(f"Executing command: {' '.join(cmd)}")
+        
+        process = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        
+        # Log the output for debugging
+        logger.info(f"Migration extraction stdout: {process.stdout}")
+        if process.stderr:
+            logger.warning(f"Migration extraction stderr: {process.stderr}")
         
         if process.returncode != 0:
-            print(f"Migration Extraction Error: {process.stderr}")
-            return {"status": "warning", "message": "Migration extraction completed with warnings", "details": [process.stderr]}
+            error_msg = f"Migration extraction script failed with exit code {process.returncode}"
+            logger.error(f"{error_msg}\nStderr: {process.stderr}\nStdout: {process.stdout}")
             
-        # Count how many migrations were extracted
-        import re
-        migrations_count = len(re.findall(r'✓ Found migration', process.stdout))
+            # Check if no migrations were found (common case)
+            if "No migration data found" in process.stdout:
+                return {
+                    "status": "error",
+                    "message": "No migration data found in backup file. This backup might be a standard SQL dump. Try using the 'Import Database Backup' option instead.",
+                    "details": [process.stdout[:500]]
+                }
+            
+            # Provide detailed error information
+            details = []
+            if process.stderr:
+                details.append(f"Error output: {process.stderr[:500]}")
+            if process.stdout:
+                details.append(f"Script output: {process.stdout[:500]}")
+            
+            return {
+                "status": "error", 
+                "message": f"Migration extraction failed: {error_msg}", 
+                "details": details
+            }
         
-        return {"status": "success", "message": f"Successfully extracted and executed {migrations_count} migrations"}
+        # Count how many migrations were extracted
+        migrations_count = len(re.findall(r'✓ Found migration', process.stdout))
+        logger.info(f"Successfully extracted {migrations_count} migrations for project {project_id}")
+        
+        return {
+            "status": "success", 
+            "message": f"Successfully extracted and executed {migrations_count} migrations",
+            "details": [process.stdout[-300:] if process.stdout else ""]
+        }
 
+    except subprocess.TimeoutExpired:
+        logger.error(f"Migration extraction timed out for project {project_id}")
+        raise HTTPException(status_code=500, detail="Migration extraction operation timed out (max 5 minutes)")
     except Exception as e:
-         raise HTTPException(status_code=500, detail=f"Migration extraction failed: {str(e)}")
+        logger.exception(f"Migration extraction failed for project {project_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Migration extraction failed: {str(e)}")
     finally:
         # Cleanup local tmp file
         if tmp_path.exists():
             tmp_path.unlink()
+            logger.info(f"Cleaned up temporary file {tmp_path}")
 
 @router.post("/{project_id}/restore")
 def restore(

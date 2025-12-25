@@ -254,7 +254,7 @@ export default function DatabasePage() {
             {/* Import Project */}
             <div className="pt-8 border-t border-border/40">
                 <h3 className="text-lg font-semibold mb-4">Database Tools</h3>
-                <ImportProject projectId={projectId} />
+                <ImportProject projectId={projectId} onSuccess={fetchTables} />
             </div>
 
             {/* Toast Notifications */}
