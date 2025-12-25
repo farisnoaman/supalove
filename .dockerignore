@@ -1,0 +1,8 @@
+.git
+.venv
+test_venv
+__pycache__
+node_modules
+.next
+.env
+*.pyc
