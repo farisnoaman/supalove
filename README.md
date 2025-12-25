@@ -1,440 +1,197 @@
-# Supabase Cloud Clone – v1 Starter Repo
+# Supalove 🚀
 
-This is a **minimal, correct v1** repository to get your first milestone working:
+**The Open-Source Supabase Cloud Clone**
 
-> **POST /projects → project backend is provisioned and reachable via subdomain**
+A fully self-hosted, multi-tenant backend-as-a-service platform that provides 100% API compatibility with Supabase Cloud. Deploy your own Supabase infrastructure on any server using Docker or Coolify.
 
-Everything here directly supports that goal.
-
----
-
-## 📁 Repository Structure
-
-```
-supabase-cloud-clone/
-├── control-plane/
-│   ├── api/
-│   │   ├── src/
-│   │   │   ├── api/
-│   │   │   │       └── v1/
-│   │   │   │           └── projects.py
-│   │   │   ├── core/
-│   │   │   │   ├── config.py
-│   │   │   │   └── database.py
-│   │   │   ├── services/
-│   │   │   │   ├── project_service.py
-│   │   │   │   └── provisioning_service.py
-│   │   │   └── main.py
-│   │   └── Dockerfile
-│   └── migrations/
-│       └── 001_init.sql
-│
-├── data-plane/
-│   └── project-template/
-│       ├── docker-compose.yml
-│       ├── postgres/
-│       │   └── init.sql
-│       ├── auth/
-│       │   └── env.example
-│       ├── storage/
-│       │   └── env.example
-│       ├── realtime/
-│       │   └── env.example
-│       └── functions/
-│           └── Dockerfile
-│
-├── infra/
-│   ├── coolify/
-│   │   └── project-template.json
-│   └── traefik/
-│       └── traefik.yml
-│
-├── scripts/
-│   ├── create-project.sh
-│   └── delete-project.sh
-│
-├── docker-compose.yml
-├── README.md
-└── ROADMAP.md
-```
+[![Deploy on Coolify](https://img.shields.io/badge/Deploy-Coolify-blue)](./DEPLOY_TO_COOLIFY.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
 ---
 
-## 🧠 control-plane (FastAPI)
+## ✨ Features
 
-### `main.py`
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Database** | ✅ | PostgreSQL 15 with Supabase extensions |
+| **Auth** | ✅ | GoTrue v2.184 - Magic links, OAuth, JWTs |
+| **REST API** | ✅ | PostgREST v12 - Auto-generated from schema |
+| **Realtime** | ✅ | Websocket subscriptions to DB changes |
+| **Storage** | ✅ | S3-compatible file storage |
+| **Edge Functions** | ✅ | Deno TypeScript runtime |
+| **Multi-Tenancy** | ✅ | Isolated project stacks per user |
+| **Dashboard** | ✅ | Next.js 16 management UI |
+| **Billing** | ✅ | Stripe integration ready |
 
-```python
-from fastapi import FastAPI
-from api.v1.projects import router as projects_router
+---
 
-app = FastAPI(title="Supabase Cloud Clone")
+## 🏗️ Architecture
 
-app.include_router(projects_router, prefix="/v1/projects")
 ```
-
-### `projects.py`
-
-```python
-from fastapi import APIRouter
-from services.project_service import create_project
-
-router = APIRouter()
-
-@router.post("/")
-def create():
-    return create_project()
-```
-
-### `project_service.py`
-
-```python
-import uuid
-from services.provisioning_service import provision_project
-
-
-def create_project():
-    project_id = uuid.uuid4().hex[:16]
-    provision_project(project_id)
-    return {
-        "project_id": project_id,
-        "api_url": f"https://{project_id}.api.yourdomain.com"
-    }
-```
-
-### `provisioning_service.py`
-
-```python
-import subprocess
-
-
-def provision_project(project_id: str):
-    subprocess.run([
-        "bash",
-        "scripts/create-project.sh",
-        project_id
-    ], check=True)
+┌─────────────────────────────────────────────────────────────┐
+│                     CONTROL PLANE                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │Dashboard │  │ FastAPI  │  │Keycloak  │  │  MinIO   │   │
+│  │(Next.js) │  │  (API)   │  │ (Auth)   │  │  (S3)    │   │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘   │
+│       │             │             │             │          │
+│       └─────────────┴─────────────┴─────────────┘          │
+│                         │                                   │
+│              Control Plane Database (Postgres)              │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ Provisions
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      DATA PLANE                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              PROJECT STACK (per tenant)              │   │
+│  │  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────────┐   │   │
+│  │  │Postgres│ │PostgREST│ │GoTrue  │ │  Realtime  │   │   │
+│  │  │  (DB)  │ │ (API)  │ │ (Auth) │ │(Websockets)│   │   │
+│  │  └────────┘ └────────┘ └────────┘ └────────────┘   │   │
+│  │  ┌────────┐ ┌────────┐ ┌───────────────────────┐   │   │
+│  │  │Storage │ │  Deno  │ │   NGINX Gateway       │   │   │
+│  │  │  API   │ │(Funcs) │ │ Routes: /rest /auth   │   │   │
+│  │  └────────┘ └────────┘ └───────────────────────┘   │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🧱 data-plane (Project Template)
+## 🚀 Quick Start
 
-### `docker-compose.yml` (simplified)
-
-```yaml
-version: "3.9"
-services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  api:
-    image: postgrest/postgrest
-    depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
-```
-
-This file will later expand to:
-
-* Auth
-* Storage
-* Realtime
-* Functions
-
-But **do NOT add them yet**.
-
----
-
-## ⚙️ infra (Coolify / Traefik)
-
-### `project-template.json` (conceptual)
-
-```json
-{
-  "name": "supabase-project",
-  "source": "./data-plane/project-template",
-  "domains": ["{project_id}.api.yourdomain.com"]
-}
-```
-
----
-
-## 🛠 scripts
-
-### `create-project.sh`
+### Local Development
 
 ```bash
-#!/bin/bash
-PROJECT_ID=$1
+# 1. Clone the repository
+git clone https://github.com/farisnoaman/supalove.git
+cd supalove
 
-cp -r data-plane/project-template /tmp/project-$PROJECT_ID
-cd /tmp/project-$PROJECT_ID
-
+# 2. Start control plane services
 docker compose up -d
+
+# 3. Install dashboard dependencies
+cd dashboard && npm install
+
+# 4. Start the API
+cd ../control-plane/api
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+uvicorn src.main:app --reload --port 8000
+
+# 5. Start the dashboard
+cd ../../dashboard
+npm run dev
+```
+
+**Access:**
+- Dashboard: http://localhost:3000
+- API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+
+### Production (Coolify)
+
+See [DEPLOY_TO_COOLIFY.md](./DEPLOY_TO_COOLIFY.md) for one-click deployment.
+
+---
+
+## 📖 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture](./docs/ARCHITECTURE.md) | System design and components |
+| [API Reference](./docs/API.md) | REST API endpoints |
+| [Deployment Guide](./DEPLOY_TO_COOLIFY.md) | Coolify deployment instructions |
+| [CLI Documentation](./CLI_docs.md) | Command-line interface |
+| [Roadmap](./ROADMAP.md) | Future development plans |
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | Control plane DB connection | `postgresql://...` |
+| `ALLOWED_ORIGINS` | CORS allowed origins | `localhost:3000` |
+| `NEXT_PUBLIC_API_URL` | Dashboard → API URL | `http://localhost:8000` |
+| `MINIO_ROOT_USER` | MinIO admin username | `minioadmin` |
+| `MINIO_ROOT_PASSWORD` | MinIO admin password | `minioadmin` |
+
+---
+
+## 🔌 API Compatibility
+
+Supalove is **100% compatible** with `@supabase/supabase-js`:
+
+```typescript
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://your-project.gateway.yourdomain.com',
+  'your-anon-key'
+)
+
+// Works exactly like Supabase Cloud!
+const { data } = await supabase.from('todos').select('*')
 ```
 
 ---
 
-## ✅ First Milestone (CRITICAL)
+## 📂 Project Structure
 
-When this works:
+```
+supalove/
+├── control-plane/          # Platform management
+│   └── api/                # FastAPI backend
+│       └── src/
+│           ├── api/v1/     # REST endpoints
+│           ├── services/   # Business logic
+│           └── models/     # SQLAlchemy models
+├── dashboard/              # Next.js 16 frontend
+│   └── src/
+│       ├── app/            # App Router pages
+│       └── components/     # React components
+├── data-plane/             # Project templates
+│   ├── project-template/   # Docker Compose stack
+│   └── projects/           # Running project data
+├── docker-compose.yml      # Local development
+├── docker-compose.coolify.yml  # Production deployment
+└── docs/                   # Documentation
+```
+
+---
+
+## 🛡️ Security
+
+- **Tenant Isolation**: Each project runs in its own Docker network
+- **JWT Authentication**: Industry-standard token-based auth
+- **Row-Level Security**: Postgres RLS for data access control
+- **HTTPS**: TLS termination via Coolify/Traefik
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our contributing guidelines before submitting PRs.
 
 ```bash
-curl -X POST http://localhost:8000/v1/projects
-```
+# Run tests
+cd control-plane/api
+pytest
 
-And you get:
-
-```json
-{
-  "project_id": "abc123...",
-  "api_url": "https://abc123.api.yourdomain.com"
-}
-```
-
-👉 **YOU HAVE WON**
-
-Everything else is iteration.
-
----
-
-## 🗺️ ROADMAP (Next Steps)
-
-1. Persist projects in control-plane DB
-2. Inject secrets (JWT, DB passwords)
-3. Replace shell scripts with Coolify API
-4. Add Auth service
-5. Add Storage
-6. Add Realtime
-7. Add Dashboard UI
-
----
-
-## 🧠 Final Guidance
-
-* Do not optimize early
-* Do not add multi-cloud
-* Do not add Kubernetes yet
-
-**One project. One click. One success.**
---------------------------------
-## 🚀 Deployment Architecture
-🎉 **Excellent — this is a BIG milestone**
-
-You now have a **working control plane**:
-
-```
-curl → FastAPI → create_project() → response
-```
-
-This is exactly how Supabase Cloud starts internally.
-
----
-
-# ✅ STEP 2 — Persist Projects (Control-Plane Database)
-
-Right now, projects are **ephemeral**.
-If you restart FastAPI → all projects are forgotten.
-
-In this step we will:
-
-> **Store projects in a control-plane database**
-> (NOT project databases — this is platform metadata)
-
-
-
-
----
-
-## 2️⃣.3 Add Postgres (local dev)
-
-At repo root, update **top-level** `docker-compose.yml`:
-
-📍 `supabase_lovable_cloud_clone/docker-compose.yml`
-
-```yaml
-version: "3.9"
-
-services:
-  control-plane-db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: platform
-      POSTGRES_PASSWORD: platform
-      POSTGRES_DB: control_plane
-    ports:
-      - "5433:5432"
-    volumes:
-      - control_plane_data:/var/lib/postgresql/data
-
-volumes:
-  control_plane_data:
-```
-
-Start it:
-
-```bash
-docker compose up -d
-```
-
-Verify:
-
-```bash
-docker ps
+# Lint code
+ruff check .
 ```
 
 ---
 
-## 2️⃣.4 Add DB Dependencies
+## 📄 License
 
-Inside your venv:
-
-```bash
-pip install sqlalchemy psycopg2-binary
-```
-
-Update `requirements.txt`:
-
-```txt
-fastapi
-uvicorn
-sqlalchemy
-psycopg2-binary
-```
+MIT License - see [LICENSE](./LICENSE) for details.
 
 ---
 
-## 2️⃣.5 Create Database Connection
-
-📍 `control-plane/api/src/core/database.py`
-
-```python
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-
-DATABASE_URL = "postgresql://platform:platform@localhost:5433/control_plane"
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
-
-Base = declarative_base()
-```
-
----
-
-## 2️⃣.6 Create Project Model
-
-📍 `control-plane/api/src/models/project.py`
-
-```python
-from sqlalchemy import Column, String, DateTime
-from datetime import datetime
-from core.database import Base
-
-class Project(Base):
-    __tablename__ = "projects"
-
-    id = Column(String, primary_key=True, index=True)
-    status = Column(String, default="provisioning")
-    created_at = Column(DateTime, default=datetime.utcnow)
-```
-
----
-
-## 2️⃣.7 Create Tables Automatically (v1 shortcut)
-
-📍 `control-plane/api/src/main.py`
-
-```python
-from fastapi import FastAPI
-from api.v1.projects import router as projects_router
-from core.database import Base, engine
-
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI(title="Supabase Cloud Clone")
-app.include_router(projects_router, prefix="/v1/projects")
-```
-
-⚠️ Later we’ll replace this with Alembic.
-
----
-
-## 2️⃣.8 Save Project When Created
-
-📍 `services/project_service.py`
-
-```python
-import uuid
-from sqlalchemy.orm import Session
-from core.database import SessionLocal
-from models.project import Project
-from services.provisioning_service import provision_project
-
-def create_project():
-    project_id = uuid.uuid4().hex[:12]
-
-    db: Session = SessionLocal()
-    project = Project(id=project_id, status="provisioning")
-    db.add(project)
-    db.commit()
-
-    provision_project(project_id)
-
-    project.status = "running"
-    db.commit()
-
-    return {
-        "project_id": project_id,
-        "status": project.status,
-        "api_url": f"http://localhost:{project_id}"
-    }
-```
-
----
-
-## 2️⃣.9 Restart & Test Again
-
-Restart API:
-
-```bash
-uvicorn main:app --reload --port 8000
-```
-
-Test:
-
-```bash
-curl -X POST http://localhost:8000/v1/projects
-```
-
----
-
-## 2️⃣.🔟 Verify Data Is Stored
-
-Connect to DB:
-
-```bash
-docker exec -it <postgres_container_id> psql -U platform -d control_plane
-```
-
-Then:
-
-```sql
-SELECT * FROM projects;
-```
-
-You should see your project 🎉
-
----
-
----
-
-
----
+**Built with ❤️ by the Supalove Team**
