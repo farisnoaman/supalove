@@ -59,6 +59,7 @@ Include Timestamps
 2025-12-25T13:24:11.614363333Z 2025-12-25 13:24:11.609 UTC [1] LOG:  database system is ready to accept connections
 2025-12-25T13:29:11.673542068Z 2025-12-25 13:29:11.673 UTC [26] LOG:  checkpoint starting: time
 2025-12-25T13:29:12.240225176Z 2025-12-25 13:29:12.240 UTC [26] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.508 s, sync=0.004 s, total=0.567 s; sync files=6, longest=0.003 s, average=0.001 s; distance=0 kB, estimate=0 kB
+------------------------
 dashboard-hck4w0k4ww8kk4gccw000ggg-132201995907
 Only Show Number of Lines
 *
@@ -77,279 +78,121 @@ Include Timestamps
 2025-12-25T13:24:21.091172838Z 
 2025-12-25T13:24:21.091177268Z ✓ Starting...
 2025-12-25T13:24:21.459391064Z ✓ Ready in 1049ms
-api-hck4w0k4ww8kk4gccw000ggg-132201978563
+-----------------------
+aapi-hck4w0k4ww8kk4gccw000ggg-133924664772
 Only Show Number of Lines
 *
-2000
+1000
 Refresh
 Stream Logs
 Include Timestamps
 
-2025-12-25T13:24:22.903401194Z INFO:     Started server process [1]
-2025-12-25T13:24:22.903494714Z INFO:     Waiting for application startup.
-2025-12-25T13:24:22.936575336Z INFO:     Application startup complete.
-2025-12-25T13:24:22.938688094Z INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-2025-12-25T13:26:34.743515378Z [Provisioning] Using Local Docker provider
-2025-12-25T13:26:34.743583718Z [Scheduler] Starting background scheduler...
-2025-12-25T13:26:34.743590258Z INFO:     10.0.2.2:33246 - "OPTIONS /api/v1/auth/register HTTP/1.1" 200 OK
-2025-12-25T13:26:34.989973295Z (trapped) error reading bcrypt version
-2025-12-25T13:26:34.990001026Z Traceback (most recent call last):
-2025-12-25T13:26:34.990006106Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-2025-12-25T13:26:34.990011056Z     version = _bcrypt.__about__.__version__
-2025-12-25T13:26:34.990015556Z               ^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:34.990020096Z AttributeError: module 'bcrypt' has no attribute '__about__'
-2025-12-25T13:26:34.998059504Z INFO:     10.0.2.2:33246 - "POST /api/v1/auth/register HTTP/1.1" 500 Internal Server Error
-2025-12-25T13:26:35.010663621Z ERROR:    Exception in ASGI application
-2025-12-25T13:26:35.010688741Z Traceback (most recent call last):
-2025-12-25T13:26:35.010692741Z   File "/usr/local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
-2025-12-25T13:26:35.010696362Z     result = await app(  # type: ignore[func-returns-value]
-2025-12-25T13:26:35.010699602Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010702941Z   File "/usr/local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-2025-12-25T13:26:35.010706301Z     return await self.app(scope, receive, send)
-2025-12-25T13:26:35.010709432Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010712581Z   File "/usr/local/lib/python3.12/site-packages/fastapi/applications.py", line 1135, in __call__
-2025-12-25T13:26:35.010715872Z     await super().__call__(scope, receive, send)
-2025-12-25T13:26:35.010719012Z   File "/usr/local/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
-2025-12-25T13:26:35.010819793Z     await self.middleware_stack(scope, receive, send)
-2025-12-25T13:26:35.010826803Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-2025-12-25T13:26:35.010830503Z     raise exc
-2025-12-25T13:26:35.010833743Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-2025-12-25T13:26:35.010837033Z     await self.app(scope, receive, _send)
-2025-12-25T13:26:35.010840183Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 191, in __call__
-2025-12-25T13:26:35.010853133Z     with recv_stream, send_stream, collapse_excgroups():
-2025-12-25T13:26:35.010855233Z                                    ^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010857183Z   File "/usr/local/lib/python3.12/contextlib.py", line 158, in __exit__
-2025-12-25T13:26:35.010859213Z     self.gen.throw(value)
-2025-12-25T13:26:35.010861073Z   File "/usr/local/lib/python3.12/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
-2025-12-25T13:26:35.010863113Z     raise exc
-2025-12-25T13:26:35.010865123Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 193, in __call__
-2025-12-25T13:26:35.010867113Z     response = await self.dispatch_func(request, call_next)
-2025-12-25T13:26:35.010869023Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010870923Z   File "/app/src/main.py", line 216, in track_requests
-2025-12-25T13:26:35.010872833Z     response = await call_next(request)
-2025-12-25T13:26:35.010874693Z                ^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010876573Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 168, in call_next
-2025-12-25T13:26:35.010878573Z     raise app_exc from app_exc.__cause__ or app_exc.__context__
-2025-12-25T13:26:35.010881983Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-2025-12-25T13:26:35.010884033Z     await self.app(scope, receive_or_disconnect, send_no_error)
-2025-12-25T13:26:35.010885953Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
-2025-12-25T13:26:35.010887933Z     await self.simple_response(scope, receive, send, request_headers=headers)
-2025-12-25T13:26:35.010889863Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
-2025-12-25T13:26:35.010891843Z     await self.app(scope, receive, send)
-2025-12-25T13:26:35.010893713Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-2025-12-25T13:26:35.010895723Z     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-2025-12-25T13:26:35.010897633Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-2025-12-25T13:26:35.010899623Z     raise exc
-2025-12-25T13:26:35.010901463Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-2025-12-25T13:26:35.010903463Z     await app(scope, receive, sender)
-2025-12-25T13:26:35.010905323Z   File "/usr/local/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-2025-12-25T13:26:35.010907703Z     await self.app(scope, receive, send)
-2025-12-25T13:26:35.010910353Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-2025-12-25T13:26:35.010917723Z     await self.middleware_stack(scope, receive, send)
-2025-12-25T13:26:35.010920493Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-2025-12-25T13:26:35.010923433Z     await route.handle(scope, receive, send)
-2025-12-25T13:26:35.010926103Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-2025-12-25T13:26:35.010929003Z     await self.app(scope, receive, send)
-2025-12-25T13:26:35.010931643Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 119, in app
-2025-12-25T13:26:35.010934313Z     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-2025-12-25T13:26:35.010936903Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-2025-12-25T13:26:35.010950744Z     raise exc
-2025-12-25T13:26:35.010953324Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-2025-12-25T13:26:35.010956154Z     await app(scope, receive, sender)
-2025-12-25T13:26:35.010958094Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 105, in app
-2025-12-25T13:26:35.010960124Z     response = await f(request)
-2025-12-25T13:26:35.010962024Z                ^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010964254Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 426, in app
-2025-12-25T13:26:35.010966244Z     raw_response = await run_endpoint_function(
-2025-12-25T13:26:35.010968214Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010970124Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 314, in run_endpoint_function
-2025-12-25T13:26:35.010972104Z     return await run_in_threadpool(dependant.call, **values)
-2025-12-25T13:26:35.010974004Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010975914Z   File "/usr/local/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
-2025-12-25T13:26:35.010977894Z     return await anyio.to_thread.run_sync(func)
-2025-12-25T13:26:35.010979784Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010982084Z   File "/usr/local/lib/python3.12/site-packages/anyio/to_thread.py", line 61, in run_sync
-2025-12-25T13:26:35.010984504Z     return await get_async_backend().run_sync_in_worker_thread(
-2025-12-25T13:26:35.010986414Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.010988324Z   File "/usr/local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2525, in run_sync_in_worker_thread
-2025-12-25T13:26:35.010990344Z     return await future
-2025-12-25T13:26:35.010992184Z            ^^^^^^^^^^^^
-2025-12-25T13:26:35.010994064Z   File "/usr/local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
-2025-12-25T13:26:35.011002804Z     result = context.run(func, *args)
-2025-12-25T13:26:35.011004804Z              ^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011006694Z   File "/app/src/api/v1/auth.py", line 52, in register
-2025-12-25T13:26:35.011008644Z     hashed_password = AuthService.get_password_hash(user_in.password)
-2025-12-25T13:26:35.011010584Z                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011012524Z   File "/app/src/services/auth_service.py", line 21, in get_password_hash
-2025-12-25T13:26:35.011014474Z     return pwd_context.hash(password)
-2025-12-25T13:26:35.011016324Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011018174Z   File "/usr/local/lib/python3.12/site-packages/passlib/context.py", line 2258, in hash
-2025-12-25T13:26:35.011020134Z     return record.hash(secret, **kwds)
-2025-12-25T13:26:35.011022014Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011024834Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 779, in hash
-2025-12-25T13:26:35.011027654Z     self.checksum = self._calc_checksum(secret)
-2025-12-25T13:26:35.011030404Z                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011033074Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 591, in _calc_checksum
-2025-12-25T13:26:35.011035844Z     self._stub_requires_backend()
-2025-12-25T13:26:35.011039104Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2254, in _stub_requires_backend
-2025-12-25T13:26:35.011041794Z     cls.set_backend()
-2025-12-25T13:26:35.011043734Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2156, in set_backend
-2025-12-25T13:26:35.011045774Z     return owner.set_backend(name, dryrun=dryrun)
-2025-12-25T13:26:35.011047754Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011049664Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2163, in set_backend
-2025-12-25T13:26:35.011051624Z     return cls.set_backend(name, dryrun=dryrun)
-2025-12-25T13:26:35.011053494Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011055394Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2188, in set_backend
-2025-12-25T13:26:35.011057364Z     cls._set_backend(name, dryrun)
-2025-12-25T13:26:35.011059274Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2311, in _set_backend
-2025-12-25T13:26:35.011061264Z     super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
-2025-12-25T13:26:35.011063184Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2224, in _set_backend
-2025-12-25T13:26:35.011065164Z     ok = loader(**kwds)
-2025-12-25T13:26:35.011066994Z          ^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011082984Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 626, in _load_backend_mixin
-2025-12-25T13:26:35.011087225Z     return mixin_cls._finalize_backend_mixin(name, dryrun)
-2025-12-25T13:26:35.011089225Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011091155Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 421, in _finalize_backend_mixin
-2025-12-25T13:26:35.011093255Z     if detect_wrap_bug(IDENT_2A):
-2025-12-25T13:26:35.011095125Z        ^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011096985Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 380, in detect_wrap_bug
-2025-12-25T13:26:35.011098955Z     if verify(secret, bug_hash):
-2025-12-25T13:26:35.011100815Z        ^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011102685Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 792, in verify
-2025-12-25T13:26:35.011104655Z     return consteq(self._calc_checksum(secret), chk)
-2025-12-25T13:26:35.011106595Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011108525Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 655, in _calc_checksum
-2025-12-25T13:26:35.011110505Z     hash = _bcrypt.hashpw(secret, config)
-2025-12-25T13:26:35.011112375Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:26:35.011114275Z ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
-2025-12-25T13:27:08.284763915Z INFO:     10.0.2.2:38000 - "OPTIONS /api/v1/auth/register HTTP/1.1" 200 OK
-2025-12-25T13:27:08.537153962Z (trapped) error reading bcrypt version
-2025-12-25T13:27:08.537181593Z Traceback (most recent call last):
-2025-12-25T13:27:08.537185962Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-2025-12-25T13:27:08.537189602Z     version = _bcrypt.__about__.__version__
-2025-12-25T13:27:08.537193012Z               ^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.537196193Z AttributeError: module 'bcrypt' has no attribute '__about__'
-2025-12-25T13:27:08.543446806Z INFO:     10.0.2.2:38000 - "POST /api/v1/auth/register HTTP/1.1" 500 Internal Server Error
-2025-12-25T13:27:08.545921327Z ERROR:    Exception in ASGI application
-2025-12-25T13:27:08.545960298Z Traceback (most recent call last):
-2025-12-25T13:27:08.545964548Z   File "/usr/local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
-2025-12-25T13:27:08.545968648Z     result = await app(  # type: ignore[func-returns-value]
-2025-12-25T13:27:08.545971978Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.545975278Z   File "/usr/local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-2025-12-25T13:27:08.545986338Z     return await self.app(scope, receive, send)
-2025-12-25T13:27:08.545988718Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.545990658Z   File "/usr/local/lib/python3.12/site-packages/fastapi/applications.py", line 1135, in __call__
-2025-12-25T13:27:08.545992668Z     await super().__call__(scope, receive, send)
-2025-12-25T13:27:08.545994558Z   File "/usr/local/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
-2025-12-25T13:27:08.545996668Z     await self.middleware_stack(scope, receive, send)
-2025-12-25T13:27:08.545998578Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-2025-12-25T13:27:08.546000598Z     raise exc
-2025-12-25T13:27:08.546002478Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-2025-12-25T13:27:08.546004478Z     await self.app(scope, receive, _send)
-2025-12-25T13:27:08.546006408Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 191, in __call__
-2025-12-25T13:27:08.546008788Z     with recv_stream, send_stream, collapse_excgroups():
-2025-12-25T13:27:08.546010698Z                                    ^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546012638Z   File "/usr/local/lib/python3.12/contextlib.py", line 158, in __exit__
-2025-12-25T13:27:08.546014608Z     self.gen.throw(value)
-2025-12-25T13:27:08.546016488Z   File "/usr/local/lib/python3.12/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
-2025-12-25T13:27:08.546104099Z     raise exc
-2025-12-25T13:27:08.546108729Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 193, in __call__
-2025-12-25T13:27:08.546110899Z     response = await self.dispatch_func(request, call_next)
-2025-12-25T13:27:08.546112859Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546115309Z   File "/app/src/main.py", line 216, in track_requests
-2025-12-25T13:27:08.546117379Z     response = await call_next(request)
-2025-12-25T13:27:08.546119269Z                ^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546121299Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 168, in call_next
-2025-12-25T13:27:08.546123349Z     raise app_exc from app_exc.__cause__ or app_exc.__context__
-2025-12-25T13:27:08.546126419Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-2025-12-25T13:27:08.546128489Z     await self.app(scope, receive_or_disconnect, send_no_error)
-2025-12-25T13:27:08.546130459Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
-2025-12-25T13:27:08.546132519Z     await self.simple_response(scope, receive, send, request_headers=headers)
-2025-12-25T13:27:08.546134529Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
-2025-12-25T13:27:08.546141459Z     await self.app(scope, receive, send)
-2025-12-25T13:27:08.546143479Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-2025-12-25T13:27:08.546145499Z     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-2025-12-25T13:27:08.546147459Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-2025-12-25T13:27:08.546149459Z     raise exc
-2025-12-25T13:27:08.546151289Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-2025-12-25T13:27:08.546153359Z     await app(scope, receive, sender)
-2025-12-25T13:27:08.546155279Z   File "/usr/local/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-2025-12-25T13:27:08.546157269Z     await self.app(scope, receive, send)
-2025-12-25T13:27:08.546159149Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-2025-12-25T13:27:08.546161209Z     await self.middleware_stack(scope, receive, send)
-2025-12-25T13:27:08.546163089Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-2025-12-25T13:27:08.546173300Z     await route.handle(scope, receive, send)
-2025-12-25T13:27:08.546175309Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-2025-12-25T13:27:08.546177329Z     await self.app(scope, receive, send)
-2025-12-25T13:27:08.546179260Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 119, in app
-2025-12-25T13:27:08.546181229Z     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-2025-12-25T13:27:08.546183159Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-2025-12-25T13:27:08.546185119Z     raise exc
-2025-12-25T13:27:08.546186949Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-2025-12-25T13:27:08.546188909Z     await app(scope, receive, sender)
-2025-12-25T13:27:08.546190769Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 105, in app
-2025-12-25T13:27:08.546192740Z     response = await f(request)
-2025-12-25T13:27:08.546194639Z                ^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546196759Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 426, in app
-2025-12-25T13:27:08.546198719Z     raw_response = await run_endpoint_function(
-2025-12-25T13:27:08.546200639Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546202519Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 314, in run_endpoint_function
-2025-12-25T13:27:08.546204500Z     return await run_in_threadpool(dependant.call, **values)
-2025-12-25T13:27:08.546210029Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546212049Z   File "/usr/local/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
-2025-12-25T13:27:08.546214109Z     return await anyio.to_thread.run_sync(func)
-2025-12-25T13:27:08.546215989Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546217900Z   File "/usr/local/lib/python3.12/site-packages/anyio/to_thread.py", line 61, in run_sync
-2025-12-25T13:27:08.546219879Z     return await get_async_backend().run_sync_in_worker_thread(
-2025-12-25T13:27:08.546221919Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546223839Z   File "/usr/local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2525, in run_sync_in_worker_thread
-2025-12-25T13:27:08.546225869Z     return await future
-2025-12-25T13:27:08.546227719Z            ^^^^^^^^^^^^
-2025-12-25T13:27:08.546229629Z   File "/usr/local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
-2025-12-25T13:27:08.546231620Z     result = context.run(func, *args)
-2025-12-25T13:27:08.546233519Z              ^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546235389Z   File "/app/src/api/v1/auth.py", line 52, in register
-2025-12-25T13:27:08.546237341Z     hashed_password = AuthService.get_password_hash(user_in.password)
-2025-12-25T13:27:08.546239280Z                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546241250Z   File "/app/src/services/auth_service.py", line 21, in get_password_hash
-2025-12-25T13:27:08.546243200Z     return pwd_context.hash(password)
-2025-12-25T13:27:08.546245101Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546247030Z   File "/usr/local/lib/python3.12/site-packages/passlib/context.py", line 2258, in hash
-2025-12-25T13:27:08.546248990Z     return record.hash(secret, **kwds)
-2025-12-25T13:27:08.546250861Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546252730Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 779, in hash
-2025-12-25T13:27:08.546254701Z     self.checksum = self._calc_checksum(secret)
-2025-12-25T13:27:08.546256581Z                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546258490Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 591, in _calc_checksum
-2025-12-25T13:27:08.546260520Z     self._stub_requires_backend()
-2025-12-25T13:27:08.546262730Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2254, in _stub_requires_backend
-2025-12-25T13:27:08.546264840Z     cls.set_backend()
-2025-12-25T13:27:08.546266730Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2156, in set_backend
-2025-12-25T13:27:08.546268720Z     return owner.set_backend(name, dryrun=dryrun)
-2025-12-25T13:27:08.546273901Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546275890Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2163, in set_backend
-2025-12-25T13:27:08.546277880Z     return cls.set_backend(name, dryrun=dryrun)
-2025-12-25T13:27:08.546279781Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546281640Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2188, in set_backend
-2025-12-25T13:27:08.546283600Z     cls._set_backend(name, dryrun)
-2025-12-25T13:27:08.546285471Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2311, in _set_backend
-2025-12-25T13:27:08.546287440Z     super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
-2025-12-25T13:27:08.546289341Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2224, in _set_backend
-2025-12-25T13:27:08.546291320Z     ok = loader(**kwds)
-2025-12-25T13:27:08.546293181Z          ^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546295061Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 626, in _load_backend_mixin
-2025-12-25T13:27:08.546297050Z     return mixin_cls._finalize_backend_mixin(name, dryrun)
-2025-12-25T13:27:08.546298930Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546300840Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 421, in _finalize_backend_mixin
-2025-12-25T13:27:08.546302800Z     if detect_wrap_bug(IDENT_2A):
-2025-12-25T13:27:08.546304680Z        ^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546306551Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 380, in detect_wrap_bug
-2025-12-25T13:27:08.546308530Z     if verify(secret, bug_hash):
-2025-12-25T13:27:08.546310431Z        ^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546312280Z   File "/usr/local/lib/python3.12/site-packages/passlib/utils/handlers.py", line 792, in verify
-2025-12-25T13:27:08.546314240Z     return consteq(self._calc_checksum(secret), chk)
-2025-12-25T13:27:08.546316130Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546318021Z   File "/usr/local/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 655, in _calc_checksum
-2025-12-25T13:27:08.546320000Z     hash = _bcrypt.hashpw(secret, config)
-2025-12-25T13:27:08.546321880Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2025-12-25T13:27:08.546323770Z ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-12-25T13:41:53.492183099Z INFO:     Started server process [1]
+2025-12-25T13:41:53.493963593Z INFO:     Waiting for application startup.
+2025-12-25T13:41:53.558478622Z INFO:     Application startup complete.
+2025-12-25T13:41:53.560322927Z INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2025-12-25T13:48:00.192902292Z [Provisioning] Using Local Docker provider
+2025-12-25T13:48:00.193343295Z [Scheduler] Starting background scheduler...
+2025-12-25T13:48:00.193365695Z INFO:     10.0.2.2:46872 - "OPTIONS /api/v1/auth/register HTTP/1.1" 200 OK
+2025-12-25T13:48:00.813295418Z INFO:     10.0.2.2:46872 - "POST /api/v1/auth/register HTTP/1.1" 200 OK
+2025-12-25T13:48:02.861340194Z INFO:     10.0.2.2:46872 - "OPTIONS /api/v1/orgs HTTP/1.1" 200 OK
+2025-12-25T13:48:03.075889420Z INFO:     10.0.2.2:46872 - "GET /api/v1/orgs HTTP/1.1" 200 OK
+2025-12-25T13:48:04.901237785Z INFO:     10.0.2.2:46872 - "OPTIONS /api/v1/projects?org_id=858be0f1-ae98-42af-8c36-8dca45d3e58b HTTP/1.1" 200 OK
+2025-12-25T13:48:05.115152795Z INFO:     10.0.2.2:46872 - "GET /api/v1/projects?org_id=858be0f1-ae98-42af-8c36-8dca45d3e58b HTTP/1.1" 200 OK
+2025-12-25T13:48:23.153104586Z INFO:     10.0.2.2:51464 - "GET /api/v1/orgs HTTP/1.1" 200 OK
+2025-12-25T13:48:26.789334647Z INFO:     10.0.2.2:51464 - "OPTIONS /api/v1/projects HTTP/1.1" 200 OK
+2025-12-25T13:48:27.007105950Z DEBUG: Loading usage_service from /app/src/services/usage_service.py
+2025-12-25T13:48:27.007127830Z DEBUG: usage_service.check_limit called for projects
+2025-12-25T13:48:27.007132130Z INFO:     10.0.2.2:51464 - "POST /api/v1/projects HTTP/1.1" 500 Internal Server Error
+2025-12-25T13:48:27.014509670Z ERROR:    Exception in ASGI application
+2025-12-25T13:48:27.014530610Z Traceback (most recent call last):
+2025-12-25T13:48:27.014569100Z   File "/usr/local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+2025-12-25T13:48:27.014573581Z     result = await app(  # type: ignore[func-returns-value]
+2025-12-25T13:48:27.014577291Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.014580561Z   File "/usr/local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+2025-12-25T13:48:27.014583881Z     return await self.app(scope, receive, send)
+2025-12-25T13:48:27.014587022Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.014605601Z   File "/usr/local/lib/python3.12/site-packages/fastapi/applications.py", line 1135, in __call__
+2025-12-25T13:48:27.014609071Z     await super().__call__(scope, receive, send)
+2025-12-25T13:48:27.014612231Z   File "/usr/local/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
+2025-12-25T13:48:27.014868123Z     await self.middleware_stack(scope, receive, send)
+2025-12-25T13:48:27.014877784Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+2025-12-25T13:48:27.014894964Z     raise exc
+2025-12-25T13:48:27.014897824Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+2025-12-25T13:48:27.014909074Z     await self.app(scope, receive, _send)
+2025-12-25T13:48:27.014911694Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 191, in __call__
+2025-12-25T13:48:27.014914474Z     with recv_stream, send_stream, collapse_excgroups():
+2025-12-25T13:48:27.014916984Z                                    ^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.014919474Z   File "/usr/local/lib/python3.12/contextlib.py", line 158, in __exit__
+2025-12-25T13:48:27.014922034Z     self.gen.throw(value)
+2025-12-25T13:48:27.014924614Z   File "/usr/local/lib/python3.12/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+2025-12-25T13:48:27.014927214Z     raise exc
+2025-12-25T13:48:27.014929614Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 193, in __call__
+2025-12-25T13:48:27.014932194Z     response = await self.dispatch_func(request, call_next)
+2025-12-25T13:48:27.014934794Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.014937344Z   File "/app/src/main.py", line 216, in track_requests
+2025-12-25T13:48:27.014939784Z     response = await call_next(request)
+2025-12-25T13:48:27.014942204Z                ^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.014944634Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 168, in call_next
+2025-12-25T13:48:27.014959114Z     raise app_exc from app_exc.__cause__ or app_exc.__context__
+2025-12-25T13:48:27.014963244Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+2025-12-25T13:48:27.014965924Z     await self.app(scope, receive_or_disconnect, send_no_error)
+2025-12-25T13:48:27.014968464Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
+2025-12-25T13:48:27.014971374Z     await self.simple_response(scope, receive, send, request_headers=headers)
+2025-12-25T13:48:27.014973944Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+2025-12-25T13:48:27.014976864Z     await self.app(scope, receive, send)
+2025-12-25T13:48:27.014979544Z   File "/usr/local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+2025-12-25T13:48:27.014982354Z     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+2025-12-25T13:48:27.014984994Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+2025-12-25T13:48:27.014987914Z     raise exc
+2025-12-25T13:48:27.014990394Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+2025-12-25T13:48:27.014998384Z     await app(scope, receive, sender)
+2025-12-25T13:48:27.015001274Z   File "/usr/local/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+2025-12-25T13:48:27.015004114Z     await self.app(scope, receive, send)
+2025-12-25T13:48:27.015006904Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+2025-12-25T13:48:27.015009764Z     await self.middleware_stack(scope, receive, send)
+2025-12-25T13:48:27.015012474Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+2025-12-25T13:48:27.015015294Z     await route.handle(scope, receive, send)
+2025-12-25T13:48:27.015018234Z   File "/usr/local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+2025-12-25T13:48:27.015021195Z     await self.app(scope, receive, send)
+2025-12-25T13:48:27.015023965Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 119, in app
+2025-12-25T13:48:27.015026945Z     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+2025-12-25T13:48:27.015029775Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+2025-12-25T13:48:27.015032625Z     raise exc
+2025-12-25T13:48:27.015035355Z   File "/usr/local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+2025-12-25T13:48:27.015038255Z     await app(scope, receive, sender)
+2025-12-25T13:48:27.015041205Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 105, in app
+2025-12-25T13:48:27.015044245Z     response = await f(request)
+2025-12-25T13:48:27.015046885Z                ^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015050075Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 426, in app
+2025-12-25T13:48:27.015052935Z     raw_response = await run_endpoint_function(
+2025-12-25T13:48:27.015055695Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015058485Z   File "/usr/local/lib/python3.12/site-packages/fastapi/routing.py", line 314, in run_endpoint_function
+2025-12-25T13:48:27.015061355Z     return await run_in_threadpool(dependant.call, **values)
+2025-12-25T13:48:27.015064135Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015066865Z   File "/usr/local/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
+2025-12-25T13:48:27.015069735Z     return await anyio.to_thread.run_sync(func)
+2025-12-25T13:48:27.015088145Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015093505Z   File "/usr/local/lib/python3.12/site-packages/anyio/to_thread.py", line 61, in run_sync
+2025-12-25T13:48:27.015096215Z     return await get_async_backend().run_sync_in_worker_thread(
+2025-12-25T13:48:27.015098795Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015106415Z   File "/usr/local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2525, in run_sync_in_worker_thread
+2025-12-25T13:48:27.015109045Z     return await future
+2025-12-25T13:48:27.015111515Z            ^^^^^^^^^^^^
+2025-12-25T13:48:27.015113855Z   File "/usr/local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
+2025-12-25T13:48:27.015116565Z     result = context.run(func, *args)
+2025-12-25T13:48:27.015119165Z              ^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015121515Z   File "/app/src/api/v1/projects.py", line 97, in create
+2025-12-25T13:48:27.015124375Z     return create_project(db, custom_domain=custom_domain, name=name, org_id=target_org_id)
+2025-12-25T13:48:27.015127045Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015129435Z   File "/app/src/services/project_service.py", line 108, in create_project
+2025-12-25T13:48:27.015131985Z     raise e
+2025-12-25T13:48:27.015134295Z   File "/app/src/services/project_service.py", line 87, in create_project
+2025-12-25T13:48:27.015136845Z     provision_output = provision_project(project_id, secrets, custom_domain=custom_domain)
+2025-12-25T13:48:27.015139585Z                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015142405Z   File "/app/src/services/provisioning_service.py", line 36, in provision_project
+2025-12-25T13:48:27.015145115Z     return _provider.provision(project_id, secrets, custom_domain=custom_domain)
+2025-12-25T13:48:27.015147555Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-12-25T13:48:27.015150605Z   File "/app/src/services/provisioning_local.py", line 50, in provision
+2025-12-25T13:48:27.015153115Z     raise FileNotFoundError(f"Project template not found at {template_dir}")
+2025-12-25T13:48:27.015155625Z FileNotFoundError: Project template not found at /app/data-plane/project-template
