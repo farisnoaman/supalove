@@ -7,6 +7,7 @@ import { Plug, Circle } from "lucide-react";
 import { ConnectProjectModal } from "./ConnectProjectModal";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { UserNav } from "./UserNav";
 
 export function ProjectHeader() {
     const params = useParams();
@@ -69,13 +70,7 @@ export function ProjectHeader() {
                         <span>Connect</span>
                     </Button>
 
-                    <Link
-                        href="/settings/profile"
-                        className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold ring-2 ring-emerald-500/20 hover:ring-emerald-500/50 transition-all cursor-pointer"
-                        title="Profile Settings"
-                    >
-                        U
-                    </Link>
+                    <UserNav />
                 </div>
             </header>
 

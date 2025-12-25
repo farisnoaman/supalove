@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { OrgSwitcher } from "@/components/OrgSwitcher";
 import { useOrg } from "@/components/providers/org-provider";
 import { useState } from "react";
+import { UserNav } from "./UserNav";
 
 export function OrgSidebar() {
     const pathname = usePathname();
@@ -91,9 +92,10 @@ export function OrgSidebar() {
                 >
                     <Menu size={20} />
                 </button>
-                <div className="font-semibold tracking-tight cursor-default select-none">
+                <div className="font-semibold tracking-tight cursor-default select-none flex-1">
                     {currentOrg.name}
                 </div>
+                <UserNav />
             </header>
 
             {/* Mobile Overlay */}

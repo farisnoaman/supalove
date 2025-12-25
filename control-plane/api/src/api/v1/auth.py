@@ -82,7 +82,11 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     db.commit()
 
     # 5. Generate Token
-    access_token = AuthService.create_access_token(data={"sub": new_user.id})
+    access_token = AuthService.create_access_token(data={
+        "sub": new_user.id,
+        "email": new_user.email,
+        "name": new_user.full_name
+    })
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/login", response_model=Token)
@@ -95,7 +99,11 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    access_token = AuthService.create_access_token(data={"sub": user.id})
+    access_token = AuthService.create_access_token(data={
+        "sub": user.id,
+        "email": user.email,
+        "name": user.full_name
+    })
     return {"access_token": access_token, "token_type": "bearer"}
 
 # TODO: Add /me endpoint with authentication dependency
