@@ -8,6 +8,7 @@ minio
 requests
 python-dotenv
 passlib[bcrypt]
+bcrypt<4.1.0
 python-jose[cryptography]
 python-multipart
 stripe
