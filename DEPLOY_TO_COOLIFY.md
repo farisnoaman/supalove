@@ -22,9 +22,9 @@ This guide explains how to deploy Supalove to your Coolify instance.
     *   **Start Command**: (Leave default)
 7.  **Environment Variables**:
     You can leave the defaults or override them in the specific secrets section:
-    *   `POSTGRES_PASSWORD` (Generate a strong one)
-    *   `KEYCLOAK_ADMIN_PASSWORD` (Generate a strong one)
     *   `MINIO_ROOT_PASSWORD` (Generate a strong one)
+    *   `NEXT_PUBLIC_API_URL` (Required build variable) - Set this to the public URL of your API (e.g., `https://api.supalove.yourdomain.com`).
+        *   **Crucial**: In Coolify, ensure this is set in the **Environment Variables** section. Since we configured it as a build argument in `docker-compose.coolify.yml`, Coolify will pass it during the build process.
 8.  **Expose Services**:
     *   **Dashboard**: Port `3000`. Assign a domain (e.g., `https://supalove.yourdomain.com`).
     *   **API**: Port `8000`. Assign a domain (e.g., `https://api.supalove.yourdomain.com`).

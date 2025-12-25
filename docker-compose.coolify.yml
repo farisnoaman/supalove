@@ -45,22 +45,12 @@ services:
   dashboard:
     build:
       context: ./dashboard
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000/api/v1}
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=${URL:-http://localhost:3000}/api/v1 # Assuming unified proxy or direct access
-      # On Coolify, we might usually put Nginx in front, or expose API separately.
-      # For simplicity in V1: Dashboard talks to API container internally for SSR, 
-      # but Client-side fetch needs public URL.
-      # If deploying as single stack, Dashboard is the entrypoint. 
-      # complex setup might need Nginx reverse proxy. 
-      # For now, let's assume API is accessible via internal network for SSR 
-      # and we might need to expose API on a different port or path if client hits it directly.
-      # WAITING: For this iteration, we assume the user might expose API service in Coolify UI 
-      # or use the Dashboard as the main entry. 
-      # Let's direct client-side calls to the relative path /api/v1 if we had a reverse proxy, 
-      # but without it, we might need the API public URL.
-      - INTERNAL_API_URL=http://api:8000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000/api/v1}
     depends_on:
       - api
 
