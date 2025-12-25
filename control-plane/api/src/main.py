@@ -1,15 +1,17 @@
-
 import sys
 import os
 from pathlib import Path
 
-# In Docker: /app/src/main.py -> parents[1] = /app
-# Locally: .../supalove/control-plane/api/src/main.py -> parents[3] = .../supalove
-# We try parents[3] first (local), fallback to parents[1] (Docker)
+# Fix path to include 'src' directory so we can import 'api', 'core', 'models' directly
+# main.py is in src/, so parent is src/
+CURRENT_DIR = Path(__file__).resolve().parent
+sys.path.append(str(CURRENT_DIR))
+
+# Also add project root for potential other imports
 try:
-    ROOT = Path(__file__).resolve().parents[3]
+    ROOT = Path(__file__).resolve().parents[3] # Local: supalove/
 except IndexError:
-    ROOT = Path(__file__).resolve().parents[1]
+    ROOT = Path(__file__).resolve().parents[1] # Docker: /app (root of copy)
 sys.path.append(str(ROOT))
 
 from fastapi import FastAPI
