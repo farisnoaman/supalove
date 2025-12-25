@@ -88,22 +88,69 @@ class LocalProvisioner(Provisioner):
         env_file = project_dir / ".env"
         env_file.write_text(env_content)
 
-        # Start the Docker containers
+        # Start the Docker containers using a robust strategy for Docker-in-Docker:
+        # 1. Create containers (without starting) so we can copy files into them
+        # 2. Copy config files using `docker cp` (bypassing volume mount issues)
+        # 3. Start containers
         import subprocess
         try:
+            print(f"Creating containers for project {project_id}...")
+            # 1. Create
+            subprocess.run(
+                ["docker", "compose", "create"],
+                cwd=project_dir,
+                capture_output=True,
+                check=True,
+                timeout=300
+            )
+
+            # 2. Copy configs
+            # Note: Container names are predictable: <project_id>-<service>-1
+            # We assume default naming convention. If this fails, we might need to inspect `docker compose ps`
+            
+            # Helper to copy files
+            def docker_cp(src: Path, container_name: str, dest_path: str):
+                cmd = ["docker", "cp", str(src), f"{container_name}:{dest_path}"]
+                print(f"Copying {src} to {container_name}:{dest_path}")
+                cp_res = subprocess.run(cmd, capture_output=True, text=True)
+                if cp_res.returncode != 0:
+                    print(f"Warning: Failed to copy {src} to {container_name}: {cp_res.stderr}")
+                    # Don't raise immediately, try to proceed, maybe container name differs
+            
+            # Copy Postgres Init Scripts
+            # These must be actionable before the DB first starts
+            docker_cp(project_dir / "postgres" / "init.sh", f"{project_id}-postgres-1", "/docker-entrypoint-initdb.d/00-init.sh")
+            docker_cp(project_dir / "postgres" / "fix_passwords.sh", f"{project_id}-postgres-1", "/docker-entrypoint-initdb.d/zz-fix-passwords.sh")
+
+            # Copy Gateway Nginx Config
+            docker_cp(project_dir / "nginx.conf", f"{project_id}-gateway-1", "/etc/nginx/nginx.conf")
+
+            # Copy Functions Code
+            # For functions, we copy the whole directory content to /functions
+            # The working dir is /functions
+            docker_cp(project_dir / "functions", f"{project_id}-functions-1", "/")
+
+            # 3. Start
+            print(f"Starting containers for project {project_id}...")
             result = subprocess.run(
-                ["docker", "compose", "up", "-d"],
+                ["docker", "compose", "start"],
                 cwd=project_dir,
                 capture_output=True,
                 text=True,
-                timeout=300  # Increased from 60s to 300s to allow image pull
+                timeout=300
             )
 
             if result.returncode != 0:
                 print(f"Failed to start containers: {result.stderr}")
                 raise Exception(f"Docker compose failed: {result.stderr}")
-
+                
             print(f"Successfully provisioned project {project_id} on ports: DB={db_port}, REST={rest_port}")
+
+        except subprocess.CalledProcessError as e:
+             # Capture stdout/stderr from the failed subprocess.run(check=True)
+             raise Exception(f"Docker command failed: {e.stderr if hasattr(e, 'stderr') else str(e)}")
+        except subprocess.TimeoutExpired:
+            raise Exception("Docker compose startup timed out")
 
         except subprocess.TimeoutExpired:
             raise Exception("Docker compose startup timed out")
