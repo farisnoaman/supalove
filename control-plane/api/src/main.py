@@ -1,5 +1,6 @@
 
 import sys
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -94,7 +95,7 @@ app = FastAPI(title="Supabase Cloud Clone", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In prod, specify the dashboard URL
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
