@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Rocket, Loader2 } from "lucide-react";
+import { ArrowLeft, Rocket, Loader2, Sparkles, Server } from "lucide-react";
 
 export default function NewProjectPage() {
     const [projectId, setProjectId] = useState("");
+    const [plan, setPlan] = useState<"shared" | "dedicated">("shared");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -27,7 +28,7 @@ export default function NewProjectPage() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ name: projectId }),
+                body: JSON.stringify({ name: projectId, plan }),
             });
 
             if (!resp.ok) {
@@ -60,6 +61,63 @@ export default function NewProjectPage() {
 
                 {!success ? (
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Plan Selection */}
+                        <div>
+                            <label className="block text-sm font-medium mb-3 text-muted-foreground">
+                                Select Plan
+                            </label>
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Shared Plan */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPlan("shared")}
+                                    className={`relative p-4 rounded-xl border-2 text-left transition-all ${plan === "shared"
+                                            ? "border-primary bg-primary/5 shadow-md"
+                                            : "border-muted hover:border-muted-foreground/30"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className={`p-2 rounded-lg ${plan === "shared" ? "bg-primary/10 text-primary" : "bg-muted"}`}>
+                                            <Sparkles size={18} />
+                                        </div>
+                                        <span className="font-bold">Shared</span>
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Free</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Shared infrastructure. Perfect for development and small projects.
+                                    </p>
+                                    {plan === "shared" && (
+                                        <div className="absolute top-2 right-2 w-3 h-3 bg-primary rounded-full" />
+                                    )}
+                                </button>
+
+                                {/* Dedicated Plan */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPlan("dedicated")}
+                                    className={`relative p-4 rounded-xl border-2 text-left transition-all ${plan === "dedicated"
+                                            ? "border-primary bg-primary/5 shadow-md"
+                                            : "border-muted hover:border-muted-foreground/30"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className={`p-2 rounded-lg ${plan === "dedicated" ? "bg-primary/10 text-primary" : "bg-muted"}`}>
+                                            <Server size={18} />
+                                        </div>
+                                        <span className="font-bold">Dedicated</span>
+                                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Premium</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Isolated Docker stack. Best for production workloads.
+                                    </p>
+                                    {plan === "dedicated" && (
+                                        <div className="absolute top-2 right-2 w-3 h-3 bg-primary rounded-full" />
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Project Name */}
                         <div>
                             <label htmlFor="projectId" className="block text-sm font-medium mb-2 text-muted-foreground">
                                 Project Name / ID
@@ -92,12 +150,12 @@ export default function NewProjectPage() {
                             {loading ? (
                                 <>
                                     <Loader2 className="animate-spin" size={20} />
-                                    Provisioning Infrastructure...
+                                    {plan === "shared" ? "Creating Database..." : "Provisioning Infrastructure..."}
                                 </>
                             ) : (
                                 <>
                                     <Rocket size={20} />
-                                    Create Project
+                                    Create {plan === "shared" ? "Shared" : "Dedicated"} Project
                                 </>
                             )}
                         </button>
@@ -108,13 +166,21 @@ export default function NewProjectPage() {
                             <div className="bg-green-100 p-2 rounded-full">✅</div>
                             <div>
                                 <h4 className="font-bold">Project Provisioned Successfully!</h4>
-                                <p className="text-sm opacity-90">Your new Supabase instance is ready.</p>
+                                <p className="text-sm opacity-90">
+                                    Your new {resultData?.plan === "shared" ? "shared" : "dedicated"} Supabase instance is ready.
+                                </p>
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <h5 className="font-semibold text-muted-foreground uppercase text-xs tracking-wider">Credentials & Endpoints</h5>
                             <div className="grid gap-3">
+                                {resultData?.plan && (
+                                    <div className="p-4 bg-muted border rounded-lg">
+                                        <div className="text-xs text-muted-foreground mb-1">Plan</div>
+                                        <div className="font-mono text-sm capitalize">{resultData?.plan}</div>
+                                    </div>
+                                )}
                                 <div className="p-4 bg-muted border rounded-lg">
                                     <div className="text-xs text-muted-foreground mb-1">API URL</div>
                                     <div className="font-mono text-sm break-all">{resultData?.api_url}</div>
@@ -144,3 +210,4 @@ export default function NewProjectPage() {
         </div>
     );
 }
+

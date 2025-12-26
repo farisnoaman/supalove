@@ -23,6 +23,7 @@ class ProjectCreate(BaseModel):
     custom_domain: str = None
     name: str = None
     org_id: str = None
+    plan: str = "shared"  # "shared" or "dedicated"
 
 @router.get("")
 def list_projects(
@@ -92,9 +93,10 @@ def create(
 
     custom_domain = project.custom_domain if project else None
     name = project.name if project else None
+    plan = project.plan if project else "shared"
 
-    # Pass org_id to service
-    return create_project(db, custom_domain=custom_domain, name=name, org_id=target_org_id)
+    # Pass org_id and plan to service
+    return create_project(db, custom_domain=custom_domain, name=name, org_id=target_org_id, plan=plan)
 
 @router.post("/{project_id}/stop")
 def stop(

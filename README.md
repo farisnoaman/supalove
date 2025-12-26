@@ -20,6 +20,8 @@ A fully self-hosted, multi-tenant backend-as-a-service platform that provides 10
 | **Storage** | ✅ | S3-compatible file storage |
 | **Edge Functions** | ✅ | Deno TypeScript runtime |
 | **Multi-Tenancy** | ✅ | Isolated project stacks per user |
+| **Shared Plan** | ✅ | Free tier with shared infrastructure |
+| **Dedicated Plan** | ✅ | Premium tier with isolated Docker stack |
 | **Dashboard** | ✅ | Next.js 16 management UI |
 | **Billing** | ✅ | Stripe integration ready |
 
@@ -101,6 +103,7 @@ See [DEPLOY_TO_COOLIFY.md](./DEPLOY_TO_COOLIFY.md) for one-click deployment.
 | Document | Description |
 |----------|-------------|
 | [Architecture](./docs/ARCHITECTURE.md) | System design and components |
+| [Shared Plan Architecture](./docs/SHARED_PLAN_ARCHITECTURE.md) | Shared vs Dedicated plans |
 | [API Reference](./docs/API.md) | REST API endpoints |
 | [Deployment Guide](./DEPLOY_TO_COOLIFY.md) | Coolify deployment instructions |
 | [CLI Documentation](./CLI_docs.md) | Command-line interface |

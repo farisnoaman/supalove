@@ -1,0 +1,176 @@
+# Shared Stack for Supalove
+# This runs shared services that serve multiple shared-plan projects
+
+services:
+  # ============================================
+  # SHARED DATABASE CLUSTER
+  # ============================================
+  shared-postgres:
+    image: supabase/postgres:15.8.1.085
+    container_name: supalove_shared_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${SHARED_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: postgres
+    ports:
+      - "${SHARED_POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - shared_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  # ============================================
+  # SHARED ROUTING GATEWAY
+  # Routes requests to correct database based on project ID
+  # ============================================
+  shared-gateway:
+    build:
+      context: ./routing-proxy
+      dockerfile: Dockerfile
+    container_name: supalove_shared_gateway
+    restart: unless-stopped
+    environment:
+      # Control plane API for project lookups
+      CONTROL_PLANE_URL: ${CONTROL_PLANE_URL:-http://host.docker.internal:8000}
+      # Shared Postgres connection
+      SHARED_POSTGRES_HOST: shared-postgres
+      SHARED_POSTGRES_PORT: 5432
+      SHARED_POSTGRES_USER: postgres
+      SHARED_POSTGRES_PASSWORD: ${SHARED_POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${SHARED_GATEWAY_PORT:-8080}:8000"
+    depends_on:
+      shared-postgres:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ============================================
+  # SHARED AUTH SERVICE (GoTrue)
+  # Multi-tenant auth supporting all shared projects
+  # ============================================
+  shared-auth:
+    image: supabase/gotrue:v2.184.0
+    container_name: supalove_shared_auth
+    restart: unless-stopped
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${SHARED_GATEWAY_URL:-http://localhost:8080}
+      GOTRUE_DB_DRIVER: postgres
+      # Note: Database URL is set dynamically per request via the routing proxy
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:${SHARED_POSTGRES_PASSWORD:-postgres}@shared-postgres:5432/postgres
+      GOTRUE_SITE_URL: ${SITE_URL:-http://localhost:3000}
+      GOTRUE_URI_ALLOW_LIST: "*"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${SHARED_JWT_SECRET:-your-super-secret-jwt-key-for-shared}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health" ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    depends_on:
+      shared-postgres:
+        condition: service_healthy
+
+  # ============================================
+  # SHARED REST API (PostgREST)
+  # Proxied through routing gateway for multi-tenancy
+  # ============================================
+  shared-api:
+    image: postgrest/postgrest:v12.2.3
+    container_name: supalove_shared_api
+    restart: unless-stopped
+    environment:
+      # Base connection - routing proxy handles DB switching
+      PGRST_DB_URI: postgresql://authenticator:${SHARED_POSTGRES_PASSWORD:-postgres}@shared-postgres:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${SHARED_JWT_SECRET:-your-super-secret-jwt-key-for-shared}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+    depends_on:
+      shared-postgres:
+        condition: service_healthy
+
+  # ============================================
+  # SHARED STORAGE SERVICE
+  # ============================================
+  shared-storage:
+    image: supabase/storage-api:v1.33.0
+    container_name: supalove_shared_storage
+    restart: unless-stopped
+    volumes:
+      - shared_storage_data:/var/lib/storage
+    environment:
+      ANON_KEY: ${SHARED_ANON_KEY:-placeholder}
+      SERVICE_KEY: ${SHARED_SERVICE_ROLE_KEY:-placeholder}
+      POSTGREST_URL: http://shared-api:3000
+      PGRST_JWT_SECRET: ${SHARED_JWT_SECRET:-your-super-secret-jwt-key-for-shared}
+      DATABASE_URL: postgres://postgres:${SHARED_POSTGRES_PASSWORD:-postgres}@shared-postgres:5432/postgres
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: shared
+      REGION: local
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/status" ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    depends_on:
+      shared-postgres:
+        condition: service_healthy
+      shared-api:
+        condition: service_started
+
+  # ============================================
+  # SHARED REALTIME SERVICE
+  # ============================================
+  shared-realtime:
+    image: supabase/realtime:v2.68.0
+    container_name: supalove_shared_realtime
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      DB_HOST: shared-postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${SHARED_POSTGRES_PASSWORD:-postgres}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+      DB_ENC_KEY: supabaserealtime
+      API_JWT_SECRET: ${SHARED_JWT_SECRET:-your-super-secret-jwt-key-for-shared}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-ChangeThisToAVeryLongRandomString}
+      ERL_AFLAGS: -proto_dist inet_tcp
+      DNS_NODES: "''"
+      APP_NAME: realtime
+      SEED_SELF_HOST: "true"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -sSfL --head -o /dev/null http://localhost:4000/api/tenants/realtime-dev/health || exit 0" ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    depends_on:
+      shared-postgres:
+        condition: service_healthy
+
+volumes:
+  shared_postgres_data:
+  shared_storage_data:
+
+
+networks:
+  default:
+    name: supalove_shared_net
+    driver: bridge

@@ -12,6 +12,15 @@ class ProjectStatus(str, enum.Enum):
     DELETING = "deleting"         # Cleanup in progress
     DELETED = "deleted"           # Soft deleted / fully removed
 
+class ProjectPlan(str, enum.Enum):
+    SHARED = "shared"       # Runs on shared infrastructure
+    DEDICATED = "dedicated" # Isolated Docker stack per project
+
+class BackendType(str, enum.Enum):
+    LOCAL_DOCKER = "local_docker"     # Local Docker Compose
+    SHARED_CLUSTER = "shared_cluster" # Shared Postgres cluster
+    COOLIFY = "coolify"               # Coolify deployment
+
 class Project(Base):
     __tablename__ = "projects"
 
@@ -23,3 +32,9 @@ class Project(Base):
     status = Column(Enum(ProjectStatus), default=ProjectStatus.CREATING)
     last_error = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Shared plan support
+    plan = Column(Enum(ProjectPlan), default=ProjectPlan.SHARED)  # Default to shared
+    backend_type = Column(Enum(BackendType), default=BackendType.SHARED_CLUSTER)
+    db_name = Column(String, nullable=True)  # Database name in shared cluster
+
