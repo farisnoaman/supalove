@@ -148,6 +148,12 @@ def dev_upgrade_plan(
     
     if not member:
         raise HTTPException(status_code=403, detail="Only owners can manage billing")
+        
+    # Validate plan exists
+    from models.plan import Plan
+    plan_exists = db.query(Plan).filter(Plan.id == req.plan_id).first()
+    if not plan_exists:
+        raise HTTPException(status_code=400, detail=f"Plan '{req.plan_id}' does not exist")
     
     # Update or create subscription
     sub = db.query(Subscription).filter(Subscription.org_id == org_id).first()

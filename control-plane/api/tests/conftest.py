@@ -37,11 +37,27 @@ def db(db_engine):
     connection = db_engine.connect()
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
+
+    # Begin a nested transaction (SAVEPOINT)
+    nested = connection.begin_nested()
+
+    # If the application code calls session.commit, it will pop the SAVEPOINT
+    # but not commit the outer transaction. 
+    # However, SQLAlchemy's session.commit() commits the transaction created by session. 
+    # To be safe, we often patch commit to flush.
+    
+    # We will NOT patch commit here to simulate real transaction behavior within the savepoint
+    # if using session.begin_nested(). But session.commit() usually commits the WHOLE thing.
+    
+    # EASIER: Patch session.commit to do nothing but flush
+    original_commit = session.commit
+    session.commit = session.flush
     
     yield session
     
+    session.rollback() # Rollback changes in session
     session.close()
-    transaction.rollback()
+    transaction.rollback() # Rollback the outer transaction
     connection.close()
 
 @pytest.fixture(scope="function")
