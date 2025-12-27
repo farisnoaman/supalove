@@ -110,52 +110,54 @@ Each organization gets a **Dedicated Cluster**, which includes:
 
 ---
 
-### Architecture Diagram
+## Visualizing the Difference
+
+### Shared Architecture (Free & Pro)
 
 ```mermaid
-flowchart TD
-    %% Users
-    UserA("👤 User A (Free)")
-    UserB("👤 User B (Pro)")
-    UserC("👤 User C (Premium)")
+graph TD
+    UserA[User A (Free)] --> Gateway
+    UserB[User B (Pro)] --> Gateway
 
-    %% Global Shared Cluster
-    subgraph GlobalShared["🌐 Global Shared Cluster"]
-        direction TB
-        Gateway("🔀 Routing Gateway")
-        SharedAPI("⚙️ Shared PostgREST")
-        SharedAuth("🔐 Shared GoTrue")
-        
-        SharedDB[("🗄️ Shared Postgres")]
-        
-        subgraph LogicalDBs["📂 Postgres Logical DBs"]
-            DBA[("Project A DB")]
-            DBB[("Project B DB")]
+    subgraph "Global Shared Cluster"
+        Gateway[Routing Gateway]
+        SharedAPI[Shared PostgREST]
+        SharedAuth[Shared GoTrue]
+
+        Gateway --> SharedAPI
+        Gateway --> SharedAuth
+
+        SharedAPI --> SharedDB[(Shared Postgres)]
+        SharedAuth --> SharedDB
+
+        subgraph "Postgres Logical DBs"
+            DBA[Project A DB]
+            DBB[Project B DB]
         end
     end
-
-    %% Private Org Cluster
-    subgraph PrivateCluster["🛡️ Private Org Cluster"]
-        direction TB
-        PrivateGateway("🔀 Private Gateway")
-        PrivateAPI("⚙️ Private PostgREST")
-        PrivateAuth("🔐 Private GoTrue")
-        DedicatedDB[("🗄️ Dedicated Postgres")]
-    end
-
-    %% Connections - Global
-    UserA --> Gateway
-    UserB --> Gateway
-    Gateway --> SharedAPI & SharedAuth
-    SharedAPI & SharedAuth --> SharedDB
-    SharedDB -.-> LogicalDBs
-
-    %% Connections - Private
-    UserC --> PrivateGateway
-    PrivateGateway --> PrivateAPI & PrivateAuth
-    PrivateAPI & PrivateAuth --> DedicatedDB
-
-    %% Styling
-    style GlobalShared fill:#e6f3ff,stroke:#3399ff,stroke-width:2px
-    style PrivateCluster fill:#e6fffa,stroke:#00cc88,stroke-width:2px
 ```
+
+### Dedicated Architecture (Premium)
+
+```mermaid
+graph TD
+    UserC[User C (Premium)] --> PrivateGateway
+
+    subgraph "Private Org Cluster"
+        PrivateGateway[Private Gateway]
+        PrivateAPI[Private PostgREST]
+        PrivateAuth[Private GoTrue]
+
+        PrivateGateway --> PrivateAPI
+        PrivateGateway --> PrivateAuth
+
+        PrivateAPI --> PrivateDB[(Dedicated Postgres)]
+        PrivateAuth --> PrivateDB
+    end
+```
+
+
+
+
+
+![Visual Architecture Diagram](./images/visual_architecture.png)
