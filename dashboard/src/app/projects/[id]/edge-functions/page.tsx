@@ -301,7 +301,7 @@ export default function EdgeFunctionsPage() {
                 </ModalContent>
             </Modal>
 
-            <Toaster position="top-right" />
+            <Toaster richColors position="top-right" />
         </div>
     );
 }

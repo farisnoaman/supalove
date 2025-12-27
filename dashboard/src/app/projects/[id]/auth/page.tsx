@@ -402,7 +402,7 @@ export default function AuthPage() {
                 </ModalContent>
             </Modal>
 
-            <Toaster position="top-right" />
+            <Toaster richColors position="top-right" />
         </div>
     );
 }

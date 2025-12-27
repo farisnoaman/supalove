@@ -486,7 +486,7 @@ export default function StoragePage() {
                 </ModalContent>
             </Modal>
 
-            <Toaster position="top-right" />
+            <Toaster richColors position="top-right" />
         </div>
     );
 }

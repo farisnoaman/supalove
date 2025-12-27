@@ -258,7 +258,7 @@ export default function DatabasePage() {
             </div>
 
             {/* Toast Notifications */}
-            <Toaster position="top-right" />
+            <Toaster richColors position="top-right" />
         </div>
     );
 }

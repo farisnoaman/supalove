@@ -795,7 +795,7 @@ export default function TableDetailPage() {
                 }}
             />
 
-            <Toaster position="top-right" />
+            <Toaster richColors position="top-right" />
         </div>
     );
 }
