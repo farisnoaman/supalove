@@ -19,7 +19,7 @@ class OrgResponse(BaseModel):
     id: str
     name: str
     slug: str
-    plan: str
+    plan: Optional[str] = "free"  # Now derived from Entitlements, optional for backward compat
     role: str = None # User's role in this org
 
     class Config:

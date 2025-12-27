@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from models.organization import Organization
 from models.project import Project
-from models.resource_quota import ResourceQuota
 from models.usage_record import UsageRecord
+from fastapi import HTTPException
 
 print(f"DEBUG: Loading usage_service from {__file__}")
 
@@ -35,29 +35,34 @@ class UsageService:
         Checks if adding 'increment' to 'resource_type' would exceed the quota.
         resource_type: 'projects', 'db_size_mb', 'storage_mb'
         """
-        print(f"DEBUG: usage_service.check_limit called for {resource_type}")
-        return True # Bypass for testing
-        quota = self.db.query(ResourceQuota).filter_by(org_id=org_id).first()
-        if not quota:
-            # If no quota found, assume free tier limits as fallback or create one?
-            # For robustness, we should probably ensure quota exists. 
-            # If strictly enforcing, default to restrictive.
-            return False
-
-        usage = self.get_current_usage(org_id)
+        from services.entitlement_service import EntitlementService
         
         if resource_type == "projects":
-            return True # Bypass for testing
-            if quota.max_projects == -1: return True
-            return (usage["projects"] + increment) <= quota.max_projects
-            
-        elif resource_type == "db_size_mb":
-            if quota.max_db_size_mb == -1: return True
-            return (usage["db_size_mb"] + increment) <= quota.max_db_size_mb
+            # Use the canonical entitlement check
+            try:
+                # This throws HTTP 403 if failed, so we catch or just use boolean logic if we had it
+                # check_can_create_project raises exception.
+                # Let's see EntitlementService implementation.
+                EntitlementService.check_can_create_project(self.db, org_id)
+                return True
+            except HTTPException:
+                return False
+            except Exception:
+                # If plan allows unlimited (-1), check_can_create_project handles it.
+                return False
+
+        # For other resources, manually check against Plan
+        ent = EntitlementService.get_entitlements(self.db, org_id)
+        plan = EntitlementService.get_plan(self.db, ent.plan_id)
+        usage = self.get_current_usage(org_id)
+        
+        if resource_type == "db_size_mb":
+            if plan.max_db_size_mb == -1: return True
+            return (usage["db_size_mb"] + (increment * 50)) <= plan.max_db_size_mb
             
         elif resource_type == "storage_mb":
-            if quota.max_storage_mb == -1: return True
-            return (usage["storage_mb"] + increment) <= quota.max_storage_mb
+            if plan.max_storage_mb == -1: return True
+            return (usage["storage_mb"] + (increment * 100)) <= plan.max_storage_mb
 
         return True
 
@@ -65,19 +70,15 @@ class UsageService:
         """
         Returns usage vs limits for UI.
         """
-        usage = self.get_current_usage(org_id)
-        quota = self.db.query(ResourceQuota).filter_by(org_id=org_id).first()
+        from services.entitlement_service import EntitlementService
         
-        if not quota:
-            # Fallback defaults if row missing
-            defaults = ResourceQuota.get_defaults("free")
-            limit_projects = defaults["max_projects"]
-            limit_db = defaults["max_db_size_mb"]
-            limit_storage = defaults["max_storage_mb"]
-        else:
-            limit_projects = quota.max_projects
-            limit_db = quota.max_db_size_mb
-            limit_storage = quota.max_storage_mb
+        usage = self.get_current_usage(org_id)
+        ent = EntitlementService.get_entitlements(self.db, org_id)
+        plan = EntitlementService.get_plan(self.db, ent.plan_id)
+        
+        limit_projects = plan.max_projects
+        limit_db = plan.max_db_size_mb
+        limit_storage = plan.max_storage_mb
 
         return {
             "projects": {

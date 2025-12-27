@@ -38,61 +38,103 @@ def create_project(db: Session, custom_domain: str = None, name: str = None, org
         custom_domain: Optional custom domain for the project
         name: Project name
         org_id: Organization ID
-        plan: Either "shared" (default) or "dedicated"
+        plan: Explicit placement "shared" or "private" (was 'dedicated') or None to infer
     """
+    # 1️⃣ Check Entitlements
+    from services.entitlement_service import EntitlementService
+    EntitlementService.check_can_create_project(db, org_id)
+
+    # 2️⃣ Resolve Cluster
+    from services.cluster_service import ClusterService
+    from models.cluster import ClusterStatus
+    
+    # Determine explicit placement if provided
+    placement = None
+    if plan == "private":
+        placement = "private"
+    elif plan == "shared":
+        placement = "shared"
+        
+    cluster = ClusterService.resolve_cluster_for_project(db, org_id)
+    
     project_id = uuid.uuid4().hex[:12]
     
-    # Determine plan and backend type
-    project_plan = ProjectPlan.SHARED if plan == "shared" else ProjectPlan.DEDICATED
-    backend_type = BackendType.SHARED_CLUSTER if plan == "shared" else BackendType.LOCAL_DOCKER
-    db_name = f"project_{project_id}" if plan == "shared" else None
+    # Determine plan and backend type based on cluster
+    # Note: 'dedicated' in ProjectPlan is now essentially 'running in private cluster' or 'dedicated-single'
+    # For now, we map private_shared cluster projects to essentially look like 'shared' backend type 
+    # but routed to a different URL.
+    
+    # However, to keep compatible with "Private Shared" architecture:
+    # Projects in private shared cluster share the cluster resources but have own DBs.
+    
+    project_status = ProjectStatus.CREATING
+    
+    # If using Global Cluster -> BackendType.shared_cluster
+    # If using Private Cluster -> BackendType.shared_cluster (but different host)
+    
+    backend_type = BackendType.shared_cluster
+    db_name = f"project_{project_id}"
 
     try:
-        # 1️⃣ Create project in 'CREATING' state
+        # 3️⃣ Create project record
         project = Project(
             id=project_id,
             name=name,
             org_id=org_id,
-            status=ProjectStatus.CREATING,
-            plan=project_plan,
+            cluster_id=cluster.id,
+            status=project_status,
+            plan=ProjectPlan.shared, # All projects are 'shared' resource usage wise (db only), unless dedicated_single
             backend_type=backend_type,
             db_name=db_name,
+            placement=placement
         )
         db.add(project)
         db.commit()
 
-        # Update to 'PROVISIONING'
-        project.status = ProjectStatus.PROVISIONING
-        db.commit()
-
-        # 2️⃣ Generate base secrets
-        secrets = generate_project_secrets(db, project_id)
-
+        # 4️⃣ Generate secrets
+        secrets = generate_project_secrets(db, project_id, plan="shared")
         if custom_domain:
             secrets["CUSTOM_DOMAIN"] = custom_domain
-
         db.commit()
 
-        # 3️⃣ Branch based on plan
-        if project_plan == ProjectPlan.SHARED:
-            # Shared plan: Create database in shared cluster, no containers
-            provision_output = provision_shared_project(db, project, secrets)
-        else:
-            # Dedicated plan: Full Docker stack provisioning
-            provision_output = provision_project(project_id, secrets, custom_domain=custom_domain)
-
-        # 4️⃣ Mark running
-        project.status = ProjectStatus.RUNNING
-        db.commit()
-        db.refresh(project)
+        # 5️⃣ Provisioning Logic
+        # If cluster is creating, we MUST wait (Async)
+        if cluster.status == ClusterStatus.creating:
+            # Leave as CREATING. Scheduler will pick up Cluster provisioning.
+            # We also need a way for Project to transition to RUNNING once Cluster is ready.
+            # For now, let's assume Scheduler also checks "Creating" projects in "Running" clusters?
+            # Or simpler: The API returns creating, FE polls. 
+            pass
+        
+        elif cluster.status == ClusterStatus.running:
+            # Cluster ready, provision immediately
+            project.status = ProjectStatus.PROVISIONING
+            db.commit()
+            
+            # Provision project DB in the resolved cluster
+            provision_output = provision_shared_project(db, project, cluster, secrets)
+            
+            project.status = ProjectStatus.RUNNING
+            EntitlementService.increment_project_count(db, org_id)
+            db.commit()
+            db.refresh(project)
+            
+            return {
+                "id": project_id,
+                "status": project.status,
+                "plan": project.plan.value,
+                "api_url": provision_output.get("api_url"),
+                "db_url": provision_output.get("db_url"),
+            }
 
         return {
             "id": project_id,
             "status": project.status,
             "plan": project.plan.value,
-            "api_url": provision_output.get("api_url"),
-            "db_url": provision_output.get("db_url"),
+            "api_url": None, # Not ready
+            "db_url": None,
         }
+        
     except Exception as e:
         db.rollback()
         # Mark as failed and store error
@@ -111,7 +153,7 @@ def stop_project(db: Session, project_id: str):
         return None
 
     # Shared projects don't have containers to stop
-    if project.plan == ProjectPlan.DEDICATED:
+    if project.plan == ProjectPlan.dedicated:
         provision_stop(project_id)
     
     project.status = ProjectStatus.STOPPED
@@ -126,7 +168,7 @@ def start_project(db: Session, project_id: str):
         return None
 
     # Shared projects don't have containers to start
-    if project.plan == ProjectPlan.DEDICATED:
+    if project.plan == ProjectPlan.dedicated:
         provision_start(project_id)
     
     project.status = ProjectStatus.RUNNING
@@ -144,7 +186,7 @@ def delete_project(db: Session, project_id: str):
     db.commit()
 
     # Only destroy containers for dedicated projects
-    if project.plan == ProjectPlan.DEDICATED:
+    if project.plan == ProjectPlan.dedicated:
         provision_delete(project_id)
     else:
         # For shared projects, drop the database from the shared cluster
@@ -163,7 +205,7 @@ def restore_project(db: Session, project_id: str):
         return None
 
     # Only restore containers for dedicated projects
-    if project.plan == ProjectPlan.DEDICATED:
+    if project.plan == ProjectPlan.dedicated:
         provision_restore(project_id)
     
     # Restored projects are essentially stopped until started explicitly

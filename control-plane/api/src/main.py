@@ -37,10 +37,10 @@ from models.edge_function import EdgeFunction
 from models.user import User
 from models.organization import Organization
 from models.org_member import OrgMember
-from models.resource_quota import ResourceQuota
 from models.project_user import ProjectUser # Import new model
 from models.subscription import Subscription
 from models.invoice import Invoice
+from models.organization_entitlement import OrganizationEntitlement
 from models.usage_record import UsageRecord
 
 Base.metadata.create_all(bind=engine)

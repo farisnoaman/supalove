@@ -18,13 +18,13 @@ from models.project import Project
 
 # Shared cluster connection settings (from environment or defaults)
 SHARED_POSTGRES_HOST = os.getenv("SHARED_POSTGRES_HOST", "localhost")
-SHARED_POSTGRES_PORT = int(os.getenv("SHARED_POSTGRES_PORT", "5433"))
+SHARED_POSTGRES_PORT = int(os.getenv("SHARED_POSTGRES_PORT", "5435"))
 SHARED_POSTGRES_USER = os.getenv("SHARED_POSTGRES_USER", "postgres")
 SHARED_POSTGRES_PASSWORD = os.getenv("SHARED_POSTGRES_PASSWORD", "postgres")
 SHARED_POSTGRES_ADMIN_DB = os.getenv("SHARED_POSTGRES_ADMIN_DB", "postgres")
 
 # Shared gateway URL for API access
-SHARED_GATEWAY_URL = os.getenv("SHARED_GATEWAY_URL", "http://localhost:8080")
+SHARED_GATEWAY_URL = os.getenv("SHARED_GATEWAY_URL", "http://localhost:8081")
 
 
 def get_admin_connection():
@@ -38,15 +38,20 @@ def get_admin_connection():
     )
 
 
-def create_project_database(db_name: str, db_password: str) -> None:
+def get_custom_connection(host, port, dbname=None, user=None, password=None):
+    return psycopg2.connect(
+        host=host,
+        port=port,
+        user=user or SHARED_POSTGRES_USER,
+        password=password or SHARED_POSTGRES_PASSWORD,
+        dbname=dbname or SHARED_POSTGRES_ADMIN_DB,
+    )
+
+def create_project_database(db_name: str, db_password: str, host: str, port: int) -> None:
     """
-    Create a new database in the shared Postgres cluster.
-    
-    Args:
-        db_name: Name of the database to create (e.g., project_abc123)
-        db_password: Password for the project's database user
+    Create a new database in the targeted Postgres cluster.
     """
-    conn = get_admin_connection()
+    conn = get_custom_connection(host, port)
     conn.autocommit = True
     cursor = conn.cursor()
     
@@ -80,20 +85,11 @@ def create_project_database(db_name: str, db_password: str) -> None:
         conn.close()
 
 
-def apply_supabase_migrations(db_name: str, db_password: str) -> None:
+def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: int) -> None:
     """
     Apply Supabase-compatible migrations to the project database.
-    
-    This sets up the required schemas and roles for Supabase services
-    (auth, storage, realtime, etc.) to work properly.
     """
-    conn = psycopg2.connect(
-        host=SHARED_POSTGRES_HOST,
-        port=SHARED_POSTGRES_PORT,
-        user=SHARED_POSTGRES_USER,
-        password=SHARED_POSTGRES_PASSWORD,
-        dbname=db_name,
-    )
+    conn = get_custom_connection(host, port, dbname=db_name)
     cursor = conn.cursor()
     
     try:
@@ -154,18 +150,19 @@ def apply_supabase_migrations(db_name: str, db_password: str) -> None:
         conn.close()
 
 
-def provision_shared_project(db: Session, project: Project, secrets: Dict[str, Any]) -> Dict[str, Any]:
+def provision_shared_project(db: Session, project: Project, cluster: Any, secrets: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Provision a shared project.
+    Provision a shared project in a specific cluster.
     
     This:
-    1. Creates a new database in the shared Postgres cluster
+    1. Creates a new database in the specified cluster
     2. Applies Supabase migrations
     3. Does NOT start any containers
     
     Args:
         db: Database session
         project: Project model instance
+        cluster: Cluster model instance
         secrets: Project secrets including JWT_SECRET, DB_PASSWORD, etc.
     
     Returns:
@@ -174,20 +171,24 @@ def provision_shared_project(db: Session, project: Project, secrets: Dict[str, A
     db_name = project.db_name
     db_password = secrets.get("DB_PASSWORD", "postgres")
     
-    print(f"[SharedProvisioning] Provisioning shared project: {project.id}")
+    host = cluster.postgres_host or SHARED_POSTGRES_HOST
+    port = cluster.postgres_port or SHARED_POSTGRES_PORT
+    api_url = cluster.api_url or SHARED_GATEWAY_URL
+    
+    print(f"[SharedProvisioning] Provisioning shared project: {project.id} in cluster {cluster.id}")
     
     # 1. Create the database
-    create_project_database(db_name, db_password)
+    create_project_database(db_name, db_password, host=host, port=port)
     
     # 2. Apply Supabase migrations
-    apply_supabase_migrations(db_name, db_password)
+    apply_supabase_migrations(db_name, db_password, host=host, port=port)
     
     print(f"[SharedProvisioning] Shared project {project.id} provisioned successfully")
     
     # Return connection info for shared gateway
     return {
-        "api_url": f"{SHARED_GATEWAY_URL}/projects/{project.id}",
-        "db_url": f"postgresql://{db_name}_user:{db_password}@{SHARED_POSTGRES_HOST}:{SHARED_POSTGRES_PORT}/{db_name}",
+        "api_url": f"{api_url}/projects/{project.id}",
+        "db_url": f"postgresql://{db_name}_user:{db_password}@{host}:{port}/{db_name}",
     }
 
 

@@ -11,8 +11,9 @@ class Organization(Base):
     name = Column(String, nullable=False)
     slug = Column(String, unique=True, index=True, nullable=False)
     billing_email = Column(String, nullable=True)
-    plan = Column(String, default="free")
+    billing_email = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
     subscription = relationship("Subscription", uselist=False, back_populates="organization")
+    entitlement = relationship("OrganizationEntitlement", uselist=False)

@@ -20,6 +20,11 @@ def get_secrets(project_id: str) -> dict:
         return {}
     return dotenv_values(env_path)
 
+def get_project_secrets(db: Session, project_id: str) -> dict:
+    """Retrieves secrets from the database."""
+    db_secrets = db.query(ProjectSecret).filter(ProjectSecret.project_id == project_id).all()
+    return {s.key: s.value for s in db_secrets}
+
 def set_secret(project_id: str, key: str, value: str):
     env_path = get_project_env_path(project_id)
     if not env_path.exists():
@@ -80,24 +85,39 @@ def find_free_port(start_port: int = 5000) -> int:
         port += 1
     raise Exception("No free ports available")
 
-def generate_project_secrets(db: Session, project_id: str) -> dict:
+def generate_project_secrets(db: Session, project_id: str, plan: str = "dedicated") -> dict:
     """Generates and persists base project secrets: ports, passwords, JWT secrets, API keys."""
     from jose import jwt
     import datetime
     
     # Generate random strings
     db_password = py_secrets.token_hex(16)
-    jwt_secret = py_secrets.token_urlsafe(32)
-    secret_key_base = py_secrets.token_urlsafe(64)
     
-    # Allocate ports (ensuring no conflicts)
-    db_port = find_free_port(5500)
-    rest_port = find_free_port(db_port + 1)
-    realtime_port = find_free_port(rest_port + 1)
-    storage_port = find_free_port(realtime_port + 1)
-    auth_port = find_free_port(storage_port + 1)
-    functions_port = find_free_port(auth_port + 1)
-    gateway_port = find_free_port(functions_port + 1)
+    if plan == "shared":
+        # For shared projects, we use the global shared secrets and ports
+        jwt_secret = os.getenv("SHARED_JWT_SECRET", "super-secret-jwt-token-with-at-least-32-characters-long")
+        # Global ports for shared infrastructure
+        db_port = int(os.getenv("SHARED_POSTGRES_PORT", "5435"))
+        # gateway/auth/rest are handled by the shared gateway, but for GoTrueProxyService:
+        auth_port = 9999 # The port where shared-auth is mapped
+        rest_port = 8081 # The port where shared-gateway is mapped
+        realtime_port = 4000
+        storage_port = 11000
+        functions_port = 5000
+        gateway_port = 8081
+    else:
+        # Dedicated plan: generate random ones
+        jwt_secret = py_secrets.token_urlsafe(32)
+        # Allocate ports (ensuring no conflicts)
+        db_port = find_free_port(5500)
+        rest_port = find_free_port(db_port + 1)
+        realtime_port = find_free_port(rest_port + 1)
+        storage_port = find_free_port(realtime_port + 1)
+        auth_port = find_free_port(storage_port + 1)
+        functions_port = find_free_port(auth_port + 1)
+        gateway_port = find_free_port(functions_port + 1)
+
+    secret_key_base = py_secrets.token_urlsafe(64)
     
     # Generate Supabase-compatible JWT keys
     def generate_supabase_key(role: str, secret: str) -> str:
@@ -112,6 +132,9 @@ def generate_project_secrets(db: Session, project_id: str) -> dict:
     anon_key = generate_supabase_key("anon", jwt_secret)
     service_role_key = generate_supabase_key("service_role", jwt_secret)
     
+    db_name = f"project_{project_id}" if plan == "shared" else "postgres"
+    db_user = f"{db_name}_user" if plan == "shared" else "postgres"
+    
     generated_secrets = {
         "DB_PASSWORD": db_password,
         "JWT_SECRET": jwt_secret,
@@ -125,8 +148,8 @@ def generate_project_secrets(db: Session, project_id: str) -> dict:
         "GATEWAY_PORT": str(gateway_port),
         "ANON_KEY": anon_key,
         "SERVICE_ROLE_KEY": service_role_key,
-        "POSTGRES_DB": "postgres",
-        "POSTGRES_USER": "postgres"
+        "POSTGRES_DB": db_name,
+        "POSTGRES_USER": db_user
     }
     
     # Persist to database

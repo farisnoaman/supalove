@@ -29,7 +29,7 @@ def create_checkout_session(
     member = db.query(OrgMember).filter(
         OrgMember.org_id == org_id,
         OrgMember.user_id == current_user.id,
-        OrgMember.role == OrgRole.owner
+        OrgMember.role == OrgRole.OWNER
     ).first()
     
     if not member:
@@ -59,7 +59,7 @@ def create_portal_session(
     member = db.query(OrgMember).filter(
         OrgMember.org_id == org_id,
         OrgMember.user_id == current_user.id,
-        OrgMember.role == OrgRole.owner
+        OrgMember.role == OrgRole.OWNER
     ).first()
     
     if not member:
@@ -119,3 +119,56 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     sig_header = request.headers.get("stripe-signature")
     
     return billing_service.handle_webhook(payload, sig_header, db)
+
+
+# ============================================
+# DEV-ONLY UPGRADE ENDPOINT (No Stripe)
+# ============================================
+
+class DevUpgradeRequest(BaseModel):
+    plan_id: str  # "free", "pro", "premium"
+
+@router.post("/orgs/{org_id}/dev-upgrade")
+def dev_upgrade_plan(
+    org_id: str,
+    req: DevUpgradeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    DEV ONLY: Directly upgrade an organization's plan without going through Stripe.
+    This endpoint should be disabled in production.
+    """
+    # Verify access (owner only)
+    member = db.query(OrgMember).filter(
+        OrgMember.org_id == org_id,
+        OrgMember.user_id == current_user.id,
+        OrgMember.role == OrgRole.OWNER
+    ).first()
+    
+    if not member:
+        raise HTTPException(status_code=403, detail="Only owners can manage billing")
+    
+    # Update or create subscription
+    sub = db.query(Subscription).filter(Subscription.org_id == org_id).first()
+    if not sub:
+        sub = Subscription(org_id=org_id)
+        db.add(sub)
+    
+    sub.plan_id = req.plan_id
+    sub.status = "active" if req.plan_id != "free" else "free"
+    sub.stripe_customer_id = f"dev_customer_{org_id[:8]}"
+    sub.stripe_subscription_id = f"dev_sub_{org_id[:8]}"
+    
+    # Update Entitlements
+    from services.entitlement_service import EntitlementService
+    ent = EntitlementService.get_entitlements(db, org_id)
+    ent.plan_id = req.plan_id
+    
+    db.commit()
+    
+    return {
+        "status": "success",
+        "message": f"Organization upgraded to {req.plan_id} plan (DEV MODE)",
+        "plan": req.plan_id
+    }

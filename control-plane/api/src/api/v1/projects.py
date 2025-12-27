@@ -15,7 +15,6 @@ from models.org_member import OrgMember, OrgRole
 from sqlalchemy.orm import Session
 from api.v1.utils import verify_project_access
 from models.project import Project
-from models.resource_quota import ResourceQuota
 
 router = APIRouter()
 

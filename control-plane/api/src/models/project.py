@@ -13,13 +13,17 @@ class ProjectStatus(str, enum.Enum):
     DELETED = "deleted"           # Soft deleted / fully removed
 
 class ProjectPlan(str, enum.Enum):
-    SHARED = "shared"       # Runs on shared infrastructure
-    DEDICATED = "dedicated" # Isolated Docker stack per project
+    shared = "shared"       # Runs on shared infrastructure
+    dedicated = "dedicated" # Isolated Docker stack per project
 
 class BackendType(str, enum.Enum):
-    LOCAL_DOCKER = "local_docker"     # Local Docker Compose
-    SHARED_CLUSTER = "shared_cluster" # Shared Postgres cluster
-    COOLIFY = "coolify"               # Coolify deployment
+    local_docker = "local_docker"     # Local Docker Compose
+    shared_cluster = "shared_cluster" # Shared Postgres cluster
+    coolify = "coolify"               # Coolify deployment
+
+class ProjectPlacement(str, enum.Enum):
+    private = "private"
+    shared = "shared"
 
 class Project(Base):
     __tablename__ = "projects"
@@ -28,13 +32,18 @@ class Project(Base):
     name = Column(String, nullable=True)
     # Multi-tenancy
     org_id = Column(String, ForeignKey("organizations.id"), nullable=True) # Nullable for migration
+    
+    # Cluster & Placement
+    cluster_id = Column(String, ForeignKey("clusters.id"), nullable=True)  # Nullable for migration
+    placement = Column(Enum(ProjectPlacement), default=ProjectPlacement.shared)
+    
     # owner_id = Column(String, nullable=True) # Deprecated in favor of org_id
     status = Column(Enum(ProjectStatus), default=ProjectStatus.CREATING)
     last_error = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Shared plan support
-    plan = Column(Enum(ProjectPlan), default=ProjectPlan.SHARED)  # Default to shared
-    backend_type = Column(Enum(BackendType), default=BackendType.SHARED_CLUSTER)
+    plan = Column(Enum(ProjectPlan), default=ProjectPlan.shared)  # Default to shared
+    backend_type = Column(Enum(BackendType), default=BackendType.shared_cluster)
     db_name = Column(String, nullable=True)  # Database name in shared cluster
 
