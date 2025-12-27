@@ -72,8 +72,8 @@ export default function NewProjectPage() {
                                     type="button"
                                     onClick={() => setPlan("shared")}
                                     className={`relative p-4 rounded-xl border-2 text-left transition-all ${plan === "shared"
-                                            ? "border-primary bg-primary/5 shadow-md"
-                                            : "border-muted hover:border-muted-foreground/30"
+                                        ? "border-primary bg-primary/5 shadow-md"
+                                        : "border-muted hover:border-muted-foreground/30"
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 mb-2">
@@ -96,8 +96,8 @@ export default function NewProjectPage() {
                                     type="button"
                                     onClick={() => setPlan("dedicated")}
                                     className={`relative p-4 rounded-xl border-2 text-left transition-all ${plan === "dedicated"
-                                            ? "border-primary bg-primary/5 shadow-md"
-                                            : "border-muted hover:border-muted-foreground/30"
+                                        ? "border-primary bg-primary/5 shadow-md"
+                                        : "border-muted hover:border-muted-foreground/30"
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 mb-2">
@@ -198,12 +198,20 @@ export default function NewProjectPage() {
                             </div>
                         </div>
 
-                        <button
-                            onClick={() => window.location.href = "/"}
-                            className="w-full py-3 border rounded-lg font-medium hover:bg-muted transition-colors"
-                        >
-                            Return to Project List
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={() => window.location.href = `/projects/${resultData.id}`}
+                                className="flex-1 py-3 bg-primary text-white rounded-lg font-bold hover:opacity-90 transition-all shadow-md active:scale-[0.98]"
+                            >
+                                Go to Dashboard
+                            </button>
+                            <button
+                                onClick={() => window.location.href = `/org/${resultData.org_id}/projects`}
+                                className="flex-1 py-3 border rounded-lg font-medium hover:bg-muted transition-colors"
+                            >
+                                Return to Project List
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

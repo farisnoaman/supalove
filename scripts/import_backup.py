@@ -50,15 +50,27 @@ def main():
     
     # Load project environment
     env = load_env(project_id)
-    db_user = env.get("POSTGRES_USER", "postgres")
-    db_name = env.get("POSTGRES_DB", "postgres")
+    project_dir = Path(f"/home/faris/Documents/MyApps/supalove/data-plane/projects/{project_id}")
+    is_shared = not project_dir.exists()
     
-    print(f"🚀 Starting import for project {project_id}...")
-    print(f"   Database: {db_name}, User: {db_user}")
+    if is_shared:
+        db_name = f"project_{project_id}"
+        db_user = f"{db_name}_user"
+        container_name = "supalove_shared_postgres"
+        # Since we use docker exec, we might need the PGPASSWORD
+        shared_password = os.getenv("SHARED_POSTGRES_PASSWORD", "postgres")
+        # In the shared container, we'll connect to the specific db
+        psql_creds = f"PGPASSWORD={shared_password} psql --username postgres --dbname {db_name}"
+    else:
+        db_user = env.get("POSTGRES_USER", "postgres")
+        db_name = env.get("POSTGRES_DB", "postgres")
+        container_name = f"{project_id}-postgres-1"
+        psql_creds = f"psql --username {db_user} --dbname {db_name}"
     
-    # 1. Identify the container
-    container_name = f"{project_id}-postgres-1"
+    print(f"🚀 Starting import for project {project_id} ({'Shared' if is_shared else 'Dedicated'})...")
+    print(f"   Database: {db_name}, Target Container: {container_name}")
     
+    # 1. Identify/Check the container
     print(f"🔍 Checking for container {container_name}...")
     try:
         inspect = subprocess.run(["docker", "inspect", "-f", "{{.State.Running}}", container_name], capture_output=True, text=True)
@@ -75,7 +87,7 @@ def main():
 
     # 2. Copy the file to the container
     is_gzipped = backup_path.suffix == '.gz'
-    dest_filename = "backup.dump.gz" if is_gzipped else "backup.dump"
+    dest_filename = f"backup_{project_id}.dump.gz" if is_gzipped else f"backup_{project_id}.dump"
     dest_path = f"/tmp/{dest_filename}"
     
     print(f"📦 Copying {backup_path.name} to container...")
@@ -84,46 +96,31 @@ def main():
     # 3. Restore strategy
     print(f"♻️  Restoring database... (This may take a while)")
     
-    # We will pipe the SQL through sed to replace 'postgres' with our actual db_user
-    # and to ignore CREATE ROLE errors if possible, but identifying the user is key.
+    # Filtering logic (same as before but using correct user)
+    actual_db_user = db_user if not is_shared else "postgres" # For shared, we use postgres superuser via docker exec
     
-    # If it's a gzipped file, we zcat it.
+    filter_cmd = (
+        f"sed -E "
+        f"'s/TO postgres/TO {actual_db_user}/g; "
+        f"s/FROM postgres/FROM {actual_db_user}/g; "
+        f"s/^(CREATE|ALTER|DROP) ROLE/-- \\1 ROLE/g; "
+        f"s/^(CREATE|ALTER|DROP) SCHEMA auth/-- \\1 SCHEMA auth/g; "
+        f"s/^(GRANT|REVOKE) .*/-- \\1 filtered/g; "
+        f"s/^ALTER DEFAULT PRIVILEGES/-- ALTER DEFAULT PRIVILEGES/g'"
+    )
+    
     if is_gzipped:
-        # 1. Replace "owner to postgres" with "owner to {db_user}"
-        # 2. Ignore "CREATE ROLE" errors is hard in pipe, but fixing owner is critical.
-        
-        # We construct a command chain:
-        # zcat | sed 's/TO postgres/TO {db_user}/g' | psql ...
-        
-        # Note: We replace "TO postgres" which handles "OWNER TO postgres" and "GRANT ... TO postgres"
-        # We also replace "FROM postgres" just in case.
-        # Be careful not to replace "postgres" if it's the database name in a connection string, but here it's SQL content.
-        
-        # Aggressive filtering to ensure data import works even if roles fail
-        # 1. Replace postgres -> db_user
-        # 2. Comment out CREATE/ALTER/DROP ROLE
-        # 3. Comment out CREATE SCHEMA auth (already exists)
-        # 4. Comment out GRANT/REVOKE (permission issues)
-        # 5. Comment out ALTER DEFAULT PRIVILEGES
-        
-        filter_cmd = (
-            f"sed -E "
-            f"'s/TO postgres/TO {db_user}/g; "
-            f"s/FROM postgres/FROM {db_user}/g; "
-            f"s/^(CREATE|ALTER|DROP) ROLE/-- \\1 ROLE/g; "
-            f"s/^(CREATE|ALTER|DROP) SCHEMA auth/-- \\1 SCHEMA auth/g; "
-            f"s/^(GRANT|REVOKE) .*/-- \\1 filtered/g; "
-            f"s/^ALTER DEFAULT PRIVILEGES/-- ALTER DEFAULT PRIVILEGES/g'"
-        )
-        
-        restore_cmd = f"zcat {dest_path} | {filter_cmd} | psql --username {db_user} --dbname {db_name}"
-        docker_cmd = ["docker", "exec", "-i", container_name, "sh", "-c", restore_cmd]
+        restore_cmd = f"zcat {dest_path} | {filter_cmd} | {psql_creds}"
     else:
-        # If it's a binary dump (.dump), we can't use sed easily.
-        # But assume it's text for now as .pg often is script.
-        # If it's custom format, we must use pg_restore.
-        # Let's assume text for consistency with the user's issue.
-        pass # The user has .gz which is SQL text.
+        restore_cmd = f"cat {dest_path} | {filter_cmd} | {psql_creds}"
+        
+    docker_cmd = ["docker", "exec", "-i", container_name, "sh", "-c", restore_cmd]
+
+    # Note: If it's a binary dump (.dump), we can't use sed easily.
+    # But assume it's text for now as .pg often is script.
+    # If it's custom format, we must use pg_restore.
+    # Let's assume text for consistency with the user's issue.
+    # The user has .gz which is SQL text.
 
     try:
         process = subprocess.run(

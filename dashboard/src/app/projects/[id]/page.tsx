@@ -20,7 +20,7 @@ export default function ProjectOverviewPage() {
     const [loading, setLoading] = useState(true);
     const [polling, setPolling] = useState(false);
 
-    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -172,7 +172,7 @@ export default function ProjectOverviewPage() {
                                 project?.status === "running" ? "fill-emerald-500" :
                                     project?.status === "failed" ? "fill-red-500" : "fill-amber-500"
                             )} />
-                            Project {project?.status}
+                            Project {project?.status || "Loading..."}
                         </Badge>
                         <h1 className="text-2xl md:text-4xl font-black tracking-tight text-gradient">
                             {project?.name || "Project Overview"}
@@ -213,7 +213,7 @@ export default function ProjectOverviewPage() {
                                 We're provisioning your database and API services. This usually takes 1-2 minutes.
                             </p>
                             <p className="text-xs text-muted-foreground mt-4 font-mono bg-muted px-2 py-1 rounded">
-                                Status: {project?.status.toUpperCase()}
+                                Status: {project?.status?.toUpperCase() || "..."}
                             </p>
                         </>
                     )}

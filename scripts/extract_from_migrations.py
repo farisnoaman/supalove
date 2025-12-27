@@ -81,23 +81,49 @@ def execute_sql_in_container(project_id: str, sql: str, db_user: str, db_name: s
     
     return result.returncode, result.stdout, result.stderr
 
-def execute_migrations(project_id: str, migrations: list, db_user: str, db_name: str):
+def execute_sql_directly(sql: str, db_user: str, db_name: str, host: str, port: int, password: str) -> tuple:
+    """Execute SQL directly via psycopg2 (for shared projects)."""
+    import psycopg2
+    try:
+        conn = psycopg2.connect(
+            host=host,
+            port=port,
+            user=db_user,
+            password=password,
+            dbname=db_name
+        )
+        conn.autocommit = True
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        cursor.close()
+        conn.close()
+        return 0, "Success", ""
+    except Exception as e:
+        return 1, "", str(e)
+
+def execute_migrations(project_id: str, migrations: list, db_user: str, db_name: str, is_shared: bool = False, shared_creds: dict = None):
     """Execute extracted migrations against project database."""
-    container_name = f"{project_id}-postgres-1"
+    target = "shared cluster" if is_shared else f"container {project_id}-postgres-1"
     
-    print(f"\n🚀 Executing {len(migrations)} migration(s) on {container_name}...")
+    print(f"\n🚀 Executing {len(migrations)} migration(s) on {target}...")
     print(f"   Database: {db_name}, User: {db_user}\n")
     
     success_count = 0
     error_count = 0
     
     for idx, sql in enumerate(migrations, 1):
-        print(f"[{idx}/{len(migrations)}] Executing migration...")
+        print(f"[{idx}/{len(migrations)}] Executing migration...", end=" ", flush=True)
         
-        returncode, stdout, stderr = execute_sql_in_container(project_id, sql, db_user, db_name)
+        if is_shared:
+            returncode, stdout, stderr = execute_sql_directly(
+                sql, db_user, db_name, 
+                shared_creds['host'], shared_creds['port'], shared_creds['password']
+            )
+        else:
+            returncode, stdout, stderr = execute_sql_in_container(project_id, sql, db_user, db_name)
         
         if returncode == 0:
-            print(f"  ✅ Migration {idx} completed")
+            print("✅ OK")
             success_count += 1
         else:
             # Check if errors are benign (already exists)
@@ -107,15 +133,18 @@ def execute_migrations(project_id: str, migrations: list, db_user: str, db_name:
                           and 'does not exist, skipping' not in line]
             
             if real_errors:
-                print(f"  ⚠ Migration {idx} had errors:")
+                print("❌ FAILED")
                 for error in real_errors[:2]:
                     print(f"    {error}")
                 error_count += 1
             else:
-                print(f"  ✅ Migration {idx} completed (with expected warnings)")
+                print("✅ OK (with warnings)")
                 success_count += 1
     
     print(f"\n📊 Summary: {success_count} successful, {error_count} with errors")
+    if error_count > 0:
+        print("\n❌ Migration process completed with critical errors.")
+        sys.exit(1)
 
 def main():
     if len(sys.argv) < 3:
@@ -132,19 +161,34 @@ def main():
         sys.exit(1)
     
     # Load project env to get DB credentials
-    env_path = Path(f"/home/faris/Documents/MyApps/supalove/data-plane/projects/{project_id}/.env")
+    project_dir = Path(f"/home/faris/Documents/MyApps/supalove/data-plane/projects/{project_id}")
+    env_path = project_dir / ".env"
     db_user = "postgres"
     db_name = "postgres"
+    is_shared = not project_dir.exists()
+    shared_creds = {}
     
-    if env_path.exists():
-        with open(env_path) as f:
-            for line in f:
-                if line.startswith("POSTGRES_USER="):
-                    db_user = line.split("=", 1)[1].strip()
-                elif line.startswith("POSTGRES_DB="):
-                    db_name = line.split("=", 1)[1].strip()
+    if not is_shared:
+        if env_path.exists():
+            with open(env_path) as f:
+                for line in f:
+                    if line.startswith("POSTGRES_USER="):
+                        db_user = line.split("=", 1)[1].strip()
+                    elif line.startswith("POSTGRES_DB="):
+                        db_name = line.split("=", 1)[1].strip()
+    else:
+        # For shared projects, we assume the naming convention and shared cluster info
+        # In a real scenario, we might want to pass these as arguments or env vars
+        import os
+        db_name = f"project_{project_id}"
+        db_user = f"{db_name}_user"
+        shared_creds = {
+            'host': os.getenv("SHARED_POSTGRES_HOST", "localhost"),
+            'port': int(os.getenv("SHARED_POSTGRES_PORT", "5434")),
+            'password': os.getenv("SHARED_POSTGRES_PASSWORD", "postgres")
+        }
     
-    print(f"🎯 Target Project: {project_id}")
+    print(f"🎯 Target Project: {project_id} ({'Shared' if is_shared else 'Dedicated'})")
     print(f"   Database: {db_name}, User: {db_user}\n")
     
     # Extract migrations
@@ -154,10 +198,13 @@ def main():
         sys.exit(1)
     
     # Execute migrations
-    execute_migrations(project_id, migrations, db_user, db_name)
+    execute_migrations(project_id, migrations, db_user, db_name, is_shared, shared_creds)
     
     print("\n✨ Migration extraction complete!")
-    print(f"   Run: docker exec -i {project_id}-postgres-1 psql -U {db_user} -d {db_name} -c \"\\dt public.*\"")
+    if not is_shared:
+        print(f"   Run: docker exec -i {project_id}-postgres-1 psql -U {db_user} -d {db_name} -c \"\\dt public.*\"")
+    else:
+        print(f"   Imports applied to shared database {db_name}.")
     print("   to verify tables were created.")
 
 if __name__ == "__main__":

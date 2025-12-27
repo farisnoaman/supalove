@@ -22,7 +22,7 @@ export default function BackupsPage() {
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
 
-    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
 
     const fetchBackups = async () => {
         try {

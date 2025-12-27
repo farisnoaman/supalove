@@ -18,6 +18,8 @@ def fetch_logs(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    verify_project_access(project_id, db, current_user)
-    logs = get_project_logs(project_id, service, lines)
+    project = verify_project_access(project_id, db, current_user)
+    from models.project import ProjectPlan
+    is_shared = project.plan == ProjectPlan.shared
+    logs = get_project_logs(project_id, service, lines, is_shared=is_shared)
     return {"logs": logs}

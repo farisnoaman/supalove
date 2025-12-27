@@ -54,7 +54,7 @@ export default function StoragePage() {
     const [newBucketName, setNewBucketName] = useState("");
     const [creatingBucket, setCreatingBucket] = useState(false);
 
-    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
 
     useEffect(() => {
         if (projectId) fetchBuckets();
