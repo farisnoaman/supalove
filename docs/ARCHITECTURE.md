@@ -58,6 +58,10 @@ The backend service handling all platform operations.
 - `provisioning_local.py` - Provisions Docker containers via `docker compose`
 - `secrets_service.py` - Generates and manages project secrets/ports
 - `project_service.py` - Project lifecycle management
+- `billing_service.py` - Stripe integration and webhooks
+- `entitlement_service.py` - Plan-based quota enforcement
+- `cluster_service.py` - Private cluster provisioning
+- `usage_service.py` - Resource usage tracking
 
 ---
 
@@ -71,8 +75,12 @@ Stores platform metadata (not user data).
 - `org_members` - User-org relationships
 - `projects` - Project metadata
 - `project_secrets` - Encrypted credentials
-- `subscriptions` - Billing plans
+- `plans` - Subscription tiers (Free, Pro, Premium)
+- `organization_entitlements` - Org plan associations and usage
+- `subscriptions` - Active billing subscriptions
 - `invoices` - Payment history
+- `clusters` - Infrastructure clusters (shared/private)
+- `cluster_usage` - Resource consumption tracking
 
 ---
 

@@ -103,6 +103,7 @@ See [DEPLOY_TO_COOLIFY.md](./DEPLOY_TO_COOLIFY.md) for one-click deployment.
 | Document | Description |
 |----------|-------------|
 | [Architecture](./docs/ARCHITECTURE.md) | System design and components |
+| [Billing System](./docs/BILLING.md) | Plans, entitlements, and Stripe integration |
 | [Shared Plan Architecture](./docs/SHARED_PLAN_ARCHITECTURE.md) | Shared vs Dedicated plans |
 | [API Reference](./docs/API.md) | REST API endpoints |
 | [Deployment Guide](./DEPLOY_TO_COOLIFY.md) | Coolify deployment instructions |
@@ -148,17 +149,28 @@ const { data } = await supabase.from('todos').select('*')
 ```
 supalove/
 ├── control-plane/          # Platform management
-│   └── api/                # FastAPI backend
-│       └── src/
-│           ├── api/v1/     # REST endpoints
-│           ├── services/   # Business logic
-│           └── models/     # SQLAlchemy models
+│   ├── api/                # FastAPI backend
+│   │   └── src/
+│   │       ├── api/v1/     # REST endpoints
+│   │       ├── services/   # Business logic
+│   │       │   ├── billing_service.py
+│   │       │   ├── entitlement_service.py
+│   │       │   ├── cluster_service.py
+│   │       │   └── usage_service.py
+│   │       └── models/     # SQLAlchemy models
+│   │           ├── plan.py
+│   │           ├── organization_entitlement.py
+│   │           ├── cluster.py
+│   │           └── cluster_usage.py
+│   └── scripts/            # Migration & verification scripts
 ├── dashboard/              # Next.js 16 frontend
 │   └── src/
 │       ├── app/            # App Router pages
+│       │   └── org/[orgId]/billing/  # Billing UI
 │       └── components/     # React components
 ├── data-plane/             # Project templates
 │   ├── project-template/   # Docker Compose stack
+│   ├── shared/             # Shared infrastructure
 │   └── projects/           # Running project data
 ├── docker-compose.yml      # Local development
 ├── docker-compose.coolify.yml  # Production deployment
