@@ -58,6 +58,7 @@ A fully self-hosted, multi-tenant backend-as-a-service platform that provides 10
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
+![Visual Architecture ](./docs/images/Architecture.png)
 
 ---
 
