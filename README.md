@@ -110,6 +110,7 @@ See [DEPLOY_TO_COOLIFY.md](./DEPLOY_TO_COOLIFY.md) for one-click deployment.
 | [API Reference](./docs/API.md) | REST API endpoints |
 | [Deployment Guide](./DEPLOY_TO_COOLIFY.md) | Coolify deployment instructions |
 | [CLI Documentation](./CLI_docs.md) | Command-line interface |
+| [Test Plan](./docs/TEST_PLAN.md) | End-to-end testing scenarios |
 | [Roadmap](./ROADMAP.md) | Future development plans |
 
 ---
