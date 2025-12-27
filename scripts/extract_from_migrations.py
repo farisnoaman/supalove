@@ -24,42 +24,74 @@ def extract_migration_sql(backup_path: Path) -> list:
     
     print("🔍 Searching for migration data...")
     
-    # Look for COPY commands - Supabase stores migrations in table format
-    #  Pattern: migration_version TAB {migration SQL in JSON-like format}
+    # Look for migration data patterns:
+    # 1. 14-digit timestamp followed by tab and SQL: 20250702033122\tSQL...
+    # 2. Lines containing tab and curly braces around SQL: ...\t{SQL...}
     
     migrations = []
-    
-    # Find all lines that look like migration data (start with a number, have CREATE TABLE)
     lines = content.split('\n')
+    
+    # Pattern for 14-digit timestamp versioning
+    version_pattern = re.compile(r'^(\d{14})\t')
+    
     for line in lines:
-        if 'CREATE TABLE' in line and (line.startswith('20') or '\t{' in line):
-            # This looks like a migration line
-            # Format: 20250702033122\t{"SQL content"}\temail\t\N
+        # Check if line looks like a migration record
+        is_migration = False
+        parts = []
+        
+        if version_pattern.match(line):
+            is_migration = True
             parts = line.split('\t')
-            if len(parts) >= 2:
-                try:
-                    # The SQL is in the second part, often in a JSON-like string
-                    sql_field = parts[1]
+        elif '\t{' in line and '}' in line:
+            # Maybe not starting with timestamp but has the {SQL} structure
+            is_migration = True
+            parts = line.split('\t')
+            
+        if is_migration and len(parts) >= 2:
+            try:
+                # Find the field that contains SQL (usually field 2 or 3)
+                # We'll look for fields containing common SQL keywords
+                for sql_candidate in parts[1:]:
+                    sql_candidate = sql_candidate.strip()
                     
-                    # Remove surrounding braces if present
-                    if sql_field.startswith('{') and sql_field.endswith('}'):
-                        sql_field = sql_field[1:-1]
+                    # Unpack if it's in {SQL} format
+                    if sql_candidate.startswith('{') and sql_candidate.endswith('}'):
+                        sql_candidate = sql_candidate[1:-1]
                     
-                    # Remove quotes
-                    sql_field = sql_field.strip('"')
+                    # Remove quotes if present
+                    if (sql_candidate.startswith('"') and sql_candidate.endswith('"')) or \
+                       (sql_candidate.startswith("'") and sql_candidate.endswith("'")):
+                        sql_candidate = sql_candidate[1:-1]
                     
                     # Unescape the SQL
-                    sql = sql_field.replace('\\n', '\n')
+                    sql = sql_candidate.replace('\\n', '\n')
                     sql = sql.replace('\\t', '\t')
                     sql = sql.replace('\\"', '"')
+                    sql = sql.replace('\\\'', '\'')
                     sql = sql.replace('\\\\', '\\')
                     
-                    if len(sql) > 100 and 'CREATE' in sql:  # Basic validation
+                    # Fix: Strip leading "comment-style" labels often found in Supabase backups
+                    # e.g. "-- my_table CREATE TABLE ..." -> "CREATE TABLE ..."
+                    sql_stripped = sql.strip()
+                    if sql_stripped.startswith("--"):
+                        # Find the first occurrence of a major keyword
+                        keywords_pattern = re.compile(r'(CREATE|ALTER|INSERT|UPDATE|DELETE|DROP|GRANT|REVOKE)\s', re.IGNORECASE)
+                        match = keywords_pattern.search(sql_stripped)
+                        if match:
+                            # Keep everything from the keyword onwards
+                            sql = sql_stripped[match.start():]
+                            print(f"    - Stripped comment prefix, new start: {sql[:30]}...")
+
+                    # Refined validation: must contain at least one characteristic SQL keyword
+                    sql_clean = sql.upper()
+                    keywords = ['CREATE ', 'ALTER ', 'INSERT ', 'UPDATE ', 'DELETE ', 'DROP ', 'GRANT ', 'REVOKE ']
+                    if any(kw in sql_clean for kw in keywords) and len(sql) > 5:
                         migrations.append(sql)
                         version = parts[0] if parts[0].isdigit() else "unknown"
                         print(f"  ✓ Found migration {version} ({len(sql)} chars)")
-                except Exception as e:
-                    continue
+                        break # Found SQL for this migration record
+            except Exception as e:
+                continue
     
     if not migrations:
         print("❌ No migration data found in backup file.")
@@ -111,12 +143,37 @@ def execute_migrations(project_id: str, migrations: list, db_user: str, db_name:
     success_count = 0
     error_count = 0
     
-    for idx, sql in enumerate(migrations, 1):
-        print(f"[{idx}/{len(migrations)}] Executing migration...", end=" ", flush=True)
+    # Pre-process migrations to ensure ownership and search path
+    processed_migrations = []
+    for sql in migrations:
+        # Replace postgres owner with project user
+        sql = sql.replace("TO postgres", f"TO {db_user}")
+        sql = sql.replace("OWNER TO postgres", f"OWNER TO {db_user}")
+        
+        # Ensure we are operating on the public schema if not specified
+        if "SET search_path" not in sql:
+            sql = f"SET search_path TO public, auth, storage, extensions;\n{sql}"
+            
+        processed_migrations.append(sql)
+    
+    for idx, sql in enumerate(processed_migrations, 1):
+        print(f"[{idx}/{len(processed_migrations)}] Executing migration...", end=" ", flush=True)
         
         if is_shared:
+            # For shared projects, we use the postgres superuser to execute the migration
+            # but getting the connection right.
+            # We already replaced ownership in the SQL, so running as postgres is fine.
+            
+            # First, ensure extensions exist
+            if idx == 1:
+                print(f"   Ensuring extensions (uuid-ossp, pgcrypto, citext)...", end=" ")
+                ext_sql = "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"; CREATE EXTENSION IF NOT EXISTS \"pgcrypto\"; CREATE EXTENSION IF NOT EXISTS \"citext\";"
+                execute_sql_directly(ext_sql, "postgres", db_name, shared_creds['host'], shared_creds['port'], shared_creds['password'])
+                print("Done.")
+                print(f"[{idx}/{len(processed_migrations)}] Executing migration...", end=" ", flush=True)
+
             returncode, stdout, stderr = execute_sql_directly(
-                sql, db_user, db_name, 
+                sql, "postgres", db_name, 
                 shared_creds['host'], shared_creds['port'], shared_creds['password']
             )
         else:
@@ -145,6 +202,50 @@ def execute_migrations(project_id: str, migrations: list, db_user: str, db_name:
     if error_count > 0:
         print("\n❌ Migration process completed with critical errors.")
         sys.exit(1)
+
+def get_created_tables(project_id, is_shared, db_user, db_name, shared_creds=None):
+    """Check what tables are now in the database."""
+    print("\n🔍 Verifying created tables...")
+    sql = """
+        SELECT schemaname, tablename 
+        FROM pg_tables 
+        WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+        ORDER BY schemaname, tablename;
+    """
+    
+    if is_shared:
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
+        try:
+            conn = psycopg2.connect(
+                host=shared_creds['host'],
+                port=shared_creds['port'],
+                user="postgres", # Use superuser for verification
+                password=shared_creds['password'],
+                dbname=db_name
+            )
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute(sql)
+            tables = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return tables
+        except Exception as e:
+            print(f"  ⚠️ Could not verify tables: {e}")
+            return []
+    else:
+        container_name = f"{project_id}-postgres-1"
+        cmd = ["docker", "exec", container_name, "psql", "-U", db_user, "-d", db_name, "-t", "-c", sql]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            tables = []
+            for line in result.stdout.split('\n'):
+                if '|' in line:
+                    parts = [p.strip() for p in line.split('|')]
+                    if len(parts) >= 2:
+                        tables.append({'schemaname': parts[0], 'tablename': parts[1]})
+            return tables
+    return []
 
 def main():
     if len(sys.argv) < 3:
@@ -177,14 +278,12 @@ def main():
                     elif line.startswith("POSTGRES_DB="):
                         db_name = line.split("=", 1)[1].strip()
     else:
-        # For shared projects, we assume the naming convention and shared cluster info
-        # In a real scenario, we might want to pass these as arguments or env vars
         import os
         db_name = f"project_{project_id}"
         db_user = f"{db_name}_user"
         shared_creds = {
             'host': os.getenv("SHARED_POSTGRES_HOST", "localhost"),
-            'port': int(os.getenv("SHARED_POSTGRES_PORT", "5434")),
+            'port': int(os.getenv("SHARED_POSTGRES_PORT", "5435")),
             'password': os.getenv("SHARED_POSTGRES_PASSWORD", "postgres")
         }
     
@@ -200,6 +299,15 @@ def main():
     # Execute migrations
     execute_migrations(project_id, migrations, db_user, db_name, is_shared, shared_creds)
     
+    # Verify tables
+    tables = get_created_tables(project_id, is_shared, db_user, db_name, shared_creds)
+    if tables:
+        print(f"\n✨ Extracted tables ({len(tables)}):")
+        for t in tables:
+            print(f"   - {t['schemaname']}.{t['tablename']}")
+    else:
+        print("\n⚠️ No tables found after migration. They might have been created in a hidden schema or the migration only contained logic/data.")
+
     print("\n✨ Migration extraction complete!")
     if not is_shared:
         print(f"   Run: docker exec -i {project_id}-postgres-1 psql -U {db_user} -d {db_name} -c \"\\dt public.*\"")

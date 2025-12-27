@@ -159,9 +159,8 @@ def import_backup(
             logger.error(f"Import script not found at {script_path}")
             raise HTTPException(status_code=500, detail=f"Import script not found at {script_path}")
         
-        # We need to run this as a subprocess
-        # python3 scripts/import_backup.py <PROJECT_ID> <FILE_PATH>
-        cmd = ["python3", str(script_path), project_id, str(tmp_path)]
+        import sys
+        cmd = [sys.executable, str(script_path), project_id, str(tmp_path)]
         logger.info(f"Executing command: {' '.join(cmd)}")
         
         process = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -242,7 +241,8 @@ def import_from_migrations(
             logger.error(f"Migration extraction script not found at {script_path}")
             raise HTTPException(status_code=500, detail=f"Migration extraction script not found at {script_path}")
         
-        cmd = ["python3", str(script_path), project_id, str(tmp_path)]
+        import sys
+        cmd = [sys.executable, str(script_path), project_id, str(tmp_path)]
         logger.info(f"Executing command: {' '.join(cmd)}")
         
         process = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -279,12 +279,21 @@ def import_from_migrations(
         
         # Count how many migrations were extracted
         migrations_count = len(re.findall(r'✓ Found migration', process.stdout))
+        
+        # Extract tables list for feedback
+        tables_found = []
+        if "✨ Extracted tables" in process.stdout:
+            table_section = process.stdout.split("✨ Extracted tables")[1]
+            tables_found = [t.strip("- ").strip() for t in table_section.split("\n") if t.strip().startswith("- ")]
+        
         logger.info(f"Successfully extracted {migrations_count} migrations for project {project_id}")
+        
+        table_feedback = f" with tables: {', '.join(tables_found[:5])}{'...' if len(tables_found) > 5 else ''}" if tables_found else ""
         
         return {
             "status": "success", 
-            "message": f"Successfully extracted and executed {migrations_count} migrations",
-            "details": [process.stdout[-300:] if process.stdout else ""]
+            "message": f"Successfully extracted {migrations_count} migrations{table_feedback}",
+            "details": [process.stdout[-500:] if process.stdout else ""]
         }
 
     except subprocess.TimeoutExpired:
