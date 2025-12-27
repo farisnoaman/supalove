@@ -22,6 +22,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/com
 import { toast } from "sonner";
 import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 interface Secret {
     key: string;
@@ -136,18 +137,30 @@ export default function SecretsPage() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Toaster richColors position="top-right" />
 
-            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            {/* Breadcrumb */}
+            <Breadcrumb
+                items={[
+                    { label: "Overview", href: `/projects/${projectId}` },
+                    { label: "Secrets" },
+                ]}
+            />
+
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Secrets & Environment Variables</h1>
+                    <h2 className="text-3xl font-bold tracking-tight text-gradient">Secrets</h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Securely manage API keys and configuration for your project.
+                        Securely manage API keys and environment variables for your project.
                     </p>
                 </div>
-                <Button onClick={() => setShowAddModal(true)} className="gap-2 w-full sm:w-auto">
-                    <Plus size={16} />
+                <Button
+                    onClick={() => setShowAddModal(true)}
+                    className="gap-2 primary-gradient shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all"
+                >
+                    <Plus size={18} />
                     Add Secret
                 </Button>
             </div>

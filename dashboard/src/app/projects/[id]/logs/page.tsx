@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const SERVICES = [
     { value: "database", label: "Database", icon: <Terminal size={14} /> },
@@ -124,11 +125,20 @@ export default function LogsPage() {
     );
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500 h-[calc(100vh-8rem)] flex flex-col">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 h-[calc(100vh-8rem)] flex flex-col">
+            {/* Breadcrumb */}
+            <Breadcrumb
+                items={[
+                    { label: "Overview", href: `/projects/${projectId}` },
+                    { label: "Logs" },
+                ]}
+            />
+
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">System Logs</h1>
-                    <p className="text-muted-foreground mt-1">
+                    <h2 className="text-3xl font-bold tracking-tight text-gradient">Logs</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
                         View real-time logs from your infrastructure services.
                     </p>
                 </div>

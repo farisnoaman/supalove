@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 interface Backup {
     name: string;
@@ -87,36 +88,35 @@ export default function BackupsPage() {
     };
 
     return (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-5xl">
-            {/* Hero Section */}
-            <div className="relative p-8 rounded-3xl bg-card border border-border/40 overflow-hidden shadow-2xl glass">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                        <Badge variant="success" className="mb-4">
-                            <Shield size={12} className="mr-1.5 fill-emerald-500" />
-                            Data Protected
-                        </Badge>
-                        <h1 className="text-4xl font-black tracking-tight text-gradient">Backups</h1>
-                        <p className="text-muted-foreground mt-2 max-w-md">
-                            Manage database and storage backups for your project. Create point-in-time snapshots of your entire infrastructure.
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Button
-                            onClick={createBackup}
-                            disabled={creating}
-                            className="primary-gradient shadow-lg shadow-emerald-500/20 min-w-[140px]"
-                        >
-                            {creating ? (
-                                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                            ) : (
-                                <RefreshCw className="h-4 w-4 mr-2" />
-                            )}
-                            {creating ? "Creating..." : "Create Backup"}
-                        </Button>
-                    </div>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Breadcrumb */}
+            <Breadcrumb
+                items={[
+                    { label: "Overview", href: `/projects/${projectId}` },
+                    { label: "Backups" },
+                ]}
+            />
+
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight text-gradient">Backups</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Manage database and storage snapshots for your project.
+                    </p>
                 </div>
+                <Button
+                    onClick={createBackup}
+                    disabled={creating}
+                    className="gap-2 primary-gradient shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all"
+                >
+                    {creating ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <RefreshCw className="h-4 w-4" />
+                    )}
+                    {creating ? "Creating..." : "Create Backup"}
+                </Button>
             </div>
 
             {/* Stats Cards */}

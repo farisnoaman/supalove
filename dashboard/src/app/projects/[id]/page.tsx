@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function ProjectOverviewPage() {
     const params = useParams();
@@ -156,7 +157,15 @@ export default function ProjectOverviewPage() {
     const topTables = tables.slice(0, 3);
 
     return (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-5xl">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Breadcrumb */}
+            <Breadcrumb
+                items={[
+                    { label: "Projects", href: "/projects" },
+                    { label: project?.name || "Overview" },
+                ]}
+            />
+
             {/* Hero Section */}
             <div className="relative p-5 md:p-8 rounded-2xl md:rounded-3xl bg-card border border-border/40 overflow-hidden shadow-2xl glass">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />

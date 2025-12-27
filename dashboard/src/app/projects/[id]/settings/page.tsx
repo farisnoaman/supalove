@@ -11,6 +11,7 @@ import {
     Save,
     RotateCcw
 } from "lucide-react";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,12 +98,25 @@ export default function SettingsPage() {
     const isRunning = project.status === 'running';
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Toaster richColors position="top-right" />
 
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>
-                <p className="text-muted-foreground">Manage your project configuration and lifecycle.</p>
+            {/* Breadcrumb */}
+            <Breadcrumb
+                items={[
+                    { label: "Overview", href: `/projects/${projectId}` },
+                    { label: "Settings" },
+                ]}
+            />
+
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight text-gradient">Settings</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Manage your project configuration and lifecycle.
+                    </p>
+                </div>
             </div>
 
             {/* General Settings */}
