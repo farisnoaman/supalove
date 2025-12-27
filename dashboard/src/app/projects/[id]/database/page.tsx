@@ -25,6 +25,8 @@ export default function DatabasePage() {
     const [showDesigner, setShowDesigner] = useState(false);
     const [tableToDelete, setTableToDelete] = useState<string | null>(null);
     const [deleting, setDeleting] = useState(false);
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+    const [filterType, setFilterType] = useState<"all" | "BASE TABLE" | "VIEW">("all");
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -82,9 +84,28 @@ export default function DatabasePage() {
         }
     };
 
-    const filteredTables = tables.filter((table) =>
-        table.table_name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const toggleSort = () => {
+        setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+    };
+
+    const cycleFilter = () => {
+        setFilterType(prev => {
+            if (prev === "all") return "BASE TABLE";
+            if (prev === "BASE TABLE") return "VIEW";
+            return "all";
+        });
+    };
+
+    const filteredTables = tables
+        .filter((table) => {
+            const matchesSearch = table.table_name.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesFilter = filterType === "all" || table.table_type === filterType;
+            return matchesSearch && matchesFilter;
+        })
+        .sort((a, b) => {
+            const comparison = a.table_name.localeCompare(b.table_name);
+            return sortOrder === "asc" ? comparison : -comparison;
+        });
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -124,10 +145,28 @@ export default function DatabasePage() {
                         className="pl-9 bg-card border-border/50 focus:border-primary/50"
                     />
                 </div>
-                <Button variant="outline" size="icon" className="text-muted-foreground">
+                <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={cycleFilter}
+                    className={cn(
+                        "text-muted-foreground",
+                        filterType !== "all" && "bg-primary/10 text-primary border-primary/30"
+                    )}
+                    title={filterType === "all" ? "Filter: All" : `Filter: ${filterType}`}
+                >
                     <Filter size={16} />
                 </Button>
-                <Button variant="outline" size="icon" className="text-muted-foreground">
+                <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={toggleSort}
+                    className={cn(
+                        "text-muted-foreground transition-transform",
+                        sortOrder === "desc" && "rotate-180"
+                    )}
+                    title={`Sort: ${sortOrder === "asc" ? "A-Z" : "Z-A"}`}
+                >
                     <SortAsc size={16} />
                 </Button>
             </div>

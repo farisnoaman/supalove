@@ -13,6 +13,7 @@ export function ProjectHeader() {
     const params = useParams();
     const projectId = params.id as string;
     const [status, setStatus] = useState<string>("loading");
+    const [projectName, setProjectName] = useState<string>("");
     const [isConnectOpen, setIsConnectOpen] = useState(false);
 
     const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
@@ -28,6 +29,7 @@ export function ProjectHeader() {
                 if (resp.ok) {
                     const data = await resp.json();
                     setStatus(data.status);
+                    setProjectName(data.name || "Unnamed Project");
                 }
             } catch (e) {
                 console.error(e);
@@ -43,20 +45,26 @@ export function ProjectHeader() {
                 <div className="w-10 lg:hidden" />
 
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span className="hidden md:inline">Project</span>
-                        <span className="hidden md:inline">/</span>
-                        <span className="font-mono text-foreground font-medium truncate">{projectId}</span>
+                    <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground truncate">
+                                {projectName || projectId}
+                            </span>
+                            <Badge variant="outline" className="gap-1.5 hidden sm:inline-flex">
+                                <Circle size={6} className={
+                                    status === "running" ? "fill-emerald-500 text-emerald-500" :
+                                        status === "failed" ? "fill-red-500 text-red-500" :
+                                            "fill-amber-500 text-amber-500"
+                                } />
+                                <span className="capitalize">{status}</span>
+                            </Badge>
+                        </div>
+                        {projectName && (
+                            <span className="text-xs font-mono text-muted-foreground/70 truncate">
+                                {projectId}
+                            </span>
+                        )}
                     </div>
-
-                    <Badge variant="outline" className="ml-2 gap-1.5 hidden sm:inline-flex">
-                        <Circle size={6} className={
-                            status === "running" ? "fill-emerald-500 text-emerald-500" :
-                                status === "failed" ? "fill-red-500 text-red-500" :
-                                    "fill-amber-500 text-amber-500"
-                        } />
-                        <span className="capitalize">{status}</span>
-                    </Badge>
                 </div>
 
                 <div className="flex items-center gap-4">
