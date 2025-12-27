@@ -103,6 +103,7 @@ See [DEPLOY_TO_COOLIFY.md](./DEPLOY_TO_COOLIFY.md) for one-click deployment.
 | Document | Description |
 |----------|-------------|
 | [Architecture](./docs/ARCHITECTURE.md) | System design and components |
+| [Architecture vs Plan](./docs/ARCHITECTURE_VS_PLAN.md) | How app structure changes per plan |
 | [Billing System](./docs/BILLING.md) | Plans, entitlements, and Stripe integration |
 | [Shared Plan Architecture](./docs/SHARED_PLAN_ARCHITECTURE.md) | Shared vs Dedicated plans |
 | [API Reference](./docs/API.md) | REST API endpoints |
