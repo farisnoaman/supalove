@@ -16,7 +16,7 @@ import {
 import {
     ArrowUpDown, Plus, Download, RefreshCw, ChevronLeft, ChevronRight,
     Settings, Table as TableIcon, Trash2, CheckSquare, Square,
-    Shield, Key, FileText, Database, Lock, Unlock
+    Shield, Key, FileText, Database, Lock, Unlock, Copy, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -54,12 +54,18 @@ export default function TableDetailPage() {
     const [indexes, setIndexes] = useState<any[]>([]);
     const [policies, setPolicies] = useState<any[]>([]);
     const [loadingMeta, setLoadingMeta] = useState(true);
+    const [tableSchema, setTableSchema] = useState<any[]>([]);
+    const [tableSql, setTableSql] = useState("");
 
     // RLS State
     const [rlsEnabled, setRlsEnabled] = useState(false);
     const [showPolicyEditor, setShowPolicyEditor] = useState(false);
     const [editingPolicy, setEditingPolicy] = useState<any | null>(null);
     const [deletingPolicy, setDeletingPolicy] = useState<string | null>(null);
+
+    // Realtime State
+    const [realtimeEnabled, setRealtimeEnabled] = useState(false);
+    const [isTogglingRealtime, setIsTogglingRealtime] = useState(false);
 
     // Modal State
     const [showDeleteTableModal, setShowDeleteTableModal] = useState(false);
@@ -83,6 +89,10 @@ export default function TableDetailPage() {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             const schema = await schemaResp.json();
+            setTableSchema(schema);
+
+            // Generate SQL from schema
+            generateTableSQL(schema);
 
             // Heuristic for PKs
             const pks = schema
@@ -231,6 +241,69 @@ export default function TableDetailPage() {
         }
     };
 
+    const generateTableSQL = (schema: any[]) => {
+        if (!schema || schema.length === 0) return;
+
+        let sql = `CREATE TABLE public.${tableName} (\n`;
+
+        schema.forEach((col: any, index: number) => {
+            sql += `  ${col.column_name} ${col.data_type}`;
+
+            if (col.character_maximum_length) {
+                sql += `(${col.character_maximum_length})`;
+            }
+
+            if (col.is_nullable === 'NO') {
+                sql += ' NOT NULL';
+            }
+
+            if (col.column_default) {
+                sql += ` DEFAULT ${col.column_default}`;
+            }
+
+            if (index < schema.length - 1) {
+                sql += ',';
+            }
+
+            sql += '\n';
+        });
+
+        sql += ');';
+        setTableSql(sql);
+    };
+
+    const copyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            toast.success("Copied to clipboard!");
+        } catch (err) {
+            toast.error("Failed to copy");
+        }
+    };
+
+    const toggleRealtime = async () => {
+        setIsTogglingRealtime(true);
+        try {
+            const token = localStorage.getItem("token");
+            const endpoint = realtimeEnabled ? 'disable' : 'enable';
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/realtime/${endpoint}`, {
+                method: 'POST',
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (resp.ok) {
+                setRealtimeEnabled(!realtimeEnabled);
+                toast.success(`Realtime ${!realtimeEnabled ? 'enabled' : 'disabled'} for table`);
+            } else {
+                toast.error(`Failed to ${endpoint} realtime`);
+            }
+        } catch (err) {
+            toast.error("Network error");
+        } finally {
+            setIsTogglingRealtime(false);
+        }
+    };
+
     // ... (Existing deleteTable and deleteSelectedRows functions) ...
     const deleteTable = async () => {
         setIsDeletingTable(true);
@@ -362,6 +435,19 @@ export default function TableDetailPage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleRealtime}
+                        disabled={isTogglingRealtime}
+                        className={cn(
+                            "gap-2 border-border/50",
+                            realtimeEnabled && "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        )}
+                    >
+                        <Zap size={14} className={realtimeEnabled ? "text-emerald-500" : ""} />
+                        {isTogglingRealtime ? "..." : realtimeEnabled ? "Realtime On" : "Enable Realtime"}
+                    </Button>
                     <Button variant="danger" size="sm" onClick={() => setShowDeleteTableModal(true)} className="gap-2 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground border-destructive/20">
                         <Trash2 size={14} />
                         Delete Table
@@ -576,6 +662,38 @@ export default function TableDetailPage() {
                             Add Column
                         </Button>
                     </div>
+
+                    {/* SQL Definition */}
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold flex items-center gap-2">
+                                <FileText size={18} className="text-primary" /> SQL Definition
+                            </h3>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => copyToClipboard(tableSql)}
+                                className="gap-2 border-border/50"
+                                disabled={!tableSql}
+                            >
+                                <Copy size={14} />
+                                Copy SQL
+                            </Button>
+                        </div>
+                        {loadingData ? (
+                            <Skeleton className="h-64 w-full rounded-xl" />
+                        ) : (
+                            <div className="bg-card border border-border/40 rounded-xl overflow-hidden">
+                                <div className="bg-muted/30 px-4 py-2 border-b border-border/40">
+                                    <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">CREATE TABLE</span>
+                                </div>
+                                <pre className="p-6 overflow-x-auto">
+                                    <code className="text-sm font-mono text-foreground">{tableSql || "No schema available"}</code>
+                                </pre>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">

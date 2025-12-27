@@ -25,23 +25,43 @@ def get_project_secrets(db: Session, project_id: str) -> dict:
     db_secrets = db.query(ProjectSecret).filter(ProjectSecret.project_id == project_id).all()
     return {s.key: s.value for s in db_secrets}
 
-def set_secret(project_id: str, key: str, value: str):
-    env_path = get_project_env_path(project_id)
-    if not env_path.exists():
-        # Create if not exists
-        env_path.parent.mkdir(parents=True, exist_ok=True)
-        env_path.touch()
+def set_secret(db: Session, project_id: str, key: str, value: str):
+    """
+    Sets a secret in the database and syncs to .env
+    """
+    secret = db.query(ProjectSecret).filter(
+        ProjectSecret.project_id == project_id, 
+        ProjectSecret.key == key
+    ).first()
     
-    set_key(env_path, key, value)
-    return get_secrets(project_id)
-
-def delete_secret(project_id: str, key: str):
-    env_path = get_project_env_path(project_id)
-    if not env_path.exists():
-        return {}
+    if secret:
+        secret.value = value
+    else:
+        secret = ProjectSecret(project_id=project_id, key=key, value=value)
+        db.add(secret)
         
-    unset_key(env_path, key)
-    return get_secrets(project_id)
+    db.commit()
+    
+    # Sync to .env
+    reconcile_secrets(db, project_id)
+    
+    return get_project_secrets(db, project_id)
+
+def delete_secret(db: Session, project_id: str, key: str):
+    """
+    Deletes a secret from the database and syncs to .env
+    """
+    db.query(ProjectSecret).filter(
+        ProjectSecret.project_id == project_id,
+        ProjectSecret.key == key
+    ).delete()
+    
+    db.commit()
+    
+    # Sync to .env
+    reconcile_secrets(db, project_id)
+    
+    return get_project_secrets(db, project_id)
 
 def find_free_port(start_port: int = 5000) -> int:
     """Find a port that's free on the HOST Docker daemon.

@@ -18,7 +18,8 @@ def list_secrets(
     current_user: User = Depends(get_current_user)
 ):
     verify_project_access(project_id, db, current_user)
-    return get_secrets(project_id)
+    from services.secrets_service import get_project_secrets
+    return get_project_secrets(db, project_id)
 
 @router.post("")
 def update_secret(
@@ -37,7 +38,7 @@ def update_secret(
     if not key:
         raise HTTPException(status_code=400, detail="Key is required")
         
-    return set_secret(project_id, key, value)
+    return set_secret(db, project_id, key, value)
 
 @router.delete("/{key}")
 def remove_secret(
@@ -47,4 +48,4 @@ def remove_secret(
     current_user: User = Depends(get_current_user)
 ):
     verify_project_access(project_id, db, current_user)
-    return delete_secret(project_id, key)
+    return delete_secret(db, project_id, key)

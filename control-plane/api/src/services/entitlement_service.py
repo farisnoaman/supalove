@@ -27,13 +27,21 @@ class EntitlementService:
     @staticmethod
     def check_can_create_project(db: Session, org_id: str) -> bool:
         """Check if org can create another project."""
+        from models.project import Project, ProjectStatus
+        
         ent = EntitlementService.get_entitlements(db, org_id)
         plan = EntitlementService.get_plan(db, ent.plan_id)
         
         if plan.max_projects == -1:  # Unlimited
             return True
+            
+        # Dynamic Count (Source of Truth)
+        current_count = db.query(Project).filter(
+            Project.org_id == org_id,
+            Project.status != ProjectStatus.DELETED
+        ).count()
         
-        if ent.projects_used >= plan.max_projects:
+        if current_count >= plan.max_projects:
             raise HTTPException(
                 status_code=403,
                 detail=f"Project limit reached ({plan.max_projects}). Upgrade your plan."
@@ -43,15 +51,10 @@ class EntitlementService:
     
     @staticmethod
     def increment_project_count(db: Session, org_id: str):
-        """Increment project counter."""
-        ent = EntitlementService.get_entitlements(db, org_id)
-        ent.projects_used += 1
-        db.commit()
+        """Deprecated: Counters are unreliable. Use dynamic counts."""
+        pass
     
     @staticmethod
     def decrement_project_count(db: Session, org_id: str):
-        """Decrement project counter."""
-        ent = EntitlementService.get_entitlements(db, org_id)
-        if ent.projects_used > 0:
-            ent.projects_used -= 1
-            db.commit()
+        """Deprecated: Counters are unreliable. Use dynamic counts."""
+        pass

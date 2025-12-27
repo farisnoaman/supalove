@@ -298,3 +298,41 @@ def get_table_size(
         return db_service.get_table_size(table_name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Realtime Management
+
+@router.post("/{project_id}/tables/{table_name}/realtime/enable")
+def enable_realtime(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Enable realtime replication for a table"""
+    verify_project_access(project_id, db, current_user)
+    try:
+        db_service = DatabaseService(project_id)
+        result = db_service.enable_realtime(table_name)
+        if result.get("error"):
+            return {"success": False, **result}
+        return {"success": True, **result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{project_id}/tables/{table_name}/realtime/disable")
+def disable_realtime(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Disable realtime replication for a table"""
+    verify_project_access(project_id, db, current_user)
+    try:
+        db_service = DatabaseService(project_id)
+        result = db_service.disable_realtime(table_name)
+        if result.get("error"):
+            return {"success": False, **result}
+        return {"success": True, **result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

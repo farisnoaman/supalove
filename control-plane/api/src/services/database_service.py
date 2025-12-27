@@ -283,3 +283,30 @@ class DatabaseService:
         if result.get("rows"):
             return result["rows"][0]
         return {}
+
+    # Realtime Management
+    
+    def enable_realtime(self, table_name: str) -> Dict[str, Any]:
+        """Enable realtime replication for a table by adding it to the realtime publication"""
+        # First, ensure the supabase_realtime publication exists
+        create_pub_sql = """
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+                    CREATE PUBLICATION supabase_realtime;
+                END IF;
+            END $$;
+        """
+        
+        create_result = self.execute_query(create_pub_sql)
+        if create_result.get("error"):
+            return create_result
+        
+        # Add the table to the publication
+        add_table_sql = f'ALTER PUBLICATION supabase_realtime ADD TABLE public."{table_name}";'
+        return self.execute_query(add_table_sql)
+    
+    def disable_realtime(self, table_name: str) -> Dict[str, Any]:
+        """Disable realtime replication for a table by removing it from the realtime publication"""
+        sql = f'ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS public."{table_name}";'
+        return self.execute_query(sql)

@@ -15,7 +15,11 @@ class UsageService:
         Calculates real-time usage for an organization.
         """
         # 1. Project Count
-        project_count = self.db.query(Project).filter_by(org_id=org_id).count()
+        # Filter out DELETED projects
+        project_count = self.db.query(Project).filter(
+            Project.org_id == org_id,
+            Project.status != "deleted"
+        ).count()
 
         # 2. Database Size (Mock for now, would use pg_database_size)
         # In a real scenario, we'd query the stats DB or cache this value.

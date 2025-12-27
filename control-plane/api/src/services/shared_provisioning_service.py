@@ -67,7 +67,7 @@ def create_project_database(db_name: str, db_password: str, host: str, port: int
             [db_password]
         )
         
-        # Grant privileges
+        # Grant privileges on database
         cursor.execute(
             sql.SQL("GRANT ALL PRIVILEGES ON DATABASE {} TO {}").format(
                 sql.Identifier(db_name),
@@ -83,6 +83,36 @@ def create_project_database(db_name: str, db_password: str, host: str, port: int
     finally:
         cursor.close()
         conn.close()
+    
+    # Connect to the new database to set schema permissions
+    try:
+        db_conn = get_custom_connection(host, port, dbname=db_name)
+        db_conn.autocommit = True
+        db_cursor = db_conn.cursor()
+        
+        # Grant full permissions on public schema to project user
+        db_cursor.execute(
+            sql.SQL("GRANT ALL ON SCHEMA public TO {}").format(
+                sql.Identifier(project_user)
+            )
+        )
+        
+        # Make project user the owner of public schema for full control
+        db_cursor.execute(
+            sql.SQL("ALTER SCHEMA public OWNER TO {}").format(
+                sql.Identifier(project_user)
+            )
+        )
+        
+        print(f"[SharedProvisioning] Granted schema permissions to {project_user}")
+        
+    except Exception as e:
+        print(f"[SharedProvisioning] Warning: Could not set schema permissions: {e}")
+    finally:
+        if 'db_cursor' in locals():
+            db_cursor.close()
+        if 'db_conn' in locals():
+            db_conn.close()
 
 
 def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: int) -> None:
