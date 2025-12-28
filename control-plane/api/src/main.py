@@ -183,6 +183,10 @@ app.include_router(users_router, prefix=f"{api_v1_prefix}/users", tags=["Users"]
 app.include_router(orgs_router, prefix=f"{api_v1_prefix}/orgs", tags=["Organizations"])
 app.include_router(billing_router, prefix=f"{api_v1_prefix}/billing", tags=["Billing"])
 
+# Shared Auth Service - GoTrue-compatible endpoints for shared projects
+from api.v1.shared_auth import router as shared_auth_router
+app.include_router(shared_auth_router, prefix=f"{api_v1_prefix}", tags=["Shared Auth"])
+
 # ============================================
 # PROMETHEUS METRICS
 # ============================================

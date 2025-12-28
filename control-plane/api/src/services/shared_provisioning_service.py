@@ -104,6 +104,23 @@ def create_project_database(db_name: str, db_password: str, host: str, port: int
             )
         )
         
+        # Grant auth schema permissions to project user (for Shared Auth Service)
+        db_cursor.execute(
+            sql.SQL("GRANT USAGE ON SCHEMA auth TO {}").format(
+                sql.Identifier(project_user)
+            )
+        )
+        db_cursor.execute(
+            sql.SQL("GRANT ALL ON ALL TABLES IN SCHEMA auth TO {}").format(
+                sql.Identifier(project_user)
+            )
+        )
+        db_cursor.execute(
+            sql.SQL("GRANT ALL ON ALL SEQUENCES IN SCHEMA auth TO {}").format(
+                sql.Identifier(project_user)
+            )
+        )
+        
         print(f"[SharedProvisioning] Granted schema permissions to {project_user}")
         
     except Exception as e:
@@ -166,6 +183,55 @@ def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: i
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO anon, authenticated, service_role;
+        
+        -- ============================================
+        -- AUTH.USERS TABLE (Supabase Compatible)
+        -- ============================================
+        CREATE TABLE IF NOT EXISTS auth.users (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            email TEXT UNIQUE NOT NULL,
+            encrypted_password TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW(),
+            email_confirmed_at TIMESTAMPTZ,
+            last_sign_in_at TIMESTAMPTZ,
+            role TEXT DEFAULT 'authenticated',
+            aud TEXT DEFAULT 'authenticated',
+            user_metadata JSONB DEFAULT '{}',
+            app_metadata JSONB DEFAULT '{}'
+        );
+        
+        -- Create auth.uid() function for RLS policies
+        CREATE OR REPLACE FUNCTION auth.uid() 
+        RETURNS UUID 
+        LANGUAGE sql STABLE
+        AS $$
+            SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid
+        $$;
+        
+        -- Create auth.role() function for RLS policies
+        CREATE OR REPLACE FUNCTION auth.role() 
+        RETURNS TEXT 
+        LANGUAGE sql STABLE
+        AS $$
+            SELECT NULLIF(current_setting('request.jwt.claim.role', true), '')::text
+        $$;
+        
+        -- Create auth.jwt() function for RLS policies
+        CREATE OR REPLACE FUNCTION auth.jwt() 
+        RETURNS JSONB 
+        LANGUAGE sql STABLE
+        AS $$
+            SELECT COALESCE(
+                current_setting('request.jwt.claims', true),
+                '{}'
+            )::jsonb
+        $$;
+        
+        -- Grant access to auth functions
+        GRANT EXECUTE ON FUNCTION auth.uid() TO anon, authenticated, service_role;
+        GRANT EXECUTE ON FUNCTION auth.role() TO anon, authenticated, service_role;
+        GRANT EXECUTE ON FUNCTION auth.jwt() TO anon, authenticated, service_role;
         """
         
         # Replace placeholder password
