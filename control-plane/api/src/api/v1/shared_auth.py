@@ -9,8 +9,8 @@ API Prefix: /projects/{project_id}/auth/v1
 
 import uuid
 import secrets
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from datetime import datetime, timedelta, timezone
+from typing import Optional, Dict, Any, Union
 
 from fastapi import APIRouter, HTTPException, Depends, Header, Request
 from pydantic import BaseModel
@@ -154,7 +154,7 @@ def create_access_token(user_id: str, email: str, role: str, jwt_secret: str,
     Create a GoTrue-compatible JWT access token.
     Returns (access_token, expires_at timestamp).
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     expires_at = now + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
     
     payload = {
@@ -393,7 +393,12 @@ async def get_user(
     
     try:
         # Decode and verify JWT
-        payload = jwt.decode(token, config["jwt_secret"], algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, 
+            config["jwt_secret"], 
+            algorithms=[ALGORITHM],
+            audience="authenticated"
+        )
         user_id = payload.get("sub")
         
         if not user_id:
