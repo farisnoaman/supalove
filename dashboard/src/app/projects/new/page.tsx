@@ -120,19 +120,19 @@ export default function NewProjectPage() {
                         {/* Project Name */}
                         <div>
                             <label htmlFor="projectId" className="block text-sm font-medium mb-2 text-muted-foreground">
-                                Project Name / ID
+                                Project Name
                             </label>
                             <input
                                 id="projectId"
                                 type="text"
                                 required
-                                placeholder="e.g. my-awesome-app"
-                                className="w-full p-3 bg-muted border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono"
+                                placeholder="e.g. Food App"
+                                className="w-full p-3 bg-muted border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-sans"
                                 value={projectId}
                                 onChange={(e) => setProjectId(e.target.value)}
                             />
                             <p className="mt-2 text-xs text-muted-foreground">
-                                This will be used for your database and API endpoints. Use lowercase, numbers, and hyphens.
+                                This is just a display name. You can use spaces, capital letters, and emojis.
                             </p>
                         </div>
 
@@ -215,7 +215,7 @@ export default function NewProjectPage() {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
 
