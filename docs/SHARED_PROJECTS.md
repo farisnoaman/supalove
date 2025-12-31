@@ -555,12 +555,103 @@ docker logs supalove_shared_gateway_v3 -f
 curl http://localhost:8000/health
 ```
 
+```
+
+---
+
+## User Management
+
+### Automatic Admin Creation
+
+When a shared project is created, an admin user is automatically provisioned:
+
+**Flow:**
+```mermaid
+graph LR
+    A[Project Created] --> B[Get Org Owner Email]
+    B --> C[Generate Secure Password]
+    C --> D[Create User in auth.users]
+    D --> E[Store Temp Password in Secrets]
+    E --> F[Admin User Ready]
+```
+
+**Implementation:**
+- Email: Organization owner's email
+- Password: Secure 16-character random password
+- Role: `admin` in `user_metadata`
+- Storage: Temporary password stored as `ADMIN_TEMP_PASSWORD` secret
+
+**Code Location:** `control-plane/api/src/services/project_user_service.py`
+
+### User Management API
+
+**Endpoints:**
+```
+GET    /api/v1/projects/{project_id}/users          # List users
+POST   /api/v1/projects/{project_id}/users          # Create user
+DELETE /api/v1/projects/{project_id}/users/{id}     # Delete user
+GET    /api/v1/projects/{project_id}/admin-password # Get temp password (one-time)
+```
+
+**User Data Structure:**
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "role": "admin|member",
+  "created_at": "timestamp",
+  "email_confirmed_at": "timestamp",
+  "user_metadata": {
+    "role": "admin|member",
+    "created_by": "system|manual",
+    "is_project_admin": true|false
+  }
+}
+```
+
+### Dashboard UI
+
+**Location:** `/projects/{id}/users`
+
+**Features:**
+- View all project users
+- Create new users with roles
+- Delete users
+- Retrieve one-time admin password
+- Role badges and status indicators
+
+### Database Storage
+
+Users are stored in each project's isolated database:
+
+```sql
+-- Project database: project_abc123
+SELECT * FROM auth.users;
+
+-- Example row
+id              | email              | role         | user_metadata
+----------------|--------------------|--------------|-------------------
+uuid-here       | admin@example.com  | authenticated| {"role": "admin"}
+```
+
+**Isolation:**
+- Users in `project_abc123` cannot access `project_xyz789`
+- Each project has completely separate user tables
+- No cross-project user data leakage
+
+### Documentation
+
+See detailed guides:
+- [API Documentation](./PROJECT_USER_MANAGEMENT_API.md) - Complete API reference
+- [User Guide](./USER_GUIDE_PROJECT_USERS.md) - How to manage users in dashboard
+
 ---
 
 ## Future Enhancements
 
-1. **Per-Project JWT Secrets** - Better security isolation
+1. ~~**Per-Project JWT Secrets**~~ ✅ **Complete** - Better security isolation
 2. **Database Sharding** - Multiple PostgreSQL instances for scaling
+
 3. **Connection Pooling** - PgBouncer for better performance
 4. **Read Replicas** - Scale read operations
 5. **Multi-Region** - Deploy shared infrastructure closer to users

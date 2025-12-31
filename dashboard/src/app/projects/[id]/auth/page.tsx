@@ -160,6 +160,32 @@ export default function AuthPage() {
                 </Button>
             </div>
 
+            {/* Deprecation Notice */}
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6">
+                <div className="flex items-start gap-4">
+                    <div className="p-2 bg-amber-500/20 rounded-lg flex-shrink-0">
+                        <Shield className="text-amber-600 dark:text-amber-400" size={20} />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-sm font-bold text-amber-900 dark:text-amber-300 mb-1">
+                            ⚠️ This page is deprecated
+                        </h3>
+                        <p className="text-sm text-amber-800 dark:text-amber-400/90 mb-3">
+                            The Keycloak authentication system shown here is being phased out.
+                            Please use the new <strong>Users</strong> page for managing project users.
+                        </p>
+                        <Button
+                            onClick={() => window.location.href = `/projects/${projectId}/users`}
+                            size="sm"
+                            className="bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-500/20"
+                        >
+                            Go to Users Page →
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-card border border-border/40 rounded-2xl glass relative overflow-hidden group">

@@ -9,6 +9,7 @@ API Prefix: /projects/{project_id}/auth/v1
 
 import uuid
 import secrets
+import json
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, Union
 
@@ -240,7 +241,7 @@ async def signup(
             user_id, request.email, hashed_pw, now, now, 
             now,  # auto-confirm
             "authenticated", "authenticated",
-            str(request.data or {}), "{}"
+            json.dumps(request.data or {}), "{}"
         ))
         
         user_row = cursor.fetchone()

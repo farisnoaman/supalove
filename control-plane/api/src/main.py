@@ -27,6 +27,7 @@ from api.v1.secrets import router as secrets_router
 from api.v1.logs import router as logs_router
 from api.v1.orgs import router as orgs_router
 from api.v1.billing import router as billing_router
+from api.v1.project_users import router as project_users_router
 
 from core.database import Base, engine
 
@@ -182,6 +183,7 @@ from api.v1.users import router as users_router
 app.include_router(users_router, prefix=f"{api_v1_prefix}/users", tags=["Users"])
 app.include_router(orgs_router, prefix=f"{api_v1_prefix}/orgs", tags=["Organizations"])
 app.include_router(billing_router, prefix=f"{api_v1_prefix}/billing", tags=["Billing"])
+app.include_router(project_users_router, prefix=f"{api_v1_prefix}/projects", tags=["Project Users"])
 
 # Shared Auth Service - GoTrue-compatible endpoints for shared projects
 from api.v1.shared_auth import router as shared_auth_router

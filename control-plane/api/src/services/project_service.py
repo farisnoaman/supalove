@@ -117,6 +117,36 @@ def create_project(db: Session, custom_domain: str = None, name: str = None, org
             project.status = ProjectStatus.RUNNING
             EntitlementService.increment_project_count(db, org_id)
             db.commit()
+            
+            # 6️⃣ Create admin user for the project
+            try:
+                from services.project_user_service import ProjectUserService
+                import logging
+                
+                logger = logging.getLogger(__name__)
+                logger.info(f"Creating admin user for project {project_id}")
+                
+                user_service = ProjectUserService()
+                admin_result = user_service.create_admin_for_new_project(
+                    db=db,
+                    project_id=project_id,
+                    org_id=org_id
+                )
+                
+                logger.info(
+                    f"Successfully created admin user {admin_result['email']} "
+                    f"for project {project_id}"
+                )
+                
+            except Exception as e:
+                # Log error but don't fail project creation
+                # User can create admin manually later via UI
+                logger = logging.getLogger(__name__)
+                logger.error(
+                    f"Failed to create admin user for project {project_id}: {e}",
+                    exc_info=True
+                )
+            
             db.refresh(project)
             
             return {

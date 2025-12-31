@@ -35,7 +35,7 @@ const sidebarSections = [
         items: [
             { href: "/database", label: "Database", icon: Database },
             { href: "/sql", label: "SQL Editor", icon: Terminal },
-            { href: "/auth", label: "Authentication", icon: Shield },
+            { href: "/users", label: "Users", icon: Users },
             { href: "/storage", label: "Storage", icon: Folder },
             { href: "/edge-functions", label: "Edge Functions", icon: Code2 },
             { href: "/realtime", label: "Realtime", icon: Bell },
