@@ -23,17 +23,21 @@ This guide explains how to deploy Supalove to your Coolify instance.
 7.  **Environment Variables**:
     You can leave the defaults or override them in the specific secrets section:
     *   `MINIO_ROOT_PASSWORD` (Generate a strong one)
-    *   `ALLOWED_ORIGINS` (Comma-separated list of allowed origins) - Set this to your dashboard domain (e.g., `https://supalove.hayataxi.online`).
-        *   **Crucial for CORS**: This fixes the "blocked by CORS policy" error. Coolify will pass this to the API.
-    *   `NEXT_PUBLIC_API_URL` (Required build variable) - Set this to the public URL of your API (e.g., `https://api.hayataxi.online`).
-        *   **Crucial**: In Coolify, ensure this is set in the **Environment Variables** section. Since we configured it as a build argument in `docker-compose.coolify.yml`, Coolify will pass it during the build process.
-8.  **Expose Services**:
-    *   **Dashboard**: Port `3000`. Assign a domain (e.g., `https://supalove.hayataxi.online`).
-    *   **API**: Port `8000`. Assign a domain (e.g., `https://api.hayataxi.online`).
-    *   **Keycloak**: Port `8080`. Assign a domain (e.g., `https://auth..hayataxi.online`).
-    *   **MinIO Console**: Port `9001` (Optional, for admin).
-    *   **MinIO API**: Port `9000`. Assign a domain (e.g., `https://s3.hayataxi.online`).
+    *   `ALLOWED_ORIGINS` (Comma-separated list of allowed origins) - Set this to your dashboard domain.
+    *   `NEXT_PUBLIC_API_URL` (Required build variable) - Set this to the public URL of your API.
+    *   `SHARED_POSTGRES_PASSWORD` (Secure password for shared DB)
+    *   `SHARED_JWT_SECRET` (32+ char random string for JWT signing)
+    *   `SECRET_KEY_BASE` (64+ char random string for Realtime service)
 
-    *Note: You need to set `NEXT_PUBLIC_API_URL` to your API domain in the Dashboard environment variables.*
+8.  **Expose Services**:
+    *   **Dashboard**: Port `3000`. Assign a domain (e.g., `https://console.example.com`).
+    *   **API (Control Plane)**: Port `8000`. Assign a domain (e.g., `https://api.example.com`).
+    *   **Shared Gateway**: Port `8083`. Assign a domain (e.g., `https://gateway.example.com`).
+    *   **MinIO Console**: Port `9001`. Assign a domain (e.g., `https://s3-console.example.com`).
+    *   **MinIO API**: Port `9000`. Assign a domain (e.g., `https://s3.example.com`).
+    *   **Keycloak** (Legacy): Port `8080`. (Optional).
+
+    *Note: The Shared Gateway (Port 8083) handles all project API traffic (Auth, API, Realtime).*
 
 9.  **Deploy**.
+
