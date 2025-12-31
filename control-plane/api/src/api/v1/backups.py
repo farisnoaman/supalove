@@ -29,8 +29,42 @@ def list_backups(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """List all backups for a project"""
     verify_project_access(project_id, db, current_user)
     try:
         return backup_service.list_backups(project_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{project_id}/backups/{backup_id:path}/download")
+def download_backup(
+    project_id: str,
+    backup_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get a download URL for a backup"""
+    verify_project_access(project_id, db, current_user)
+    try:
+        # backup_id comes URL-encoded, decode the path
+        from urllib.parse import unquote
+        backup_path = unquote(backup_id)
+        return backup_service.download_backup(project_id, backup_path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{project_id}/backups/{backup_id:path}/restore")
+def restore_backup(
+    project_id: str,
+    backup_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Restore a backup (WARNING: This will overwrite current data!)"""
+    verify_project_access(project_id, db, current_user)
+    try:
+        from urllib.parse import unquote
+        backup_path = unquote(backup_id)
+        return backup_service.restore_backup(project_id, backup_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

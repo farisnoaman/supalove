@@ -19,42 +19,26 @@ class BackupService:
             self.storage_service.client.make_bucket(self.backup_bucket)
 
     def _get_db_url(self, project_id: str) -> str:
-        # Construct DB URL from secrets. 
-        # Note: In a real distributed system, we need to ensure the worker allows network access to the DB.
-        # For Local/Coolify, we assume the DB is reachable via the URL constructed in provisioning.
+        """
+        Construct DB URL from project secrets.
+        Works for both shared and dedicated projects.
+        """
         db = SessionLocal()
-        secrets = db.query(ProjectSecret).filter(ProjectSecret.project_id == project_id).all()
-        secret_map = {s.key: s.value for s in secrets}
-        db.close()
-        
-        # We might not have the full URL stored as a secret, usually it's constructed.
-        # But we do have DB_PASSWORD.
-        # Let's rely on retrieving the 'project' object which might have the db_url cached 
-        # OR re-construct it. The project_service return value has it.
-        # For now, let's assume we can reconstruct it or fetch it.
-        # Actually, `provisioning_service` returns it, but we don't persist the full URL in DB usually?
-        # Let's look at `Project` model or secrets.
-        
-        # Fallback: Construct for Local/Coolify
-        # This is a bit brittle, ideally we persist the connection info.
-        # Let's use the secret map.
-        password = secret_map.get("DB_PASSWORD", "postgres")
-        # For local, it's localhost:DB_PORT. For Coolify, it's domain based.
-        # We need to know which provider was used or the stored URL.
-        # Let's verify if `db_url` is stored on the Project model? No, it's usually returned dynamically.
-        # But `Project` has status.
-        
-        # HACK: For this implementation, let's assume standard local docker ports for now 
-        # or fetch from Provisioner if possible.
-        # Better approach: The `project_service.create_project` returns db_url. 
-        # We should probably persist it or allow `provisioning_service` to return info for existing projects.
-        
-        # Let's stick to Local defaults for immediate testability.
-        # Real-world: Store `db_connection_string` in ProjectSecret.
-        
-        port = secret_map.get("DB_PORT", "5432")
-        host = "localhost" # Assuming reachable from control-plane
-        return f"postgresql://app:{password}@{host}:{port}/app"
+        try:
+            secrets = db.query(ProjectSecret).filter(ProjectSecret.project_id == project_id).all()
+            secret_map = {s.key: s.value for s in secrets}
+            
+            # Get database connection details from secrets
+            db_host = secret_map.get("DB_HOST", "localhost")
+            db_port = secret_map.get("DB_PORT", "5432")
+            db_name = secret_map.get("POSTGRES_DB", "postgres")
+            db_user = secret_map.get("POSTGRES_USER", "postgres")
+            db_password = secret_map.get("DB_PASSWORD", "postgres")
+            
+            # Construct PostgreSQL URL
+            return f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        finally:
+            db.close()
 
     def backup_database(self, project_id: str) -> str:
         """
@@ -157,10 +141,84 @@ class BackupService:
 
     def restore_backup(self, project_id: str, backup_id: str):
         """
-        Restores a backup. 
-        backup_id is the object path in the backup bucket.
+        Restores a database backup.
+        backup_id is the object path in the backup bucket (e.g., "project_id/db_20240101_120000.sql")
+        
+        WARNING: This will overwrite the current database!
         """
-        # Download backup
-        # pg_restore
-        # This is strictly manual-ish for now as it overrides data.
-        pass
+        print(f"[Backup] Restoring backup {backup_id} for project {project_id}...")
+        
+        db_url = self._get_db_url(project_id)
+        
+        try:
+            # Download backup from MinIO
+            response = self.storage_service.client.get_object(self.backup_bucket, backup_id)
+            
+            # Save to temp file
+            temp_file = "/tmp/restore_backup.sql"
+            with open(temp_file, "wb") as f:
+                for data in response.stream(32*1024):
+                    f.write(data)
+            
+            # Parse DB URL for pg_restore
+            from urllib.parse import urlparse
+            u = urlparse(db_url)
+            
+            env = os.environ.copy()
+            env["PGPASSWORD"] = u.password
+            
+            # Use pg_restore for custom format backups
+            command = [
+                "pg_restore",
+                "-h", u.hostname,
+                "-p", str(u.port),
+                "-U", u.username,
+                "-d", u.path.lstrip("/"),
+                "--clean",  # Drop existing objects before restore
+                "--if-exists",  # Don't error if objects don't exist
+                "--no-owner",   # Do not attempt to set ownership
+                "--no-acl",     # Do not restore access privileges (grant/revoke)
+                temp_file
+            ]
+            
+            # Allow exit code 1 (warnings) as success
+            result = subprocess.run(command, env=env, check=False, capture_output=True, text=True)
+            
+            if result.returncode > 1:
+                # Real failure
+                raise Exception(f"pg_restore failed with code {result.returncode}: {result.stderr}")
+            elif result.returncode == 1:
+                # Warnings (safe to ignore usually)
+                print(f"[Backup] Restore finished with warnings: {result.stderr}")
+            else:
+                # Success (code 0)
+                print(f"[Backup] Restore completed successfully")
+            
+            # Cleanup
+            os.remove(temp_file)
+            
+            return {"status": "success", "message": "Database restored successfully"}
+            
+        except Exception as e:
+            print(f"[Backup] Restore failed: {e}")
+            if os.path.exists("/tmp/restore_backup.sql"):
+                os.remove("/tmp/restore_backup.sql")
+            raise
+    
+    def download_backup(self, project_id: str, backup_id: str):
+        """
+        Get a presigned URL to download a backup file.
+        Returns a temporary download URL valid for 1 hour.
+        """
+        try:
+            # Generate presigned URL for download
+            from datetime import timedelta
+            url = self.storage_service.client.presigned_get_object(
+                self.backup_bucket,
+                backup_id,
+                expires=timedelta(hours=1)
+            )
+            return {"download_url": url, "expires_in": "1 hour"}
+        except Exception as e:
+            print(f"[Backup] Download URL generation failed: {e}")
+            raise

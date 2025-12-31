@@ -67,6 +67,52 @@ export default function BackupsPage() {
         }
     };
 
+    const downloadBackup = async (backupName: string) => {
+        try {
+            const token = localStorage.getItem("token");
+            const encodedName = encodeURIComponent(backupName);
+            const res = await fetch(`${API_URL}/api/v1/projects/${projectId}/backups/${encodedName}/download`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                // Open download URL in new tab
+                window.open(data.download_url, '_blank');
+                toast.success("Download started");
+            } else {
+                toast.error("Failed to get download link");
+            }
+        } catch (error) {
+            toast.error("Failed to download backup");
+        }
+    };
+
+    const restoreBackup = async (backupName: string) => {
+        if (!confirm("⚠️ WARNING: This will overwrite your current database! Are you sure you want to restore this backup?")) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            const encodedName = encodeURIComponent(backupName);
+            const res = await fetch(`${API_URL}/api/v1/projects/${projectId}/backups/${encodedName}/restore`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                toast.success("Backup restored successfully");
+            } else {
+                toast.error("Failed to restore backup");
+            }
+        } catch (error) {
+            toast.error("Failed to restore backup");
+        }
+    };
+
     useEffect(() => {
         fetchBackups();
     }, [projectId]);
@@ -173,6 +219,7 @@ export default function BackupsPage() {
                                     <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Snapshot Name</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Size</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Created At</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/10">
@@ -202,6 +249,30 @@ export default function BackupsPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-muted-foreground">
                                                 {formatDate(backup.last_modified)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => downloadBackup(backup.name)}
+                                                        className="h-8 px-3 text-xs gap-1.5"
+                                                    >
+                                                        <Download className="h-3 w-3" />
+                                                        Download
+                                                    </Button>
+                                                    {type === "database" && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => restoreBackup(backup.name)}
+                                                            className="h-8 px-3 text-xs gap-1.5 border-amber-500/20 text-amber-600 hover:bg-amber-500/10"
+                                                        >
+                                                            <RefreshCw className="h-3 w-3" />
+                                                            Restore
+                                                        </Button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     );
