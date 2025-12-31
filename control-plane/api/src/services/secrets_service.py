@@ -114,8 +114,9 @@ def generate_project_secrets(db: Session, project_id: str, plan: str = "dedicate
     db_password = py_secrets.token_hex(16)
     
     if plan == "shared":
-        # For shared projects, we use the global shared secrets and ports
-        jwt_secret = os.getenv("SHARED_JWT_SECRET", "super-secret-jwt-token-with-at-least-32-characters-long")
+        # For shared projects, generate unique JWT secret per project (security best practice)
+        # This ensures cryptographic isolation - tokens from Project A cannot be validated in Project B
+        jwt_secret = py_secrets.token_urlsafe(32)
         # Global ports for shared infrastructure
         db_port = int(os.getenv("SHARED_POSTGRES_PORT", "5435"))
         # gateway/auth/rest are handled by the shared gateway, but for GoTrueProxyService:
