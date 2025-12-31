@@ -78,7 +78,24 @@ export default function TableDetailPage() {
         fetchTableData();
         fetchMetadata();
         fetchPolicies();
+        fetchTableStatus();
     }, [projectId, tableName]);
+
+    const fetchTableStatus = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const resp = await fetch(`${API_URL}/api/v1/projects/${projectId}/tables/${tableName}/status`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (resp.ok) {
+                const status = await resp.json();
+                setRlsEnabled(status.rls_enabled);
+                setRealtimeEnabled(status.realtime_enabled);
+            }
+        } catch (err) {
+            console.error("Failed to fetch table status", err);
+        }
+    };
 
     const fetchTableData = async () => {
         setLoadingData(true);
@@ -211,6 +228,7 @@ export default function TableDetailPage() {
                 setRlsEnabled(enable);
                 toast.success(`RLS ${enable ? 'enabled' : 'disabled'} for table`);
                 fetchPolicies();
+                fetchTableStatus();
             } else {
                 toast.error(`Failed to ${endpoint} RLS`);
             }
@@ -294,6 +312,7 @@ export default function TableDetailPage() {
             if (resp.ok) {
                 setRealtimeEnabled(!realtimeEnabled);
                 toast.success(`Realtime ${!realtimeEnabled ? 'enabled' : 'disabled'} for table`);
+                fetchTableStatus();
             } else {
                 toast.error(`Failed to ${endpoint} realtime`);
             }

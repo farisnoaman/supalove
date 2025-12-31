@@ -49,9 +49,22 @@ class DatabaseService:
         """
         try:
             conn_string = self._get_connection_string()
+            
+            # DEBUGGING: Log connection details
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"[SQL EDITOR DEBUG] Project ID: {self.project_id}")
+            logger.info(f"[SQL EDITOR DEBUG] Connection String: {conn_string}")
+            
             conn = psycopg2.connect(conn_string)
             cursor = conn.cursor(cursor_factory=RealDictCursor)
             
+            # DEBUGGING: Verify which database we're actually connected to
+            cursor.execute("SELECT current_database(), current_user;")
+            db_info = cursor.fetchone()
+            logger.info(f"[SQL EDITOR DEBUG] Connected to database: {db_info['current_database']}, user: {db_info['current_user']}")
+            
+            # Now execute the actual user query
             cursor.execute(sql)
             
             # Check if query returns data (SELECT, RETURNING, etc.)
@@ -93,14 +106,23 @@ class DatabaseService:
             }
     
     def get_tables(self) -> List[Dict[str, Any]]:
-        """Get list of all tables in the database"""
+        """Get list of all tables in the database with property status"""
         sql = """
             SELECT 
-                table_name,
-                table_type
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-            ORDER BY table_name;
+                t.table_name,
+                t.table_type,
+                (c.relrowsecurity) as rls_enabled,
+                EXISTS (
+                    SELECT 1 FROM pg_publication_tables 
+                    WHERE pubname = 'supabase_realtime' 
+                    AND schemaname = 'public' 
+                    AND tablename = t.table_name
+                ) as realtime_enabled
+            FROM information_schema.tables t
+            JOIN pg_class c ON c.relname = t.table_name
+            JOIN pg_namespace n ON n.oid = c.relnamespace AND n.nspname = t.table_schema
+            WHERE t.table_schema = 'public'
+            ORDER BY t.table_name;
         """
         result = self.execute_query(sql)
         return result.get("rows", [])
@@ -120,6 +142,26 @@ class DatabaseService:
         """
         result = self.execute_query(sql)
         return result.get("rows", [])
+
+    def get_table_status(self, table_name: str) -> Dict[str, Any]:
+        """Get RLS and Realtime status for a specific table"""
+        sql = f"""
+            SELECT 
+                (c.relrowsecurity) as rls_enabled,
+                EXISTS (
+                    SELECT 1 FROM pg_publication_tables 
+                    WHERE pubname = 'supabase_realtime' 
+                    AND schemaname = 'public' 
+                    AND tablename = '{table_name}'
+                ) as realtime_enabled
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = 'public' AND c.relname = '{table_name}';
+        """
+        result = self.execute_query(sql)
+        if result.get("rows"):
+            return result["rows"][0]
+        return {"rls_enabled": False, "realtime_enabled": False}
     
     def get_table_data(self, table_name: str, limit: int = 50) -> Dict[str, Any]:
         """Get sample data from a table"""
@@ -308,5 +350,5 @@ class DatabaseService:
     
     def disable_realtime(self, table_name: str) -> Dict[str, Any]:
         """Disable realtime replication for a table by removing it from the realtime publication"""
-        sql = f'ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS public."{table_name}";'
+        sql = f'ALTER PUBLICATION supabase_realtime DROP TABLE public."{table_name}";'
         return self.execute_query(sql)

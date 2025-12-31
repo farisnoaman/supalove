@@ -88,9 +88,13 @@ export function RLSPolicyEditor({
 
             const method = policy ? "PUT" : "POST";
 
+            const token = localStorage.getItem("token");
             const resp = await fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     policy_name: policyName,
                     command,

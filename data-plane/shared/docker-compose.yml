@@ -28,11 +28,11 @@ services:
   # SHARED ROUTING GATEWAY
   # Routes requests to correct database based on project ID
   # ============================================
-  shared-gateway:
+  shared-gateway-v3:
     build:
       context: ./routing-proxy
       dockerfile: Dockerfile
-    container_name: supalove_shared_gateway
+    container_name: supalove_shared_gateway_v3
     restart: unless-stopped
     environment:
       # Control plane API for project lookups
@@ -43,7 +43,7 @@ services:
       SHARED_POSTGRES_USER: postgres
       SHARED_POSTGRES_PASSWORD: ${SHARED_POSTGRES_PASSWORD:-postgres}
     ports:
-      - "${SHARED_GATEWAY_PORT:-8080}:8000"
+      - "8083:8000"
     depends_on:
       shared-postgres:
         condition: service_healthy
@@ -58,6 +58,8 @@ services:
     image: supabase/gotrue:v2.184.0
     container_name: supalove_shared_auth
     restart: unless-stopped
+    ports:
+      - "9999:9999"
     environment:
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: 9999

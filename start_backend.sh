@@ -5,6 +5,8 @@ cd "$(dirname "$0")"
 
 echo "🚀 Starting Infrastructure (PostgreSQL, MinIO, Keycloak)..."
 docker compose up -d control-plane-db keycloak minio
+echo "🌐 Starting Shared Infrastructure..."
+docker compose -f data-plane/shared/docker-compose.yml up -d
 
 # Give the database a moment to initialize
 echo "⏳ Waiting for infrastructure to warm up..."

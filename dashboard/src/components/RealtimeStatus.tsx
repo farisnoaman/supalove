@@ -53,11 +53,12 @@ export function RealtimeStatus({ projectId, className, showLabel = true }: Realt
             try {
                 const healthResp = await fetch(`${httpUrl}/api/tenants`, {
                     method: "GET",
+                    headers: { "X-Tenant-Id": projectId },
                     signal: AbortSignal.timeout(3000)
                 });
 
-                if (healthResp.ok || healthResp.status === 401) {
-                    // 401 is expected without auth, but it means service is running
+                if (healthResp.ok || healthResp.status === 401 || healthResp.status === 403) {
+                    // 401/403 is expected without auth, but it means service is running
                     setStatus("connected");
                     setLastPing(new Date());
                 } else {

@@ -78,7 +78,6 @@ def get_table_schema(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/tables/{table_name}/data")
-@router.get("/{project_id}/tables/{table_name}/data")
 def get_table_data(
     project_id: str,
     table_name: str,
@@ -91,6 +90,21 @@ def get_table_data(
     try:
         db_service = DatabaseService(project_id)
         return db_service.get_table_data(table_name, limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{project_id}/tables/{table_name}/status")
+def get_table_status(
+    project_id: str,
+    table_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get RLS and Realtime status for a specific table"""
+    verify_project_access(project_id, db, current_user)
+    try:
+        db_service = DatabaseService(project_id)
+        return db_service.get_table_status(table_name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

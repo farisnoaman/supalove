@@ -2,11 +2,27 @@ import subprocess
 from typing import List, Optional
 from services.provisioning_local import BASE_PROJECTS_DIR
 
+def _find_shared_container(service_pattern: str) -> Optional[str]:
+    """
+    Dynamically find the running shared container name by pattern.
+    Returns the container name or None if not found.
+    """
+    try:
+        cmd = ["docker", "ps", "--filter", f"name={service_pattern}", "--format", "{{.Names}}"]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        if result.returncode == 0 and result.stdout.strip():
+            # Return the first matching container (most recent if multiple)
+            containers = result.stdout.strip().split('\n')
+            return containers[0] if containers else None
+    except Exception:
+        pass
+    return None
+
 def get_project_logs(project_id: str, service_name: str, lines: int = 100, is_shared: bool = False) -> str:
     """
     Fetches logs for a specific service in a project.
     For dedicated projects: uses docker compose logs.
-    For shared projects: uses docker logs from the shared containers, grepping for project ID if possible.
+    For shared projects: uses docker logs from the shared containers, with filtering where possible.
     """
     service_map = {
         "database": "postgres",
@@ -22,33 +38,62 @@ def get_project_logs(project_id: str, service_name: str, lines: int = 100, is_sh
     
     if is_shared:
         # Shared projects use containers in the supalove_shared stack
-        shared_container_map = {
+        # Dynamically find the actual running container names
+        shared_container_patterns = {
             "postgres": "supalove_shared_postgres",
             "auth": "supalove_shared_auth",
-            "api": "supalove_shared_gateway", # The gateway matches project routing
+            "api": "supalove_shared_gateway",  # Gateway handles API routing
             "realtime": "supalove_shared_realtime",
             "storage": "supalove_shared_storage"
         }
-        container_name = shared_container_map.get(docker_service)
+        
+        pattern = shared_container_patterns.get(docker_service)
+        if not pattern:
+            return f"Logs not supported for service: {service_name}"
+        
+        # Find the actual running container
+        container_name = _find_shared_container(pattern)
         if not container_name:
-            return f"Shared logs currently not supported for service: {service_name}"
+            return f"Shared {service_name} container not found or not running"
         
         try:
-            # For shared services, we tail the logs. 
-            # Ideally we'd grep for the project_id but some services might not include it 
-            # in every line. For now, fetch overall logs for the shared service.
+            # Fetch logs from the shared container
             cmd = ["docker", "logs", "--tail", str(lines), container_name]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             
             if result.returncode != 0:
-                return f"Error fetching shared logs: {result.stderr}"
+                return f"Error fetching logs: {result.stderr}"
             
-            # If it's the gateway, we can grep for project_id to show only relevant logs
-            if docker_service == "api":
-                filtered = [line for line in result.stdout.split('\n') if project_id in line]
-                return "\n".join(filtered) or f"(No gateway logs found for project {project_id} in last {lines} lines)"
+            all_logs = result.stdout + result.stderr  # Combine stdout and stderr
+            
+            # Apply service-specific filtering
+            if docker_service == "postgres":
+                # Filter PostgreSQL logs by database name
+                db_name = f"project_{project_id}"
+                filtered = [line for line in all_logs.split('\n') if db_name in line]
+                if filtered:
+                    return "\n".join(filtered)
+                else:
+                    return f"(No database logs found for {db_name} in last {lines} lines)\n\nNote: PostgreSQL logs are filtered by database name."
+            
+            elif docker_service == "api":
+                # Filter gateway logs by project ID
+                filtered = [line for line in all_logs.split('\n') if project_id in line]
+                if filtered:
+                    return "\n".join(filtered)
+                else:
+                    return f"(No gateway logs found for project {project_id} in last {lines} lines)\n\nNote: Gateway logs are filtered by project ID in request paths."
+            
+            else:
+                # For auth, realtime, storage - these are multi-tenant services
+                # We can't easily filter by project, so show a warning
+                warning = f"⚠️  Note: {service_name.upper()} is a shared multi-tenant service.\n"
+                warning += f"Logs below may include activity from ALL projects, not just {project_id}.\n"
+                warning += "=" * 80 + "\n\n"
+                return warning + (all_logs or "(No logs found)")
                 
-            return result.stdout or "(No logs found)"
+        except subprocess.TimeoutExpired:
+            return f"Error: Log fetch timed out for {container_name}"
         except Exception as e:
             return f"Error: {str(e)}"
 

@@ -83,53 +83,9 @@ def create_project_database(db_name: str, db_password: str, host: str, port: int
     finally:
         cursor.close()
         conn.close()
-    
-    # Connect to the new database to set schema permissions
-    try:
-        db_conn = get_custom_connection(host, port, dbname=db_name)
-        db_conn.autocommit = True
-        db_cursor = db_conn.cursor()
-        
-        # Grant full permissions on public schema to project user
-        db_cursor.execute(
-            sql.SQL("GRANT ALL ON SCHEMA public TO {}").format(
-                sql.Identifier(project_user)
-            )
-        )
-        
-        # Make project user the owner of public schema for full control
-        db_cursor.execute(
-            sql.SQL("ALTER SCHEMA public OWNER TO {}").format(
-                sql.Identifier(project_user)
-            )
-        )
-        
-        # Grant auth schema permissions to project user (for Shared Auth Service)
-        db_cursor.execute(
-            sql.SQL("GRANT USAGE ON SCHEMA auth TO {}").format(
-                sql.Identifier(project_user)
-            )
-        )
-        db_cursor.execute(
-            sql.SQL("GRANT ALL ON ALL TABLES IN SCHEMA auth TO {}").format(
-                sql.Identifier(project_user)
-            )
-        )
-        db_cursor.execute(
-            sql.SQL("GRANT ALL ON ALL SEQUENCES IN SCHEMA auth TO {}").format(
-                sql.Identifier(project_user)
-            )
-        )
-        
-        print(f"[SharedProvisioning] Granted schema permissions to {project_user}")
-        
-    except Exception as e:
-        print(f"[SharedProvisioning] Warning: Could not set schema permissions: {e}")
-    finally:
-        if 'db_cursor' in locals():
-            db_cursor.close()
-        if 'db_conn' in locals():
-            db_conn.close()
+    # Schema-specific permissions will be granted in apply_supabase_migrations
+    # after the schemas are created.
+    print(f"[SharedProvisioning] Database {db_name} and role {project_user} prepared")
 
 
 def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: int) -> None:
@@ -141,7 +97,8 @@ def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: i
     
     try:
         # Create Supabase-required schemas
-        migrations = """
+        project_user = f"{db_name}_user"
+        migrations = f"""
         -- Create required schemas
         CREATE SCHEMA IF NOT EXISTS auth;
         CREATE SCHEMA IF NOT EXISTS storage;
@@ -165,11 +122,11 @@ def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: i
         END $$;
         
         DO $$ BEGIN
-            CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD 'PLACEHOLDER_PASSWORD';
+            CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD '{db_password}';
         EXCEPTION WHEN duplicate_object THEN NULL;
         END $$;
         
-        -- Grant schema access
+        -- Grant schema access to project roles
         GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
         GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
         GRANT USAGE ON SCHEMA storage TO anon, authenticated, service_role;
@@ -179,7 +136,13 @@ def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: i
         GRANT authenticated TO authenticator;
         GRANT service_role TO authenticator;
         
-        -- Enable Row Level Security by default on public tables
+        -- Grant schema access to the project user (the one used for migrations and SQL editor)
+        GRANT USAGE, CREATE ON SCHEMA public TO {project_user};
+        GRANT USAGE, CREATE ON SCHEMA auth TO {project_user};
+        GRANT USAGE, CREATE ON SCHEMA storage TO {project_user};
+        GRANT USAGE, CREATE ON SCHEMA _realtime TO {project_user};
+        
+        -- Enable Row Level Security functionality
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO anon, authenticated, service_role;
@@ -197,8 +160,8 @@ def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: i
             last_sign_in_at TIMESTAMPTZ,
             role TEXT DEFAULT 'authenticated',
             aud TEXT DEFAULT 'authenticated',
-            user_metadata JSONB DEFAULT '{}',
-            app_metadata JSONB DEFAULT '{}'
+            user_metadata JSONB DEFAULT '{{}}',
+            app_metadata JSONB DEFAULT '{{}}'
         );
         
         -- Create auth.uid() function for RLS policies
@@ -224,22 +187,61 @@ def apply_supabase_migrations(db_name: str, db_password: str, host: str, port: i
         AS $$
             SELECT COALESCE(
                 current_setting('request.jwt.claims', true),
-                '{}'
+                '{{}}'
             )::jsonb
         $$;
         
-        -- Grant access to auth functions
-        GRANT EXECUTE ON FUNCTION auth.uid() TO anon, authenticated, service_role;
-        GRANT EXECUTE ON FUNCTION auth.role() TO anon, authenticated, service_role;
-        GRANT EXECUTE ON FUNCTION auth.jwt() TO anon, authenticated, service_role;
+        GRANT ALL ON ALL TABLES IN SCHEMA auth TO {project_user};
+        GRANT ALL ON ALL SEQUENCES IN SCHEMA auth TO {project_user};
+        GRANT EXECUTE ON FUNCTION auth.uid() TO anon, authenticated, service_role, {project_user};
+        GRANT EXECUTE ON FUNCTION auth.role() TO anon, authenticated, service_role, {project_user};
+        GRANT EXECUTE ON FUNCTION auth.jwt() TO anon, authenticated, service_role, {project_user};
+
+        -- ============================================
+        -- STORAGE TABLES
+        -- ============================================
+        CREATE TABLE IF NOT EXISTS storage.buckets (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            owner UUID,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW(),
+            public BOOLEAN DEFAULT FALSE,
+            avif_autoprovision BOOLEAN DEFAULT FALSE,
+            file_size_limit BIGINT,
+            allowed_mime_types TEXT[]
+        );
+
+        CREATE TABLE IF NOT EXISTS storage.objects (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            bucket_id TEXT REFERENCES storage.buckets(id),
+            name TEXT,
+            owner UUID,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW(),
+            last_accessed_at TIMESTAMPTZ DEFAULT NOW(),
+            metadata JSONB,
+            path_tokens TEXT[] GENERATED ALWAYS AS (string_to_array(name, '/')) STORED
+        );
+
+        GRANT ALL ON ALL TABLES IN SCHEMA storage TO {project_user};
+        GRANT ALL ON ALL SEQUENCES IN SCHEMA storage TO {project_user};
+
+        -- ============================================
+        -- REALTIME PUBLICATION
+        -- ============================================
+        DO $$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+                CREATE PUBLICATION supabase_realtime;
+            END IF;
+        EXCEPTION WHEN OTHERS THEN 
+            RAISE NOTICE 'Could not create publication';
+        END $$;
         """
-        
-        # Replace placeholder password
-        migrations = migrations.replace("PLACEHOLDER_PASSWORD", db_password)
         
         cursor.execute(migrations)
         conn.commit()
-        print(f"[SharedProvisioning] Applied migrations to {db_name}")
+        print(f"[SharedProvisioning] Applied full migrations to {db_name}")
         
     finally:
         cursor.close()
