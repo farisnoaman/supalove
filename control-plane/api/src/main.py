@@ -43,6 +43,7 @@ from models.subscription import Subscription
 from models.invoice import Invoice
 from models.organization_entitlement import OrganizationEntitlement
 from models.usage_record import UsageRecord
+from models.cluster import Cluster  # Fix: Import Cluster model
 
 Base.metadata.create_all(bind=engine)
 

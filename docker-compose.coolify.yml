@@ -120,6 +120,7 @@ services:
       - "5435:5432"
     volumes:
       - shared_postgres_data:/var/lib/postgresql/data
+      - ./data-plane/shared/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres", "-h", "localhost" ]
       interval: 5s
