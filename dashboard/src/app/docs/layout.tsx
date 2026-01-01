@@ -10,7 +10,14 @@ export default function DocsLayout({
 }) {
     // Read docs directory
     const docsDir = path.join(process.cwd(), "..", "docs");
-    const files = fs.readdirSync(docsDir).filter(f => f.endsWith(".md"));
+    let files: string[] = [];
+    try {
+        if (fs.existsSync(docsDir)) {
+            files = fs.readdirSync(docsDir).filter(f => f.endsWith(".md"));
+        }
+    } catch (error) {
+        console.warn("Could not read docs directory:", error);
+    }
 
     const docItems = files.map(file => ({
         name: file.replace(".md", ""),

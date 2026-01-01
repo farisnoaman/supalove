@@ -1,14 +1,15 @@
 # Stage 1: Dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
+COPY dashboard/package*.json ./
 RUN npm install
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY dashboard/ .
+COPY docs/ /docs/
 # Set environment variables for build if needed (e.g. backend URL)
 # For Next.js client-side fetch, it might need to know the URL at build time if pre-rendering,
 # but we are using "use client" so it's fine.
