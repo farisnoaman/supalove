@@ -31,19 +31,21 @@ from api.v1.project_users import router as project_users_router
 
 from core.database import Base, engine
 
-# 👇 ADD these imports
-from models.project import Project
-from models.project_secret import ProjectSecret
-from models.edge_function import EdgeFunction
+# Models (Import all to ensure they are registered in metadata)
 from models.user import User
 from models.organization import Organization
 from models.org_member import OrgMember
-from models.project_user import ProjectUser # Import new model
+from models.project import Project
+from models.project_secret import ProjectSecret
+from models.project_user import ProjectUser
+from models.cluster import Cluster
+from models.cluster_usage import ClusterUsage
+from models.plan import Plan
 from models.subscription import Subscription
 from models.invoice import Invoice
 from models.organization_entitlement import OrganizationEntitlement
 from models.usage_record import UsageRecord
-from models.cluster import Cluster  # Fix: Import Cluster model
+from models.edge_function import EdgeFunction
 
 Base.metadata.create_all(bind=engine)
 
