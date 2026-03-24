@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
 from services.database_service import DatabaseService
-from services.database_service import DatabaseService
 from api.v1.utils import verify_project_access
 from api.v1.deps import get_db, get_current_user
 from sqlalchemy.orm import Session
@@ -28,7 +27,6 @@ class PolicyUpdate(BaseModel):
     check_expression: Optional[str] = None
 
 @router.get("/{project_id}/tables")
-@router.get("/{project_id}/tables")
 def list_tables(
     project_id: str,
     db: Session = Depends(get_db),
@@ -42,7 +40,6 @@ def list_tables(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/{project_id}/sql")
 @router.post("/{project_id}/sql")
 def execute_sql(
     project_id: str,
@@ -61,7 +58,6 @@ def execute_sql(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{project_id}/tables/{table_name}/schema")
 @router.get("/{project_id}/tables/{table_name}/schema")
 def get_table_schema(
     project_id: str,
@@ -111,7 +107,6 @@ def get_table_status(
 # RLS Policy Management
 
 @router.get("/{project_id}/tables/{table_name}/policies")
-@router.get("/{project_id}/tables/{table_name}/policies")
 def list_rls_policies(
     project_id: str,
     table_name: str,
@@ -126,7 +121,6 @@ def list_rls_policies(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/{project_id}/tables/{table_name}/policies")
 @router.post("/{project_id}/tables/{table_name}/policies")
 def create_rls_policy(
     project_id: str,
@@ -154,7 +148,6 @@ def create_rls_policy(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/tables/{table_name}/policies/{policy_name}")
-@router.get("/{project_id}/tables/{table_name}/policies/{policy_name}")
 def get_rls_policy(
     project_id: str,
     table_name: str,
@@ -176,7 +169,6 @@ def get_rls_policy(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.put("/{project_id}/tables/{table_name}/policies/{policy_name}")
 @router.put("/{project_id}/tables/{table_name}/policies/{policy_name}")
 def update_rls_policy(
     project_id: str,
@@ -206,7 +198,6 @@ def update_rls_policy(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{project_id}/tables/{table_name}/policies/{policy_name}")
-@router.delete("/{project_id}/tables/{table_name}/policies/{policy_name}")
 def delete_rls_policy(
     project_id: str,
     table_name: str,
@@ -226,7 +217,6 @@ def delete_rls_policy(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{project_id}/tables/{table_name}/rls/enable")
-@router.post("/{project_id}/tables/{table_name}/rls/enable")
 def enable_rls(
     project_id: str,
     table_name: str,
@@ -244,7 +234,6 @@ def enable_rls(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/{project_id}/tables/{table_name}/rls/disable")
 @router.post("/{project_id}/tables/{table_name}/rls/disable")
 def disable_rls(
     project_id: str,
@@ -266,7 +255,6 @@ def disable_rls(
 # Table Exploration
 
 @router.get("/{project_id}/tables/{table_name}/constraints")
-@router.get("/{project_id}/tables/{table_name}/constraints")
 def get_table_constraints(
     project_id: str,
     table_name: str,
@@ -282,7 +270,6 @@ def get_table_constraints(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/tables/{table_name}/indexes")
-@router.get("/{project_id}/tables/{table_name}/indexes")
 def get_table_indexes(
     project_id: str,
     table_name: str,
@@ -297,7 +284,6 @@ def get_table_indexes(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{project_id}/tables/{table_name}/size")
 @router.get("/{project_id}/tables/{table_name}/size")
 def get_table_size(
     project_id: str,
